@@ -3513,3 +3513,10 @@ window.definirFerramentaMapaTaticoWT = definirFerramentaMapaTaticoWT;
 window.limparMapaTaticoWT = limparMapaTaticoWT;
 window.alternarModoImersivoMapa = alternarModoImersivoMapa;
 window.tocarSom = tocarSom;
+
+// Exposição global dos controles do Bestiário para os botões inline da interface.
+window.inicializarBestiarioElarion = inicializarBestiarioElarion;
+window.renderizarBestiario = renderizarBestiario;
+window.abrirDetalheBestiario = abrirDetalheBestiario;
+window.fecharDetalheBestiario = fecharDetalheBestiario;
+window.criarTokenDoBestiario = criarTokenDoBestiario;
