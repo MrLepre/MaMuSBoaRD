@@ -29,6 +29,10 @@ let imagemMestreAberta = false;
 let campanhaAtual = null;
 let sistemaAtual = null;
 let campanhasDisponiveis = [];
+let sessaoAtual = null;
+let diarioAtual = null;
+let diarioImagens = [];
+let sessoesCampanha = [];
 
 // --- WORLD TRIGGER: estado tático local (Squad / Radar / Stealth) ---
 let wtRecalculoVisibilidadeAgendado = false;
@@ -845,6 +849,9 @@ try {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('diario-arquivos')?.addEventListener('change', adicionarImagensDiario);
+  let timerAutoSaveDiario=null;
+  ['diario-titulo','diario-conteudo'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{ if(!sessaoEhEditavel()) return; clearTimeout(timerAutoSaveDiario); timerAutoSaveDiario=setTimeout(()=>salvarDiarioAtual(false),1800); }));
   window.addEventListener('resize', () => {
     if (worldTriggerAtivo()) atualizarVisibilidadeTodosTokensWT();
   });
@@ -861,7 +868,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const abaSalva = localStorage.getItem('cronicas_camelot_aba');
-    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais'].includes(abaSalva)) {
+    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais', 'diario', 'sessoes'].includes(abaSalva)) {
       mudarAba(abaSalva, abaSalva === 'rolagens' ? { __restauracaoAbaSalva: true } : undefined);
     }
   } catch (err) {}
@@ -914,6 +921,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           vttPanX = payload.payload.panX || 0;
           vttPanY = payload.payload.panY || 0;
           atualizarTransformMapaVTT();
+        })
+        .on('broadcast', { event: 'sessao_atualizada' }, async (payload) => {
+          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return; await carregarSessaoAtual(); if(abaAtual==='diario') carregarDiarioAtual(); if(abaAtual==='sessoes' && ehMestreGlobal) carregarSessoesCampanha();
         })
         .on('broadcast', { event: 'nova_rolagem' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
@@ -1094,6 +1104,7 @@ async function fazerLogout() {
   atualizarVisibilidadeAcoesRapidas();
   garantirAbasEconomiaJornaisVisiveis();
   campanhasDisponiveis = [];
+  sessaoAtual = null; diarioAtual = null; diarioImagens = []; sessoesCampanha = [];
   atualizarContextoCampanha();
   renderizarListaCampanhas();
   const containerFicha = document.getElementById('container-ficha-carregada');
@@ -1124,6 +1135,8 @@ function atualizarInterfaceAuth(user) {
     const btnAbaSistemas = document.getElementById('btn-aba-sistemas');
     const btnNovoSistema = document.getElementById('btn-novo-sistema');
     if (btnAbaSistemas) btnAbaSistemas.style.display = ehMestreGlobal ? 'inline-flex' : 'none';
+    const btnAbaSessoes = document.getElementById('btn-aba-sessoes');
+    if (btnAbaSessoes) btnAbaSessoes.style.display = ehMestreGlobal ? 'inline-flex' : 'none';
     if (btnNovoSistema) btnNovoSistema.style.display = ehMestreGlobal ? 'inline-flex' : 'none';
     if (ehMestreGlobal) {
       if (badgeMestre) badgeMestre.style.display = 'inline-block';
@@ -1263,19 +1276,9 @@ function acaoRapida(tipo) {
   }
 
   if (tipo === 'nota') {
-    const texto = prompt('📝 Nota rápida\n\nDigite sua anotação:');
-    if (texto === null || !texto.trim()) return;
-    let notas = [];
-    try {
-      notas = JSON.parse(localStorage.getItem('cronicas_camelot_notas') || '[]');
-      if (!Array.isArray(notas)) notas = [];
-    } catch (err) {
-      notas = [];
-    }
-    notas.unshift({ texto: texto.trim(), data: new Date().toISOString() });
-    localStorage.setItem('cronicas_camelot_notas', JSON.stringify(notas.slice(0, 100)));
-    mostrarPopup('📝 Nota salva neste dispositivo.');
-    tocarSom('success');
+    mudarAba('diario');
+    focarElementoDepoisDoAba('diario-conteudo');
+    mostrarPopup(sessaoAtual ? '📔 Diário da sessão aberto.' : '🕯️ O diário ficará pronto quando o Mestre iniciar uma sessão.');
     return;
   }
 
@@ -1329,6 +1332,16 @@ function atualizarVisibilidadeAcoesRapidas() {
 }
 
 function atualizarContextoCampanha() {
+  const avisoEncerrada = document.getElementById('aviso-campanha-encerrada');
+  if (avisoEncerrada) {
+    if (campanhaAtual?.status === 'encerrada') {
+      avisoEncerrada.style.display = 'block';
+      avisoEncerrada.innerHTML = `<strong>🔒 Campanha encerrada</strong><br>Esta mesa está em modo de consulta. Os dados foram preservados e não devem ser alterados.`;
+    } else {
+      avisoEncerrada.style.display = 'none';
+      avisoEncerrada.innerHTML = '';
+    }
+  }
   const contexto = document.getElementById('contexto-campanha');
   const nome = document.getElementById('campanha-ativa-nome');
   const sistema = document.getElementById('campanha-ativa-sistema');
@@ -1367,7 +1380,7 @@ async function carregarCampanhasDoUsuario(userId) {
   // controlado por campanha_membros + RLS.
   const { data, error } = await supabaseClient
     .from('campanhas')
-    .select('id,nome,descricao,sistema_id,mestre_id,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
+    .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -1527,7 +1540,12 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   abasCarregadas = { mapa: false, galeria: false };
   dadosGaleriaAtual = [];
   pastaGaleriaAtual = 'Todas';
+  sessaoAtual = null;
+  diarioAtual = null;
+  diarioImagens = [];
+  sessoesCampanha = [];
   resetarDadosEconomiaJornalAoTrocarCampanha();
+  await carregarSessaoAtual();
 
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session?.user) carregarFichaDoUsuario(session.user.id);
@@ -1536,6 +1554,8 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   if (abaAtual === 'mapa') { abasCarregadas.mapa = true; carregarMapaAtual(); }
   if (abaAtual === 'galeria') { abasCarregadas.galeria = true; carregarGaleria(true); }
+  if (abaAtual === 'diario') carregarDiarioAtual();
+  if (abaAtual === 'sessoes' && ehMestreGlobal) carregarSessoesCampanha();
 
   if (mostrarFeedback) mostrarPopup(`🏰 Campanha ativa: ${campanha.nome}`);
 }
@@ -1553,24 +1573,25 @@ function renderizarListaCampanhas() {
     const card = document.createElement('article');
     card.className = 'card-campanha' + (campanhaAtual?.id === campanha.id ? ' ativa' : '');
     const sistema = campanha.sistemas?.nome || 'Sistema não definido';
+    const encerrada = campanha.status === 'encerrada';
     const pedido = obterPedidoCampanha(campanha.id);
     const souMestre = ehMestreGlobal || campanha.mestre_id === window.usuarioAtualId;
     const membroConhecido = campanhaAtual?.id === campanha.id || souMestre || (window.campanhasMembroIds instanceof Set && window.campanhasMembroIds.has(campanha.id));
     let acao = 'solicitarEntradaCampanha';
     let textoBotao = '📨 Solicitar entrada';
-    if (campanhaAtual?.id === campanha.id) { acao = 'selecionarCampanha'; textoBotao = '✓ Campanha ativa'; }
+    if (campanhaAtual?.id === campanha.id) { acao = 'selecionarCampanha'; textoBotao = encerrada ? '✓ Visualizando encerrada' : '✓ Campanha ativa'; }
     else if (pedido) { acao = null; textoBotao = '⏳ Pedido pendente'; }
-    else if (membroConhecido) { acao = 'selecionarCampanha'; textoBotao = 'Entrar nesta campanha'; }
+    else if (membroConhecido) { acao = 'selecionarCampanha'; textoBotao = encerrada ? 'Visualizar campanha encerrada' : 'Entrar nesta campanha'; }
     card.innerHTML = `
       <div class="card-campanha-conteudo">
         <span class="card-campanha-icone">🏰</span>
-        <div><h3>${escaparHTML(campanha.nome)}</h3>
+        <div><h3>${escaparHTML(campanha.nome)} ${encerrada ? '<span class="status-campanha encerrada">🔒 Encerrada</span>' : '<span class="status-campanha">🟢 Ativa</span>'}</h3>
         <p>${escaparHTML(campanha.descricao || 'Sem descrição.')}</p>
         <span class="card-campanha-meta">⚙️ ${escaparHTML(sistema)} · ${membroConhecido ? 'Você tem acesso' : 'Acesso mediante aprovação do Mestre'}</span></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         ${acao ? `<button type="button" class="btn-selecionar-campanha" onclick="${acao}('${campanha.id}')">${textoBotao}</button>` : `<button type="button" class="btn-selecionar-campanha" disabled>${textoBotao}</button>`}
-        ${souMestre ? `<button type="button" class="btn-secundario" onclick="abrirEditarCampanha('${campanha.id}', event)">✏️ Editar</button>` : ''}
+        ${souMestre ? `${!encerrada ? `<button type="button" class="btn-secundario" onclick="abrirEditarCampanha('${campanha.id}', event)">✏️ Editar</button>` : ''}${encerrada ? `<button type="button" class="btn-perigo-campanha" onclick="apagarCampanha('${campanha.id}', event)">🗑️ Apagar</button>` : `<button type="button" class="btn-encerrar-campanha" onclick="encerrarCampanha('${campanha.id}', event)">🔒 Encerrar</button><button type="button" class="btn-perigo-campanha" onclick="apagarCampanha('${campanha.id}', event)">🗑️ Apagar</button>`}` : ''}
       </div>`;
     lista.appendChild(card);
   });
@@ -1595,7 +1616,7 @@ async function prepararFormularioCampanha(campanha=null) {
   if (painel) painel.style.display = 'block';
   if (titulo) titulo.textContent = campanha ? '✏️ Editar campanha' : '👑 Criar nova campanha';
   if (texto) texto.textContent = campanha ? 'Altere os dados da campanha. Os personagens, mapas, economia, jornais e demais recursos continuam vinculados à mesma campanha.' : 'Escolha um nome para a nova mesa. Ela será criada separada da campanha atual.';
-  if (btn) { btn.textContent = campanha ? '💾 Salvar alterações' : '⚔️ Criar Campanha'; btn.onclick = campanha ? () => salvarEdicaoCampanha(campanha.id) : criarNovaCampanha; }
+  if (campanha?.status === 'encerrada') { if (btn) btn.disabled = true; } else if (btn) { btn.disabled = false; btn.textContent = campanha ? '💾 Salvar alterações' : '⚔️ Criar Campanha'; btn.onclick = campanha ? () => salvarEdicaoCampanha(campanha.id) : criarNovaCampanha; }
   if (nome) nome.value = campanha?.nome || '';
   if (descricao) descricao.value = campanha?.descricao || '';
   if (select) {
@@ -1630,7 +1651,7 @@ async function salvarEdicaoCampanha(campanhaId) {
   const { data, error } = await supabaseClient.from('campanhas')
     .update({ nome, descricao, sistema_id: sistemaId, updated_at: new Date().toISOString() })
     .eq('id', campanhaId)
-    .select('id,nome,descricao,sistema_id,mestre_id,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
+    .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
     .single();
   if (error) return mostrarPopup('❌ Não foi possível salvar a campanha: ' + error.message);
   const idx = campanhasDisponiveis.findIndex(c => c.id === campanhaId);
@@ -1645,6 +1666,89 @@ async function salvarEdicaoCampanha(campanhaId) {
   renderizarListaCampanhas();
   fecharNovaCampanha();
   mostrarPopup(`✅ Campanha "${nome}" atualizada.`);
+}
+
+async function encerrarCampanha(campanhaId, evento) {
+  if (evento) { evento.preventDefault(); evento.stopPropagation(); }
+  if (!ehMestreGlobal || !supabaseClient || !campanhaId) return;
+  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  if (!campanha) return mostrarPopup('❌ Campanha não encontrada.');
+  if (campanha.status === 'encerrada') return mostrarPopup('🔒 Esta campanha já está encerrada.');
+  const ok = confirm(`Encerrar a campanha "${String(campanha.nome || '').replace(/"/g, '\\"')}"?\n\nEla NÃO será apagada. Personagens, mapas, imagens e registros serão preservados, mas a campanha ficará bloqueada para alterações.`);
+  if (!ok) return;
+  const { data, error } = await supabaseClient.from('campanhas')
+    .update({ status:'encerrada', encerrada_at:new Date().toISOString(), updated_at:new Date().toISOString() })
+    .eq('id', campanhaId).eq('mestre_id', window.usuarioAtualId)
+    .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
+    .single();
+  if (error) return mostrarPopup('❌ Não foi possível encerrar a campanha: ' + error.message);
+  const idx = campanhasDisponiveis.findIndex(c => c.id === campanhaId);
+  if (idx >= 0) campanhasDisponiveis[idx] = data;
+  if (campanhaAtual?.id === campanhaId) {
+    campanhaAtual = data;
+    atualizarContextoCampanha();
+    atualizarVisibilidadeAcoesRapidas();
+  }
+  renderizarListaCampanhas();
+  mostrarPopup(`🔒 Campanha "${campanha.nome}" encerrada. Os dados foram preservados.`);
+}
+
+async function apagarCampanha(campanhaId, evento) {
+  if (evento) { evento.preventDefault(); evento.stopPropagation(); }
+  if (!ehMestreGlobal || !supabaseClient || !campanhaId) return;
+  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  if (!campanha) return mostrarPopup('❌ Campanha não encontrada.');
+  const aviso = campanha.status === 'encerrada'
+    ? `APAGAR PERMANENTEMENTE a campanha "${campanha.nome}"?\n\nTodos os personagens, mapas, imagens, pedidos e demais dados vinculados serão removidos. Esta ação não pode ser desfeita.`
+    : `APAGAR PERMANENTEMENTE a campanha "${campanha.nome}"?\n\nA campanha ainda está ATIVA. Todos os personagens, mapas, imagens, pedidos e demais dados vinculados serão removidos. Esta ação não pode ser desfeita.`;
+  if (!confirm(aviso)) return;
+  const confirmacao = prompt(`Digite APAGAR para confirmar a exclusão definitiva de "${campanha.nome}".`);
+  if (confirmacao !== 'APAGAR') return mostrarPopup('❌ Exclusão cancelada.');
+
+  // Captura arquivos da galeria antes do CASCADE do banco.
+  const { data: imagens } = await supabaseClient.from('galeria_imagens').select('storage_path,publico').eq('campanha_id', campanhaId);
+  if (Array.isArray(imagens)) {
+    const porBucket = { galeria:[], 'galeria-privada':[] };
+    imagens.forEach(img => { if (img?.storage_path) porBucket[img.publico ? 'galeria' : 'galeria-privada'].push(img.storage_path); });
+    for (const bucket of Object.keys(porBucket)) {
+      const paths = porBucket[bucket];
+      for (let i=0;i<paths.length;i+=100) {
+        const { error } = await supabaseClient.storage.from(bucket).remove(paths.slice(i,i+100));
+        if (error) console.warn(`Arquivo de galeria não removido (${bucket}):`, error.message);
+      }
+    }
+  }
+
+  // Mapas antigos foram armazenados na raiz de galeria. Tenta remover somente o arquivo
+  // referenciado pelo registro do mapa, sem tocar em outros arquivos.
+  const { data: mapas } = await supabaseClient.from('mapas').select('url_mapa').eq('campanha_id', campanhaId);
+  if (Array.isArray(mapas)) {
+    for (const mapa of mapas) {
+      const url = String(mapa?.url_mapa || '');
+      const m = url.match(/\/storage\/v1\/object\/public\/galeria\/([^?]+)$/);
+      if (m && /^mapa_[^/]+\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(m[1])) {
+        const { error } = await supabaseClient.storage.from('galeria').remove([decodeURIComponent(m[1])]);
+        if (error) console.warn('Arquivo de mapa não removido:', error.message);
+      }
+    }
+  }
+
+  const { error } = await supabaseClient.from('campanhas').delete().eq('id', campanhaId).eq('mestre_id', window.usuarioAtualId);
+  if (error) return mostrarPopup('❌ Não foi possível apagar a campanha: ' + error.message);
+
+  if (campanhaAtual?.id === campanhaId) {
+    campanhaAtual = null;
+    sistemaAtual = null;
+    salvarCampanhaLocalmente();
+    atualizarContextoCampanha();
+    atualizarVisibilidadeAcoesRapidas();
+    fecharAcoesRapidas();
+    dadosFichaAtual = null;
+    abasCarregadas = { mapa:false, galeria:false };
+  }
+  campanhasDisponiveis = campanhasDisponiveis.filter(c => c.id !== campanhaId);
+  renderizarListaCampanhas();
+  mostrarPopup(`🗑️ Campanha "${campanha.nome}" apagada permanentemente.`);
 }
 
 function fecharNovaCampanha() {
@@ -1675,7 +1779,7 @@ async function criarNovaCampanha() {
   const { data, error } = await supabaseClient
     .from('campanhas')
     .insert({ nome, descricao, sistema_id: sistemaId, mestre_id: session.user.id })
-    .select('id,nome,descricao,sistema_id,mestre_id,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
+    .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
     .single();
 
   if (error) return mostrarPopup('❌ Não foi possível criar a campanha: ' + error.message);
@@ -2366,9 +2470,205 @@ async function novoTrabalhoNoctavell(){
   mostrarPopup('📜 Trabalho criado.'); carregarTrabalhosNoctavell();
 }
 
+// --- SESSÕES E DIÁRIO ---
+function sessaoEhEditavel(){
+  return Boolean(sessaoAtual?.status === 'aberta' && campanhaAtual?.status !== 'encerrada');
+}
+
+function nomeUsuarioAtual(){
+  return document.getElementById('user-nick-display')?.innerText?.trim() || 'Jogador';
+}
+
+function atualizarStatusSessaoUI(){
+  const aberta = sessaoAtual?.status === 'aberta';
+  const labelDiario = document.getElementById('status-diario-sessao');
+  const labelMestre = document.getElementById('status-sessao-mestre');
+  const labelSessao = document.getElementById('diario-sessao-label');
+  const statusTexto = aberta ? `🎬 Sessão ${sessaoAtual.numero} aberta` : (sessaoAtual ? `📕 Sessão ${sessaoAtual.numero} encerrada` : 'Sem sessão aberta');
+  if(labelDiario){ labelDiario.textContent=statusTexto; labelDiario.classList.toggle('status-sessao-aberta', aberta); labelDiario.classList.toggle('status-sessao-encerrada', !!sessaoAtual && !aberta); }
+  if(labelMestre){ labelMestre.textContent=statusTexto; labelMestre.classList.toggle('status-sessao-aberta', aberta); labelMestre.classList.toggle('status-sessao-encerrada', !!sessaoAtual && !aberta); }
+  if(labelSessao) labelSessao.textContent=sessaoAtual ? `Sessão ${sessaoAtual.numero} · ${sessaoAtual.status === 'aberta' ? 'em andamento' : 'encerrada'}` : 'Nenhuma sessão selecionada';
+}
+
+async function carregarSessaoAtual(){
+  if(!supabaseClient || !obterCampanhaIdAtual()) { sessaoAtual=null; atualizarStatusSessaoUI(); return null; }
+  const {data,error}=await supabaseClient.from('sessoes_campanha').select('*').eq('campanha_id',obterCampanhaIdAtual()).eq('status','aberta').order('numero',{ascending:false}).limit(1).maybeSingle();
+  if(error){ console.warn('Sessões não configuradas:',error); sessaoAtual=null; atualizarStatusSessaoUI(); return null; }
+  sessaoAtual=data||null;
+  atualizarStatusSessaoUI();
+  renderizarControleSessaoMestre();
+  atualizarEditorDiarioUI();
+  return sessaoAtual;
+}
+
+async function iniciarSessao(){
+  if(!ehMestreGlobal || !supabaseClient || !obterCampanhaIdAtual()) return mostrarPopup('❌ Apenas o Mestre pode iniciar uma sessão em uma campanha ativa.');
+  if(campanhaAtual?.status==='encerrada') return mostrarPopup('🔒 Esta campanha está encerrada.');
+  await carregarSessaoAtual();
+  if(sessaoAtual) return mostrarPopup(`🎬 A Sessão ${sessaoAtual.numero} já está aberta.`);
+  const nome=prompt('🎬 Nome opcional da sessão:', `Sessão ${(sessoesCampanha.length||0)+1}`);
+  if(nome===null) return;
+  const {data:ultima}=await supabaseClient.from('sessoes_campanha').select('numero').eq('campanha_id',obterCampanhaIdAtual()).order('numero',{ascending:false}).limit(1).maybeSingle();
+  const numero=(Number(ultima?.numero)||0)+1;
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {data,error}=await supabaseClient.from('sessoes_campanha').insert({campanha_id:obterCampanhaIdAtual(),numero,nome:nome.trim().slice(0,120)||`Sessão ${numero}`,status:'aberta',iniciada_em:new Date().toISOString(),iniciada_por:session?.user?.id}).select('*').single();
+  if(error) return mostrarPopup('❌ Não foi possível iniciar a sessão: '+error.message);
+  sessaoAtual=data; tocarSom('success'); vibrarPadrao([30,40,30]);
+  atualizarStatusSessaoUI(); renderizarControleSessaoMestre(); atualizarEditorDiarioUI();
+  if(abaAtual==='sessoes') carregarSessoesCampanha();
+  mostrarPopup(`🎬 Sessão ${numero} iniciada! As rolagens e diários agora serão catalogados nela.`);
+  if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:data.id,status:'aberta',numero:data.numero,nome:data.nome}});
+}
+
+async function encerrarSessao(){
+  if(!ehMestreGlobal || !supabaseClient || !sessaoAtual?.id) return;
+  if(!confirm(`Encerrar a Sessão ${sessaoAtual.numero}?\n\nAs rolagens e diários já salvos permanecerão no histórico.`)) return;
+  const {data,error}=await supabaseClient.from('sessoes_campanha').update({status:'encerrada',encerrada_em:new Date().toISOString()}).eq('id',sessaoAtual.id).eq('campanha_id',obterCampanhaIdAtual()).select('*').single();
+  if(error) return mostrarPopup('❌ Não foi possível encerrar a sessão: '+error.message);
+  const {count:rolagens}=await supabaseClient.from('sessao_rolagens').select('id',{count:'exact',head:true}).eq('sessao_id',data.id);
+  const {count:diarios}=await supabaseClient.from('sessao_diarios').select('id',{count:'exact',head:true}).eq('sessao_id',data.id);
+  const {data:final}=await supabaseClient.from('sessoes_campanha').update({total_rolagens:rolagens||0,total_diarios:diarios||0}).eq('id',data.id).select('*').single();
+  sessaoAtual=final||data; atualizarStatusSessaoUI(); atualizarEditorDiarioUI(); renderizarControleSessaoMestre();
+  if(abaAtual==='sessoes') carregarSessoesCampanha();
+  mostrarPopup(`📕 Sessão ${sessaoAtual.numero} encerrada. ${rolagens||0} rolagens e ${diarios||0} diários catalogados.`);
+  if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:sessaoAtual.id,status:'encerrada',numero:sessaoAtual.numero}});
+}
+
+function renderizarControleSessaoMestre(){
+  const box=document.getElementById('painel-controle-sessao'); if(!box) return;
+  if(!ehMestreGlobal){box.style.display='none';return;}
+  box.style.display='block';
+  if(!campanhaAtual){box.innerHTML='<p>Selecione uma campanha.</p>';return;}
+  if(campanhaAtual.status==='encerrada') { box.innerHTML='<div class="sessao-controle"><div><h3>🔒 Campanha encerrada</h3><p>Não é possível iniciar novas sessões.</p></div></div>'; return; }
+  if(sessaoAtual?.status==='aberta') box.innerHTML=`<div class="sessao-controle"><div><h3>🎬 Sessão ${sessaoAtual.numero} em andamento</h3><p>${escaparHTML(sessaoAtual.nome||'Sessão')} · iniciada em ${new Date(sessaoAtual.iniciada_em).toLocaleString('pt-BR')}</p></div><button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar Sessão</button></div>`;
+  else box.innerHTML='<div class="sessao-controle"><div><h3>🕯️ A mesa está pronta</h3><p>Inicie uma sessão para começar a registrar automaticamente rolagens e diários.</p></div><button type="button" class="btn-ficha-principal" onclick="iniciarSessao()">🎬 Iniciar Sessão</button></div>';
+}
+
+async function carregarSessoesCampanha(){
+  const lista=document.getElementById('lista-sessoes-campanha'); if(!lista) return;
+  if(!ehMestreGlobal){lista.innerHTML='<p>Apenas o Mestre possui o controle completo das sessões.</p>';return;}
+  if(!obterCampanhaIdAtual()){lista.innerHTML='<div class="estado-galeria">Selecione uma campanha.</div>';return;}
+  const {data,error}=await supabaseClient.from('sessoes_campanha').select('*').eq('campanha_id',obterCampanhaIdAtual()).order('numero',{ascending:false});
+  if(error){lista.innerHTML='<div class="estado-galeria">Execute o SQL das sessões no Supabase para ativar este módulo.</div>';return;}
+  sessoesCampanha=data||[];
+  renderizarControleSessaoMestre(); atualizarStatusSessaoUI();
+  lista.innerHTML=sessoesCampanha.length?sessoesCampanha.map(x=>`<article class="card-campanha"><div class="card-campanha-conteudo"><span class="card-campanha-icone">${x.status==='aberta'?'🎬':'📕'}</span><div><h3>Sessão ${Number(x.numero)||0} ${x.status==='aberta'?'<span class="status-campanha">🟢 Aberta</span>':'<span class="status-campanha encerrada">📕 Encerrada</span>'}</h3><p>${escaparHTML(x.nome||`Sessão ${x.numero}`)}</p><span class="card-campanha-meta">Início: ${x.iniciada_em?new Date(x.iniciada_em).toLocaleString('pt-BR'):'—'} · ${x.encerrada_em?'Fim: '+new Date(x.encerrada_em).toLocaleString('pt-BR'):'Em andamento'}</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-selecionar-campanha" onclick="abrirDetalhesSessao('${x.id}')">📖 Ver registros</button>${x.status==='aberta'&&sessaoAtual?.id===x.id?'<button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar</button>':''}</div></article>`).join(''):'<div class="estado-galeria">Nenhuma sessão registrada nesta campanha.</div>';
+}
+
+async function registrarRolagemNaSessao(descricao,resultado){
+  if(!supabaseClient || !sessaoAtual?.id || sessaoAtual.status!=='aberta') return;
+  const {error}=await supabaseClient.from('sessao_rolagens').insert({sessao_id:sessaoAtual.id,campanha_id:obterCampanhaIdAtual(),user_id:window.usuarioAtualId,nick:nomeUsuarioAtual(),descricao:String(descricao||'').slice(0,500),resultado:String(resultado??'').slice(0,1000)});
+  if(error) console.warn('Não foi possível catalogar a rolagem:',error);
+}
+
+function atualizarEditorDiarioUI(){
+  const sem=document.getElementById('diario-sem-sessao'), editor=document.getElementById('painel-diario-editor');
+  if(!sem||!editor) return;
+  const editavel=sessaoEhEditavel();
+  sem.style.display=sessaoAtual?'none':'block';
+  editor.style.display=sessaoAtual?'block':'none';
+  ['diario-titulo','diario-conteudo','diario-arquivos'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!editavel;});
+  const btn=editor.querySelector('.btn-ficha-principal'); if(btn) btn.disabled=!editavel;
+}
+
+async function carregarDiarioAtual(){
+  if(!supabaseClient || !obterCampanhaIdAtual()) return atualizarEditorDiarioUI();
+  if(!sessaoAtual) await carregarSessaoAtual();
+  if(!sessaoAtual){ atualizarEditorDiarioUI(); carregarHistoricoDiarioPessoal(); return; }
+  const {data,error}=await supabaseClient.from('sessao_diarios').select('*').eq('sessao_id',sessaoAtual.id).eq('user_id',window.usuarioAtualId).maybeSingle();
+  if(error){ console.warn('Diário indisponível:',error); mostrarPopup('❌ Execute o SQL das sessões para ativar o diário.'); return; }
+  diarioAtual=data||null; diarioImagens=Array.isArray(data?.imagens)?data.imagens:[];
+  const titulo=document.getElementById('diario-titulo'), conteudo=document.getElementById('diario-conteudo');
+  if(titulo) titulo.value=data?.titulo||''; if(conteudo) conteudo.value=data?.conteudo||'';
+  const ultima=document.getElementById('diario-ultima-salvacao'); if(ultima) ultima.textContent=data?.atualizado_em?`Salvo em ${new Date(data.atualizado_em).toLocaleString('pt-BR')}`:'Ainda não salvo nesta sessão.';
+  renderizarImagensDiario(); atualizarEditorDiarioUI(); atualizarStatusSessaoUI(); carregarHistoricoDiarioPessoal();
+}
+
+async function salvarDiarioAtual(mostrarFeedback=true){
+  if(!supabaseClient || !sessaoEhEditavel()) return mostrarPopup('🕯️ O diário só pode ser editado durante uma sessão aberta.');
+  const titulo=document.getElementById('diario-titulo')?.value.trim()||'Registro da sessão';
+  const conteudo=document.getElementById('diario-conteudo')?.value||'';
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  const payload={sessao_id:sessaoAtual.id,campanha_id:obterCampanhaIdAtual(),user_id:session?.user?.id,autor_nick:nomeUsuarioAtual(),titulo:titulo.slice(0,120),conteudo:conteudo.slice(0,30000),imagens:diarioImagens,atualizado_em:new Date().toISOString()};
+  const {data,error}=await supabaseClient.from('sessao_diarios').upsert(payload,{onConflict:'sessao_id,user_id'}).select('*').single();
+  if(error) return mostrarPopup('❌ Não foi possível salvar o diário: '+error.message);
+  diarioAtual=data;
+  const ultima=document.getElementById('diario-ultima-salvacao'); if(ultima) ultima.textContent=`Salvo em ${new Date(data.atualizado_em).toLocaleString('pt-BR')}`;
+  if(mostrarFeedback){ tocarSom('success'); mostrarPopup('📔 Diário salvo na sessão.'); }
+}
+
+async function adicionarImagensDiario(event){
+  if(!sessaoEhEditavel()) return;
+  const files=Array.from(event.target.files||[]); event.target.value='';
+  if(!files.length) return;
+  if(files.length>12 || diarioImagens.length+files.length>30) return mostrarPopup('❌ Limite de imagens do diário: 30.');
+  for(const file of files){
+    if(!file.type.startsWith('image/')) continue;
+    if(file.size>8*1024*1024){ mostrarPopup(`⚠️ ${file.name} ignorada: máximo de 8 MB.`); continue; }
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const path=`${obterCampanhaIdAtual()}/${sessaoAtual.id}/${window.usuarioAtualId}/${crypto.randomUUID?.()||Date.now()+Math.random().toString(16).slice(2)}.${ext}`;
+    const {error}=await supabaseClient.storage.from('sessao-notas').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    if(error){console.warn(error);mostrarPopup('❌ Falha ao enviar '+file.name);continue;}
+    diarioImagens.push({storage_path:path,nome:file.name.slice(0,160),tipo:file.type,tamanho:file.size});
+  }
+  renderizarImagensDiario(); await salvarDiarioAtual();
+}
+
+async function renderizarImagensDiario(){
+  const box=document.getElementById('diario-imagens-preview'); if(!box) return;
+  box.innerHTML='';
+  if(!diarioImagens.length){box.innerHTML='<div class="estado-galeria">Nenhuma imagem vinculada ainda.</div>';return;}
+  for(let i=0;i<diarioImagens.length;i++){
+    const img=diarioImagens[i]; let url='';
+    if(img.url) url=img.url; else if(img.storage_path){const r=await supabaseClient.storage.from('sessao-notas').createSignedUrl(img.storage_path,3600);url=r.data?.signedUrl||'';}
+    const card=document.createElement('div'); card.className='diario-imagem-card';
+    card.innerHTML=`${url?`<img src="${escaparAtributoHTML(url)}" alt="${escaparAtributoHTML(img.nome||'Imagem do diário')}" loading="lazy">`:'<div style="padding:20px;text-align:center;color:#aaa">Imagem indisponível</div>'}<div class="diario-imagem-nome">${escaparHTML(img.nome||'Imagem')}</div>${sessaoEhEditavel()?`<button type="button" class="btn-perigo" onclick="removerImagemDiario(${i})">✕</button>`:''}`;
+    box.appendChild(card);
+  }
+}
+
+async function removerImagemDiario(index){
+  if(!sessaoEhEditavel() || !diarioImagens[index]) return;
+  const item=diarioImagens[index];
+  if(!confirm(`Remover a imagem “${item.nome||'Imagem'}” do diário?`)) return;
+  if(item.storage_path) await supabaseClient.storage.from('sessao-notas').remove([item.storage_path]);
+  diarioImagens.splice(index,1); renderizarImagensDiario(); await salvarDiarioAtual();
+}
+
+async function carregarHistoricoDiarioPessoal(){
+  const box=document.getElementById('lista-diario-historico'), painel=document.getElementById('diario-historico-pessoal'); if(!box||!painel) return;
+  if(!supabaseClient||!obterCampanhaIdAtual()||!window.usuarioAtualId){painel.style.display='none';return;}
+  const {data,error}=await supabaseClient.from('sessao_diarios').select('id,sessao_id,titulo,conteudo,imagens,atualizado_em,sessoes_campanha(numero,nome,encerrada_em)').eq('campanha_id',obterCampanhaIdAtual()).eq('user_id',window.usuarioAtualId).order('atualizado_em',{ascending:false}).limit(30);
+  if(error){painel.style.display='none';return;}
+  painel.style.display='block';
+  box.innerHTML=data?.length?data.map(x=>`<article class="diario-registro"><h4>📔 ${escaparHTML(x.titulo||'Registro')}</h4><div class="diario-registro-meta">Sessão ${Number(x.sessoes_campanha?.numero)||'—'} · ${escaparHTML(x.sessoes_campanha?.nome||'')} · ${x.atualizado_em?new Date(x.atualizado_em).toLocaleString('pt-BR'):''}</div><div class="diario-registro-conteudo">${escaparHTML(x.conteudo||'')}</div><div class="diario-registro-imagens" data-diario-id="${x.id}"></div></article>`).join(''):'<div class="estado-galeria">Você ainda não possui registros de diário nesta campanha.</div>';
+  for(const x of data||[]){
+    const target=box.querySelector(`[data-diario-id="${x.id}"]`); if(!target) continue;
+    for(const im of (Array.isArray(x.imagens)?x.imagens:[])){ const r=im.storage_path?await supabaseClient.storage.from('sessao-notas').createSignedUrl(im.storage_path,3600):{data:{signedUrl:im.url||''}}; if(r.data?.signedUrl){const el=document.createElement('img');el.src=r.data.signedUrl;el.alt=im.nome||'Imagem do diário';el.loading='lazy';target.appendChild(el);} }
+  }
+}
+
+async function abrirDetalhesSessao(sessaoId){
+  if(!ehMestreGlobal||!supabaseClient) return;
+  const box=document.getElementById('painel-detalhes-sessao'); if(!box) return;
+  box.style.display='block'; box.innerHTML='<div class="estado-galeria">Carregando registros...</div>';
+  const {data:diarios,error:e1}=await supabaseClient.from('sessao_diarios').select('*,sessoes_campanha(numero,nome)').eq('sessao_id',sessaoId).order('atualizado_em',{ascending:false});
+  const {data:rolagens,error:e2}=await supabaseClient.from('sessao_rolagens').select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
+  if(e1||e2){box.innerHTML='<div class="estado-galeria">Não foi possível carregar os registros desta sessão.</div>';return;}
+  const sess=sessoesCampanha.find(x=>x.id===sessaoId)||sessaoAtual;
+  let html=`<div class="sessao-controle"><div><h3>📖 Sessão ${Number(sess?.numero)||'—'} · ${escaparHTML(sess?.nome||'')}</h3><p>${diarios?.length||0} diário(s) · ${rolagens?.length||0} rolagem(ns)</p></div><button type="button" class="btn-secundario" onclick="document.getElementById('painel-detalhes-sessao').style.display='none'">Fechar</button></div>`;
+  html+=`<details class="sessao-detalhe" open><summary>🎲 Rolagens da sessão (${rolagens?.length||0})</summary>`;
+  html+=rolagens?.length?rolagens.map(r=>`<div class="diario-registro"><div class="diario-registro-meta">${escaparHTML(r.nick||'Jogador')} · ${r.criado_em?new Date(r.criado_em).toLocaleString('pt-BR'):''}</div><strong>${escaparHTML(r.descricao||'Rolagem')}</strong><div class="diario-registro-conteudo">${escaparHTML(r.resultado||'')}</div></div>`).join(''):'<p class="estado-galeria">Nenhuma rolagem registrada.</p>';
+  html+='</details><details class="sessao-detalhe" open><summary>📔 Diários dos jogadores (${diarios?.length||0})</summary>';
+  html+=diarios?.length?diarios.map(d=>`<article class="diario-registro"><h4>📔 ${escaparHTML(d.titulo||'Registro')} — ${escaparHTML(d.autor_nick||'Jogador')}</h4><div class="diario-registro-meta">Salvo em ${d.atualizado_em?new Date(d.atualizado_em).toLocaleString('pt-BR'):''}</div><div class="diario-registro-conteudo">${escaparHTML(d.conteudo||'')}</div><div class="diario-registro-imagens" data-master-diario="${d.id}"></div></article>`).join(''):'<p class="estado-galeria">Nenhum diário salvo nesta sessão.</p>';
+  html+='</details>'; box.innerHTML=html;
+  for(const d of diarios||[]){ const target=box.querySelector(`[data-master-diario="${d.id}"]`); if(!target)continue; for(const im of (Array.isArray(d.imagens)?d.imagens:[])){const r=im.storage_path?await supabaseClient.storage.from('sessao-notas').createSignedUrl(im.storage_path,3600):{data:{signedUrl:im.url||''}};if(r.data?.signedUrl){const el=document.createElement('img');el.src=r.data.signedUrl;el.alt=im.nome||'Imagem do diário';el.loading='lazy';target.appendChild(el);}} }
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'economia', 'jornais', 'noctavell', 'grupo', 'mapa', 'rolagens', 'galeria'];
+  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'economia', 'jornais', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -2417,6 +2717,8 @@ function mudarAba(nomeAba, evento) {
     abasCarregadas.mapa = true;
     carregarMapaAtual();
   }
+  if (nomeAba === 'diario' && supabaseClient) { carregarDiarioAtual(); }
+  if (nomeAba === 'sessoes' && supabaseClient && ehMestreGlobal) { carregarSessoesCampanha(); }
   if (nomeAba === 'galeria' && !abasCarregadas.galeria && supabaseClient) {
     abasCarregadas.galeria = true;
     carregarGaleria();
@@ -3479,6 +3781,8 @@ function registrarRolagemHistorico(descricao, resultado, veioDoBroadcast = false
 
   historico.prepend(item);
   mostrarPopup(`🎲 ${textoRes}`);
+
+  if (!veioDoBroadcast) registrarRolagemNaSessao(descricao, textoRes);
 
   if (!veioDoBroadcast && canalMesa) {
     canalMesa.send({

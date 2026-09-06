@@ -43,6 +43,8 @@
       <button onclick="mudarAba('grupo', event)">Fichas do Grupo</button>
       <button onclick="mudarAba('mapa', event)">Mapa</button>
       <button onclick="mudarAba('rolagens', event)">Rolagens</button>
+      <button id="btn-aba-diario" onclick="mudarAba('diario', event)">📔 Meu Diário</button>
+      <button id="btn-aba-sessoes" onclick="mudarAba('sessoes', event)" style="display:none;">🎬 Sessões</button>
       <button onclick="mudarAba('galeria', event)">Chat & Galeria</button>
     </nav>
 
@@ -110,6 +112,7 @@
         <div id="lista-pedidos-campanha" class="lista-campanhas"><div class="estado-galeria">Nenhum pedido pendente.</div></div>
       </div>
 
+      <div id="aviso-campanha-encerrada" class="aviso-campanha-encerrada" style="display:none;"></div>
       <div id="lista-campanhas" class="lista-campanhas">
         <div class="estado-galeria">Faça login para carregar campanhas.</div>
       </div>
@@ -369,6 +372,61 @@
           <p style="color: #a8a8b3;">Nenhuma rolagem realizada ainda.</p>
         </div>
       </div>
+    </section>
+
+    <section id="aba-diario" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">📔 Diário da sessão</span>
+          <h2>Meu Bloco de Notas</h2>
+          <p class="subtexto-galeria">Anote descobertas, pistas, falas e momentos importantes. O conteúdo fica catalogado na sessão atual e pode receber imagens.</p>
+        </div>
+        <div id="status-diario-sessao" class="status-galeria">Sem sessão aberta</div>
+      </div>
+      <div id="diario-sem-sessao" class="card-secao" style="display:none;">
+        <h3>🕯️ Nenhuma sessão está aberta</h3>
+        <p>Quando o Mestre iniciar uma sessão, seu diário ficará vinculado automaticamente a ela.</p>
+      </div>
+      <div id="painel-diario-editor" class="card-secao" style="display:none;">
+        <div class="diario-meta">
+          <label>📌 Título<input id="diario-titulo" type="text" maxlength="120" placeholder="Ex.: Pistas sobre Avalon"></label>
+          <span id="diario-sessao-label">Sessão —</span>
+        </div>
+        <label class="diario-editor-label">✍️ Anotações
+          <textarea id="diario-conteudo" rows="16" maxlength="30000" placeholder="Escreva aqui o que seu personagem descobriu, sentiu ou precisa lembrar..."></textarea>
+        </label>
+        <div class="diario-imagens-area">
+          <div class="diario-imagens-cabecalho"><strong>🖼️ Imagens do diário</strong><span>Você pode anexar mapas, pistas, retratos e referências.</span></div>
+          <input id="diario-arquivos" type="file" accept="image/*" multiple>
+          <div id="diario-imagens-preview" class="diario-imagens-grid"></div>
+        </div>
+        <div class="diario-acoes">
+          <button type="button" class="btn-ficha-principal" onclick="salvarDiarioAtual()">💾 Salvar Diário</button>
+          <span id="diario-ultima-salvacao">Ainda não salvo nesta sessão.</span>
+        </div>
+      </div>
+      <div id="diario-historico-pessoal" class="card-secao" style="display:none;">
+        <h3>📚 Meus registros anteriores</h3>
+        <div id="lista-diario-historico"></div>
+      </div>
+    </section>
+
+    <section id="aba-sessoes" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">🎬 Controle da mesa</span>
+          <h2>Sessões da Campanha</h2>
+          <p class="subtexto-galeria">Cada sessão guarda as rolagens e os diários separadamente, criando um histórico completo da campanha.</p>
+        </div>
+        <div id="status-sessao-mestre" class="status-galeria">Nenhuma sessão aberta</div>
+      </div>
+      <div id="painel-controle-sessao" class="card-secao" style="display:none;"></div>
+      <div id="painel-resumo-sessao" class="card-secao" style="display:none;"></div>
+      <div class="card-secao">
+        <h3>📜 Histórico de sessões</h3>
+        <div id="lista-sessoes-campanha"><div class="estado-galeria">Selecione uma campanha para carregar as sessões.</div></div>
+      </div>
+      <div id="painel-detalhes-sessao" class="card-secao" style="display:none;"></div>
     </section>
 
     <section id="aba-galeria" class="painel">
