@@ -1,0 +1,10 @@
+MaMuSBoaRD — identidade da mesa
+
+Alterações desta versão:
+- O nome visual da mesa foi alterado de “Mesa Virtual - Crônicas de Camelot” para “MaMuSBoaRD”.
+- “Crônicas de Camelot” continua existindo normalmente como nome possível de campanha/sistema; não foi renomeado no banco.
+- Tema global padrão: vermelho, preto e dourado, com possibilidade de detalhes roxos existentes na interface.
+- Ao selecionar uma campanha, a interface passa a usar automaticamente as cores definidas em sistemas.configuracao.tema (corPrimaria, corFundo e corPainel).
+- Ao sair da campanha ou fazer logout, a interface volta ao tema vermelho/preto/dourado.
+- A cor do meta theme-color do navegador também acompanha o tema ativo.
+- A mecânica do mapa, tokens, zoom, pan, dados, sessões, galeria e demais sistemas não foi alterada.

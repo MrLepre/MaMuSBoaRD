@@ -1101,6 +1101,7 @@ async function fazerLogout() {
   dadosFichaAtual = null;
   campanhaAtual = null;
   sistemaAtual = null;
+  aplicarTemaMesa();
   atualizarVisibilidadeAcoesRapidas();
   garantirAbasEconomiaJornaisVisiveis();
   campanhasDisponiveis = [];
@@ -1331,6 +1332,56 @@ function atualizarVisibilidadeAcoesRapidas() {
   if (!campanhaAtual) fecharAcoesRapidas();
 }
 
+function hexParaRgb(valor) {
+  const m = String(valor || '').trim().match(/^#([0-9a-f]{6})$/i);
+  if (!m) return '194,31,50';
+  const h = m[1];
+  return `${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)}`;
+}
+
+function aplicarTemaMesa() {
+  const root = document.documentElement;
+  const body = document.body;
+  if (!root || !body) return;
+
+  const tema = sistemaAtual?.configuracao?.tema || null;
+  if (!campanhaAtual || !tema) {
+    body.classList.remove('tema-sistema');
+    body.classList.add('tema-base');
+    root.style.setProperty('--cam-bg', '#100609');
+    root.style.setProperty('--cam-panel', '#16090d');
+    root.style.setProperty('--cam-panel-alt', '#211016');
+    root.style.setProperty('--cam-gold', '#d4af37');
+    root.style.setProperty('--cam-gold-light', '#f3d075');
+    root.style.setProperty('--cam-gold-dark', '#8c6d1e');
+    root.style.setProperty('--cam-border', '#5b252b');
+    root.style.setProperty('--cam-primary', '#c21f32');
+    root.style.setProperty('--cam-primary-rgb', '194,31,50');
+    root.style.setProperty('--cam-gold-rgb', '212,175,55');
+    atualizarMetaThemeColor('#100609');
+    return;
+  }
+
+  const primaria = /^#[0-9a-f]{6}$/i.test(String(tema.corPrimaria || '')) ? tema.corPrimaria : '#c5a059';
+  const fundo = /^#[0-9a-f]{6}$/i.test(String(tema.corFundo || '')) ? tema.corFundo : '#090a0f';
+  const painel = /^#[0-9a-f]{6}$/i.test(String(tema.corPainel || '')) ? tema.corPainel : '#151821';
+  const rgb = hexParaRgb(primaria);
+
+  body.classList.remove('tema-base');
+  body.classList.add('tema-sistema');
+  root.style.setProperty('--tema-primaria', primaria);
+  root.style.setProperty('--tema-fundo', fundo);
+  root.style.setProperty('--tema-painel', painel);
+  root.style.setProperty('--tema-primary-rgb', rgb);
+  root.style.setProperty('--cam-gold-rgb', rgb);
+  atualizarMetaThemeColor(fundo);
+}
+
+function atualizarMetaThemeColor(cor) {
+  const meta = document.getElementById('meta-theme-color');
+  if (meta) meta.setAttribute('content', cor || '#100609');
+}
+
 function atualizarContextoCampanha() {
   const avisoEncerrada = document.getElementById('aviso-campanha-encerrada');
   if (avisoEncerrada) {
@@ -1529,6 +1580,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   // Só agora que o sistema foi resolvido carregamos o estado tático da campanha.
   carregarEstadoWorldTrigger();
+  aplicarTemaMesa();
   garantirAbasEconomiaJornaisVisiveis();
 
   salvarCampanhaLocalmente();
@@ -1659,6 +1711,7 @@ async function salvarEdicaoCampanha(campanhaId) {
   if (campanhaAtual?.id === campanhaId) {
     campanhaAtual = data;
     sistemaAtual = data.sistemas || null;
+    aplicarTemaMesa();
     atualizarContextoCampanha();
     garantirAbasEconomiaJornaisVisiveis();
     resetarDadosEconomiaJornalAoTrocarCampanha();

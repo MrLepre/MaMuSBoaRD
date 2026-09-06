@@ -1,13 +1,16 @@
 :root {
-  --cam-bg: #07090f;
-  --cam-panel: #10141f;
-  --cam-panel-alt: #161b2c;
+  --cam-bg: #100609;
+  --cam-panel: #16090d;
+  --cam-panel-alt: #211016;
   --cam-gold: #d4af37;
   --cam-gold-light: #f3d075;
   --cam-gold-dark: #8c6d1e;
-  --cam-border: #4a3d24;
-  --cam-text: #e2d9c5;
-  --cam-blue-royal: #1b2a4a;
+  --cam-border: #5b252b;
+  --cam-text: #eadfd0;
+  --cam-blue-royal: #35121b;
+  --cam-primary: #c21f32;
+  --cam-primary-rgb: 194,31,50;
+  --cam-gold-rgb: 212,175,55;
 }
 
 * {
@@ -1423,4 +1426,88 @@ body.imagem-mestre-aberta { overflow:hidden !important; }
     align-items: center;
     white-space: nowrap;
   }
+}
+
+
+/* ==========================================================
+   MaMuSBoaRD — IDENTIDADE GLOBAL E TEMAS POR SISTEMA
+   ========================================================== */
+body {
+  background-color: var(--cam-bg);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(var(--cam-primary-rgb), .18) 0%, transparent 70%),
+    radial-gradient(circle at 10% 90%, rgba(var(--cam-gold-rgb), .07) 0%, transparent 40%);
+  transition: background-color .25s ease, color .25s ease;
+}
+
+.topo-mesa {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cam-panel) 98%, black), color-mix(in srgb, var(--cam-bg) 96%, black));
+  border-bottom-color: var(--cam-border);
+}
+
+.abas-navegacao {
+  background: color-mix(in srgb, var(--cam-panel-alt) 96%, black);
+  border-bottom-color: var(--cam-border);
+}
+
+.abas-navegacao button.ativo,
+.abas-navegacao button:hover {
+  background: color-mix(in srgb, var(--cam-primary) 30%, var(--cam-panel-alt));
+  border-color: var(--cam-gold);
+  color: var(--cam-gold-light);
+}
+
+button {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--cam-primary) 42%, var(--cam-panel-alt)),
+    color-mix(in srgb, var(--cam-bg) 88%, var(--cam-primary)));
+  color: var(--cam-gold-light);
+  border-color: var(--cam-gold);
+}
+
+.btn-secundario {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--cam-primary) 20%, var(--cam-panel-alt)),
+    var(--cam-panel)) !important;
+}
+
+.card-secao,
+.card-campanha,
+.card-sistema,
+.card-secao-campanha {
+  border-color: var(--cam-border);
+}
+
+input, select, textarea {
+  border-color: var(--cam-border);
+}
+
+#contexto-campanha {
+  border-color: var(--cam-border);
+  background: color-mix(in srgb, var(--cam-panel) 94%, var(--cam-primary));
+}
+
+/* O tema principal da mesa: vermelho + preto + dourado.
+   Os temas de sistema substituem estes tokens automaticamente. */
+body.tema-sistema {
+  --cam-gold: var(--tema-primaria);
+  --cam-gold-light: color-mix(in srgb, var(--tema-primaria) 72%, white);
+  --cam-gold-dark: color-mix(in srgb, var(--tema-primaria) 60%, black);
+  --cam-border: color-mix(in srgb, var(--tema-primaria) 35%, #25252b);
+  --cam-primary: var(--tema-primaria);
+  --cam-primary-rgb: var(--tema-primary-rgb);
+  --cam-bg: var(--tema-fundo);
+  --cam-panel: var(--tema-painel);
+  --cam-panel-alt: color-mix(in srgb, var(--tema-painel) 82%, var(--tema-primaria));
+  --cam-blue-royal: color-mix(in srgb, var(--tema-primaria) 25%, var(--tema-painel));
+}
+
+body.tema-base {
+  --cam-gold-rgb: 212,175,55;
+}
+
+#meta-theme-color { color-scheme: dark; }
+
+@media (prefers-reduced-motion: reduce) {
+  body { transition: none; }
 }
