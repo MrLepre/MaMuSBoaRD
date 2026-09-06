@@ -2119,7 +2119,10 @@ function mudarAba(nomeAba, evento) {
   }
   if (nomeAba === 'sistemas' && supabaseClient) {
     (async () => {
-      if (ehMestreGlobal) await garantirSistemaElarion();
+      if (ehMestreGlobal) {
+        await garantirSistemaElarion();
+        await garantirSistemaEterBrasas();
+      }
       await carregarSistemas();
     })();
   }
