@@ -1,0 +1,22 @@
+ÉTER & BRASAS — ECONOMIA VIVA + JORNAIS
+
+1) Execute no Supabase o arquivo SQL:
+   sql-economia-jornais-eter-brasas.sql
+
+2) Economia
+- Cada registro pertence à campanha ativa.
+- Jogadores podem consultar mercados, mercadorias, preços e eventos.
+- Apenas o Mestre pode criar/editar/apagar mercados, mercadorias e eventos.
+- O preço atual de uma mercadoria é calculado como preço base + ajuste percentual definido pelo Mestre.
+- Oferta e demanda são registradas como indicadores visíveis, sem impor uma fórmula automática não definida pelo sistema.
+- As 11 moedas do arquivo de valores de moedas foram incorporadas como valores-base.
+
+3) Jornais
+- Apenas o Mestre publica/edita/apaga notícias.
+- Jogadores veem somente notícias publicadas.
+- Notícias são separadas por campanha e podem ser filtradas por categoria e região.
+- A publicação gera atualização em tempo real para a campanha ativa.
+
+4) Segurança
+- RLS usa eh_membro_da_campanha() e eh_mestre_da_campanha().
+- Nenhum registro econômico/jornal é compartilhado entre campanhas.

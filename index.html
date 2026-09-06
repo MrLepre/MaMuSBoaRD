@@ -37,6 +37,8 @@
       <button onclick="mudarAba('campanhas', event)">Campanhas</button>
       <button id="btn-aba-sistemas" onclick="mudarAba('sistemas', event)" style="display:none;">Sistemas RPG</button>
       <button id="btn-aba-bestiario" onclick="mudarAba('bestiario', event)" style="display:none;">📖 Bestiário</button>
+      <button id="btn-aba-economia" class="aba-mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo">💰 Economia</button>
+      <button id="btn-aba-jornais" class="aba-mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo">📰 Jornais</button>
       <button onclick="mudarAba('grupo', event)">Fichas do Grupo</button>
       <button onclick="mudarAba('mapa', event)">Mapa</button>
       <button onclick="mudarAba('rolagens', event)">Rolagens</button>
@@ -242,6 +244,61 @@
           <div id="bestiario-detalhe-corpo" class="modal-ficha-grupo-body"></div>
         </div>
       </div>
+    </section>
+
+
+    <section id="aba-economia" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">💰 Mercado Vivo</span>
+          <h2>Economia do Mundo</h2>
+          <p class="subtexto-galeria">Os preços, a oferta e a demanda pertencem à campanha. O Mestre pode transformar acontecimentos em mudanças econômicas reais.</p>
+        </div>
+        <div class="economia-acoes-mestre" id="economia-acoes-mestre" style="display:none;">
+          <button class="btn-nova-campanha" type="button" onclick="abrirEditorMercado()">＋ Mercado</button>
+          <button class="btn-nova-campanha" type="button" onclick="abrirEditorMercadoria()">＋ Mercadoria</button>
+          <button class="btn-nova-campanha" type="button" onclick="abrirEditorEventoEconomico()">＋ Evento</button>
+        </div>
+      </div>
+
+      <div id="economia-sem-campanha" class="estado-galeria">Selecione uma campanha para carregar a economia.</div>
+      <div id="economia-painel-mestre" class="card-secao economia-mestre" style="display:none;">
+        <div class="economia-mestre-cabecalho"><div><h3>👑 Painel do Mestre</h3><p>Altere mercados, mercadorias e choques econômicos sem misturar dados de outras campanhas.</p></div><button type="button" class="btn-secundario" onclick="recarregarEconomiaAtual()">↻ Atualizar</button></div>
+        <div id="economia-formulario" class="economia-formulario" style="display:none;"></div>
+      </div>
+      <div id="economia-resumo" class="economia-grid"></div>
+      <div class="economia-secao"><div class="economia-secao-titulo"><h3>🪙 Moedas do mundo</h3><span>Valores-base do Éter & Brasas</span></div><div id="lista-moedas-economia" class="economia-grid"></div></div>
+      <div class="economia-secao">
+        <div class="economia-secao-titulo"><h3>🏪 Mercados</h3><span id="economia-contagem-mercados"></span></div>
+        <div id="lista-mercados-economia" class="economia-grid"></div>
+      </div>
+      <div class="economia-secao">
+        <div class="economia-secao-titulo"><h3>📦 Mercadorias</h3><span id="economia-contagem-itens"></span></div>
+        <div id="lista-itens-economia" class="economia-grid"></div>
+      </div>
+      <div class="economia-secao">
+        <div class="economia-secao-titulo"><h3>🌪️ Eventos econômicos</h3><span>Histórico da campanha</span></div>
+        <div id="lista-eventos-economia" class="lista-campanhas"></div>
+      </div>
+    </section>
+
+    <section id="aba-jornais" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">📰 Notícias do mundo</span>
+          <h2>Jornais</h2>
+          <p class="subtexto-galeria">O Mestre registra acontecimentos, rumores, guerras, crises e descobertas. Os jogadores acompanham apenas as notícias publicadas para a campanha.</p>
+        </div>
+        <button id="btn-novo-jornal" class="btn-nova-campanha" type="button" style="display:none;" onclick="abrirEditorJornal()">＋ Nova notícia</button>
+      </div>
+      <div id="jornais-sem-campanha" class="estado-galeria">Selecione uma campanha para ler o jornal.</div>
+      <div id="painel-editor-jornal" class="card-secao jornal-editor" style="display:none;"></div>
+      <div class="jornal-filtros card-secao">
+        <input id="jornal-busca" type="search" placeholder="🔎 Buscar notícia..." autocomplete="off">
+        <select id="jornal-categoria"><option value="">Todas as categorias</option><option>Política</option><option>Guerra</option><option>Economia</option><option>Monstros</option><option>Magia</option><option>Guildas</option><option>Reinos</option><option>Mundo</option><option>Urgente</option><option>Rumor</option></select>
+        <select id="jornal-regiao"><option value="">Todas as regiões</option></select>
+      </div>
+      <div id="lista-jornais" class="jornal-grid"></div>
     </section>
 
     <section id="aba-mapa" class="painel">

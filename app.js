@@ -857,10 +857,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   atualizarStatusConexao(supabaseClient ? 'online' : 'offline', supabaseClient ? 'Conectando à Távola...' : 'Modo local — Supabase indisponível.');
+  garantirAbasEconomiaJornaisVisiveis();
 
   try {
     const abaSalva = localStorage.getItem('cronicas_camelot_aba');
-    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria'].includes(abaSalva)) {
+    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais'].includes(abaSalva)) {
       mudarAba(abaSalva, abaSalva === 'rolagens' ? { __restauracaoAbaSalva: true } : undefined);
     }
   } catch (err) {}
@@ -869,6 +870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
       atualizarInterfaceAuth(session?.user || null);
+      garantirAbasEconomiaJornaisVisiveis();
 
       if (session?.user) {
         // Garante que o sistema Elarion exista antes de carregar a lista de Sistemas.
@@ -929,6 +931,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         .on('broadcast', { event: 'vtt_ping' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
           criarEfeitoPing(payload.payload.x, payload.payload.y);
+        })
+        .on('broadcast', { event: 'economia_atualizada' }, (payload) => {
+          if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
+          if (abaAtual === 'economia') carregarEconomiaAtual(true);
+        })
+        .on('broadcast', { event: 'jornal_atualizado' }, (payload) => {
+          if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
+          if (abaAtual === 'jornais') carregarJornaisAtual(true);
         })
         .on('broadcast', { event: 'vtt_mover_token' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
@@ -1515,9 +1525,12 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   abasCarregadas = { mapa: false, galeria: false };
   dadosGaleriaAtual = [];
   pastaGaleriaAtual = 'Todas';
+  resetarDadosEconomiaJornalAoTrocarCampanha();
 
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session?.user) carregarFichaDoUsuario(session.user.id);
+  if (abaAtual === 'economia') carregarEconomiaAtual(true);
+  if (abaAtual === 'jornais') carregarJornaisAtual(true);
 
   if (abaAtual === 'mapa') { abasCarregadas.mapa = true; carregarMapaAtual(); }
   if (abaAtual === 'galeria') { abasCarregadas.galeria = true; carregarGaleria(true); }
@@ -2065,9 +2078,128 @@ function criarTokenDoBestiario(idx){
   mostrarPopup(`🐾 ${m.nome} foi colocado no mapa!`);
 }
 
+
+// =========================================================
+// ÉTER & BRASAS — ECONOMIA VIVA + JORNAIS DA CAMPANHA
+// =========================================================
+let economiaDados = { mercados: [], itens: [], eventos: [] };
+let jornaisDados = [];
+let economiaCarregadaCampanha = null;
+let jornaisCarregadosCampanha = null;
+
+function sistemaEterBrasasAtivo() {
+  return sistemaAtual?.configuracao?.tipo === 'eter_brasas' || /éter\s*&\s*brasas/i.test(sistemaAtual?.nome || '');
+}
+function moedaEterPorCodigo(codigo) {
+  const lista = [
+    ['LUM','Lúmen','Ł','Brassanthium'],['KRO','Króna','Kr','Frostheim'],['DRM','Drom','Ð','Zerathis'],['COG','Cogmark','⚙','Altherion'],['LEF','Folha','♣',"Kael'Thir"],['AST','Astreel','✦','Astra'],['KOB','Koban','Ꝏ','Kuroshida'],['VMR','Vargr','Vm','Drosgard'],['ICR','Coroa de Ferro','IC','Valmorra'],['LUN','Lunis','☾','Lunareth'],['DBL','Dobrão','Db','Drakenshore']
+  ];
+  return lista.find(m => m[0] === codigo) || null;
+}
+function formatarMoedaEter(valor, codigo='LUM') {
+  const m = moedaEterPorCodigo(codigo);
+  return `${Number(valor || 0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} ${m?.[2] || 'Ł'}`;
+}
+function obterPrecoAtualEconomia(item) {
+  const base = Number(item?.preco_base) || 0;
+  const mod = Number(item?.modificador_percentual) || 0;
+  return Math.max(0, base * (1 + mod / 100));
+}
+function normalizarTextoEconomia(v){ return String(v ?? '').trim(); }
+
+async function carregarEconomiaAtual(force=false) {
+  const id = obterCampanhaIdAtual();
+  const vazio = document.getElementById('economia-sem-campanha');
+  if (!id) { if(vazio) vazio.style.display='block'; return; }
+  if (!force && economiaCarregadaCampanha === id) { renderizarEconomia(); return; }
+  if (vazio) vazio.style.display='none';
+  if (!supabaseClient) return;
+  economiaCarregadaCampanha = id;
+  const [m,i,e] = await Promise.all([
+    supabaseClient.from('economia_mercados').select('*').eq('campanha_id',id).order('nome'),
+    supabaseClient.from('economia_itens').select('*').eq('campanha_id',id).order('nome'),
+    supabaseClient.from('economia_eventos').select('*').eq('campanha_id',id).order('created_at',{ascending:false})
+  ]);
+  if (m.error || i.error || e.error) {
+    console.error('Economia:',m.error||i.error||e.error);
+    document.getElementById('lista-mercados-economia').innerHTML='<div class="estado-galeria">A economia ainda não foi preparada no Supabase. Execute o SQL da atualização.</div>';
+    return;
+  }
+  economiaDados={mercados:m.data||[],itens:i.data||[],eventos:e.data||[]};
+  renderizarEconomia();
+}
+function renderizarEconomia(){
+  const id=obterCampanhaIdAtual();
+  const painel=document.getElementById('economia-painel-mestre');
+  const acoes=document.getElementById('economia-acoes-mestre');
+  if (painel) painel.style.display = ehMestreGlobal && id ? 'block':'none';
+  if (acoes) acoes.style.display = ehMestreGlobal && id ? 'flex':'none';
+  const resumo=document.getElementById('economia-resumo');
+  if(resumo) resumo.innerHTML=`<div class="economia-kpi"><strong>${economiaDados.mercados.length}</strong><span>Mercados</span></div><div class="economia-kpi"><strong>${economiaDados.itens.length}</strong><span>Mercadorias</span></div><div class="economia-kpi"><strong>${economiaDados.eventos.length}</strong><span>Eventos registrados</span></div>`;
+  const lmoin=document.getElementById('lista-moedas-economia');
+  if(lmoin) lmoin.innerHTML=[['LUM','Lúmen','Ł','Brassanthium',1,1],['KRO','Króna','Kr','Frostheim',1.4,0.71],['DRM','Drom','Ð','Zerathis',0.6,1.67],['COG','Cogmark','⚙','Altherion',1.2,0.83],['LEF','Folha','♣',"Kael'Thir",0.9,1.11],['AST','Astreel','✦','Astra',1.6,0.63],['KOB','Koban','Ꝏ','Kuroshida',1.3,0.77],['VMR','Vargr','Vm','Drosgard',0.7,1.43],['ICR','Coroa de Ferro','IC','Valmorra',1.1,0.91],['LUN','Lunis','☾','Lunareth',1.5,0.67],['DBL','Dobrão','Db','Drakenshore',0.5,2]].map(m=>`<article class="economia-card moeda-card"><div class="economia-card-topo"><div><span class="economia-selo">${m[0]}</span><h4>${escaparHTML(m[1])}</h4></div><span class="economia-moeda">${m[2]}</span></div><div class="economia-mini-grid"><span>Reino <b>${escaparHTML(m[3])}</b></span><span>Taxa / Lúmen <b>${m[4]}</b></span><span>1 Lúmen = <b>${m[5]} ${m[2]}</b></span></div></article>`).join('');
+  const lm=document.getElementById('lista-mercados-economia');
+  if(lm) lm.innerHTML=economiaDados.mercados.length?economiaDados.mercados.map(m=>`<article class="economia-card"><div class="economia-card-topo"><div><span class="economia-selo">🏪 ${escaparHTML(m.regiao||'Mundo')}</span><h4>${escaparHTML(m.nome)}</h4></div><span class="economia-moeda">${escaparHTML(m.moeda_simbolo||moedaEterPorCodigo(m.moeda_codigo)?.[2]||'Ł')}</span></div><p>${escaparHTML(m.observacoes||'Mercado sem observações.')}</p><div class="economia-mini-grid"><span>Riqueza <b>${Number(m.riqueza||5)}/10</b></span><span>Inflação <b>${Number(m.inflacao||0)}%</b></span><span>Moeda <b>${escaparHTML(m.moeda_codigo||'LUM')}</b></span></div>${ehMestreGlobal?`<div class="economia-card-acoes"><button type="button" onclick="abrirEditorMercado('${m.id}')">✏️ Editar</button><button type="button" class="btn-perigo" onclick="excluirMercado('${m.id}')">🗑️</button></div>`:''}</article>`).join(''):'<div class="estado-galeria">Nenhum mercado cadastrado. O Mestre pode criar o primeiro.</div>';
+  const li=document.getElementById('lista-itens-economia');
+  if(li) li.innerHTML=economiaDados.itens.length?economiaDados.itens.map(item=>`<article class="economia-card economia-item"><div class="economia-card-topo"><div><span class="economia-selo">📦 ${escaparHTML(item.categoria||'Mercadoria')}</span><h4>${escaparHTML(item.nome)}</h4></div><strong class="economia-preco">${formatarMoedaEter(obterPrecoAtualEconomia(item),item.moeda_codigo||'LUM')}</strong></div><div class="economia-mini-grid"><span>Base <b>${formatarMoedaEter(item.preco_base,item.moeda_codigo||'LUM')}</b></span><span>Mercado <b>${escaparHTML(economiaDados.mercados.find(x=>x.id===item.mercado_id)?.nome||'—')}</b></span><span>Ajuste <b>${Number(item.modificador_percentual||0)>0?'+':''}${Number(item.modificador_percentual||0)}%</b></span><span>Oferta/Demanda <b>${Number(item.oferta||0)} / ${Number(item.demanda||0)}</b></span></div>${item.descricao?`<p>${escaparHTML(item.descricao)}</p>`:''}${ehMestreGlobal?`<div class="economia-card-acoes"><button type="button" onclick="abrirEditorMercadoria('${item.id}')">✏️ Editar</button><button type="button" class="btn-perigo" onclick="excluirMercadoria('${item.id}')">🗑️</button></div>`:''}</article>`).join(''):'<div class="estado-galeria">Nenhuma mercadoria cadastrada.</div>';
+  const le=document.getElementById('lista-eventos-economia');
+  if(le) le.innerHTML=economiaDados.eventos.length?economiaDados.eventos.map(e=>`<article class="card-campanha economia-evento"><div class="card-campanha-conteudo"><span class="card-campanha-icone">${escaparHTML(e.icone||'🌪️')}</span><div><h3>${escaparHTML(e.titulo)}</h3><p>${escaparHTML(e.descricao||'')}</p><span class="card-campanha-meta">${escaparHTML(e.tipo||'Evento')} · ${escaparHTML(e.regiao||'Mundo')} · Intensidade ${Number(e.intensidade||1)}/5 · ${e.created_at?new Date(e.created_at).toLocaleString('pt-BR'):''}</span></div></div>${ehMestreGlobal?`<button type="button" class="btn-perigo" onclick="excluirEventoEconomico('${e.id}')">🗑️ Apagar</button>`:''}</article>`).join(''):'<div class="estado-galeria">Nenhum evento econômico registrado.</div>';
+  document.getElementById('economia-contagem-mercados')?.replaceChildren(document.createTextNode(`${economiaDados.mercados.length} cadastrados`));
+  document.getElementById('economia-contagem-itens')?.replaceChildren(document.createTextNode(`${economiaDados.itens.length} cadastradas`));
+}
+function recarregarEconomiaAtual(){ carregarEconomiaAtual(true); }
+function fecharEditorEconomia(){ const el=document.getElementById('economia-formulario'); if(el){el.style.display='none';el.innerHTML='';} }
+function abrirEditorMercado(id=null){
+  if(!ehMestreGlobal)return; const x=economiaDados.mercados.find(v=>v.id===id)||{}; const el=document.getElementById('economia-formulario'); if(!el)return;
+  el.style.display='block'; el.innerHTML=`<div class="economia-editor"><h3>${id?'✏️ Editar':'＋ Criar'} mercado</h3><div class="economia-form-grid"><label>Nome<input id="econ-mercado-nome" maxlength="80" value="${escaparHTML(x.nome||'')}"></label><label>Região<input id="econ-mercado-regiao" maxlength="80" value="${escaparHTML(x.regiao||'')}"></label><label>Moeda<select id="econ-mercado-moeda">${['LUM','KRO','DRM','COG','LEF','AST','KOB','VMR','ICR','LUN','DBL'].map(c=>`<option value="${c}" ${x.moeda_codigo===c?'selected':''}>${c} — ${moedaEterPorCodigo(c)?.[1]}</option>`).join('')}</select></label><label>Riqueza (1–10)<input id="econ-mercado-riqueza" type="number" min="1" max="10" value="${Number(x.riqueza||5)}"></label><label>Inflação %<input id="econ-mercado-inflacao" type="number" step="0.1" value="${Number(x.inflacao||0)}"></label></div><label>Observações<textarea id="econ-mercado-obs" rows="3" maxlength="1000">${escaparHTML(x.observacoes||'')}</textarea></label><div class="economia-editor-acoes"><button type="button" class="btn-ficha-principal" onclick="salvarMercado('${id||''}')">💾 Salvar</button><button type="button" class="btn-secundario" onclick="fecharEditorEconomia()">Cancelar</button></div></div>`;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function salvarMercado(id=''){ if(!ehMestreGlobal||!supabaseClient||!obterCampanhaIdAtual())return; const payload={campanha_id:obterCampanhaIdAtual(),nome:normalizarTextoEconomia(document.getElementById('econ-mercado-nome')?.value),regiao:normalizarTextoEconomia(document.getElementById('econ-mercado-regiao')?.value)||'Mundo',moeda_codigo:document.getElementById('econ-mercado-moeda')?.value||'LUM',riqueza:Math.max(1,Math.min(10,Number(document.getElementById('econ-mercado-riqueza')?.value)||5)),inflacao:Number(document.getElementById('econ-mercado-inflacao')?.value)||0,observacoes:document.getElementById('econ-mercado-obs')?.value.trim()||'',atualizado_por:window.usuarioAtualId}; if(!payload.nome)return mostrarPopup('❌ Informe o nome do mercado.'); const r=id?await supabaseClient.from('economia_mercados').update(payload).eq('id',id).eq('campanha_id',obterCampanhaIdAtual()):await supabaseClient.from('economia_mercados').insert(payload); if(r.error)return mostrarPopup('❌ '+r.error.message); fecharEditorEconomia(); await carregarEconomiaAtual(true); transmitirEconomia('mercado'); }
+async function excluirMercado(id){if(!ehMestreGlobal||!confirm('Apagar este mercado?'))return; const r=await supabaseClient.from('economia_mercados').delete().eq('id',id).eq('campanha_id',obterCampanhaIdAtual()); if(r.error)return mostrarPopup('❌ '+r.error.message); await carregarEconomiaAtual(true);}
+function abrirEditorMercadoria(id=null){ if(!ehMestreGlobal)return; const x=economiaDados.itens.find(v=>v.id===id)||{}; const el=document.getElementById('economia-formulario'); if(!el)return; el.style.display='block'; el.innerHTML=`<div class="economia-editor"><h3>${id?'✏️ Editar':'＋ Criar'} mercadoria</h3><div class="economia-form-grid"><label>Nome<input id="econ-item-nome" maxlength="80" value="${escaparHTML(x.nome||'')}"></label><label>Categoria<input id="econ-item-cat" maxlength="60" value="${escaparHTML(x.categoria||'')}"></label><label>Mercado<select id="econ-item-mercado"><option value="">Global / sem mercado</option>${economiaDados.mercados.map(m=>`<option value="${m.id}" ${x.mercado_id===m.id?'selected':''}>${escaparHTML(m.nome)}</option>`).join('')}</select></label><label>Moeda<select id="econ-item-moeda">${['LUM','KRO','DRM','COG','LEF','AST','KOB','VMR','ICR','LUN','DBL'].map(c=>`<option value="${c}" ${x.moeda_codigo===c?'selected':''}>${c} — ${moedaEterPorCodigo(c)?.[1]}</option>`).join('')}</select></label><label>Preço base<input id="econ-item-preco" type="number" min="0" step="0.01" value="${Number(x.preco_base||0)}"></label><label>Ajuste de preço %<input id="econ-item-mod" type="number" step="0.1" value="${Number(x.modificador_percentual||0)}"></label><label>Oferta<input id="econ-item-oferta" type="number" min="0" value="${Number(x.oferta||0)}"></label><label>Demanda<input id="econ-item-demanda" type="number" min="0" value="${Number(x.demanda||0)}"></label></div><label>Descrição<textarea id="econ-item-desc" rows="3" maxlength="1000">${escaparHTML(x.descricao||'')}</textarea></label><div class="economia-editor-acoes"><button type="button" class="btn-ficha-principal" onclick="salvarMercadoria('${id||''}')">💾 Salvar</button><button type="button" class="btn-secundario" onclick="fecharEditorEconomia()">Cancelar</button></div></div>`; el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+async function salvarMercadoria(id=''){if(!ehMestreGlobal||!supabaseClient||!obterCampanhaIdAtual())return; const payload={campanha_id:obterCampanhaIdAtual(),nome:normalizarTextoEconomia(document.getElementById('econ-item-nome')?.value),categoria:normalizarTextoEconomia(document.getElementById('econ-item-cat')?.value)||'Mercadoria',mercado_id:document.getElementById('econ-item-mercado')?.value||null,moeda_codigo:document.getElementById('econ-item-moeda')?.value||'LUM',preco_base:Math.max(0,Number(document.getElementById('econ-item-preco')?.value)||0),modificador_percentual:Number(document.getElementById('econ-item-mod')?.value)||0,oferta:Math.max(0,Number(document.getElementById('econ-item-oferta')?.value)||0),demanda:Math.max(0,Number(document.getElementById('econ-item-demanda')?.value)||0),descricao:document.getElementById('econ-item-desc')?.value.trim()||'',atualizado_por:window.usuarioAtualId}; if(!payload.nome)return mostrarPopup('❌ Informe o nome da mercadoria.'); const r=id?await supabaseClient.from('economia_itens').update(payload).eq('id',id).eq('campanha_id',obterCampanhaIdAtual()):await supabaseClient.from('economia_itens').insert(payload); if(r.error)return mostrarPopup('❌ '+r.error.message); fecharEditorEconomia(); await carregarEconomiaAtual(true); transmitirEconomia('mercadoria');}
+async function excluirMercadoria(id){if(!ehMestreGlobal||!confirm('Apagar esta mercadoria?'))return;const r=await supabaseClient.from('economia_itens').delete().eq('id',id).eq('campanha_id',obterCampanhaIdAtual());if(r.error)return mostrarPopup('❌ '+r.error.message);await carregarEconomiaAtual(true);}
+function abrirEditorEventoEconomico(){if(!ehMestreGlobal)return;const el=document.getElementById('economia-formulario');if(!el)return;el.style.display='block';el.innerHTML=`<div class="economia-editor"><h3>🌪️ Registrar acontecimento econômico</h3><div class="economia-form-grid"><label>Título<input id="econ-evento-titulo" maxlength="100" placeholder="Ex.: Guerra fecha a fronteira"></label><label>Tipo<select id="econ-evento-tipo"><option>Guerra</option><option>Fome</option><option>Escassez</option><option>Superprodução</option><option>Descoberta</option><option>Festival</option><option>Catástrofe</option><option>Bloqueio comercial</option><option>Nova rota</option><option>Política</option><option>Outro</option></select></label><label>Região<input id="econ-evento-regiao" maxlength="80" placeholder="Ex.: Frostheim"></label><label>Intensidade (1–5)<input id="econ-evento-intensidade" type="number" min="1" max="5" value="3"></label><label>Ícone<input id="econ-evento-icone" maxlength="4" value="🌪️"></label></div><label>O que aconteceu?<textarea id="econ-evento-desc" rows="4" maxlength="2000" placeholder="Descreva a causa e as consequências."></textarea></label><div class="economia-editor-acoes"><button type="button" class="btn-ficha-principal" onclick="salvarEventoEconomico()">📌 Registrar evento</button><button type="button" class="btn-secundario" onclick="fecharEditorEconomia()">Cancelar</button></div></div>`;el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+async function salvarEventoEconomico(){if(!ehMestreGlobal||!supabaseClient||!obterCampanhaIdAtual())return;const payload={campanha_id:obterCampanhaIdAtual(),titulo:normalizarTextoEconomia(document.getElementById('econ-evento-titulo')?.value),tipo:document.getElementById('econ-evento-tipo')?.value||'Outro',regiao:normalizarTextoEconomia(document.getElementById('econ-evento-regiao')?.value)||'Mundo',intensidade:Math.max(1,Math.min(5,Number(document.getElementById('econ-evento-intensidade')?.value)||3)),icone:normalizarTextoEconomia(document.getElementById('econ-evento-icone')?.value)||'🌪️',descricao:document.getElementById('econ-evento-desc')?.value.trim()||'',criado_por:window.usuarioAtualId};if(!payload.titulo||!payload.descricao)return mostrarPopup('❌ Preencha o título e a descrição.');const r=await supabaseClient.from('economia_eventos').insert(payload);if(r.error)return mostrarPopup('❌ '+r.error.message);fecharEditorEconomia();await carregarEconomiaAtual(true);transmitirEconomia('evento');}
+async function excluirEventoEconomico(id){if(!ehMestreGlobal||!confirm('Apagar este evento do histórico?'))return;const r=await supabaseClient.from('economia_eventos').delete().eq('id',id).eq('campanha_id',obterCampanhaIdAtual());if(r.error)return mostrarPopup('❌ '+r.error.message);await carregarEconomiaAtual(true);}
+function transmitirEconomia(tipo){if(canalMesa)canalMesa.send({type:'broadcast',event:'economia_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),tipo,quando:Date.now()}});}
+
+async function carregarJornaisAtual(force=false){
+  const id=obterCampanhaIdAtual(); const vazio=document.getElementById('jornais-sem-campanha');
+  if(!id){if(vazio)vazio.style.display='block';return;} if(!force&&jornaisCarregadosCampanha===id){renderizarJornais();return;} if(vazio)vazio.style.display='none'; if(!supabaseClient)return;
+  jornaisCarregadosCampanha=id; const r=await supabaseClient.from('jornais_campanha').select('*').eq('campanha_id',id).eq('publicado',true).order('publicado_em',{ascending:false});
+  if(r.error){console.error('Jornais:',r.error);document.getElementById('lista-jornais').innerHTML='<div class="estado-galeria">Execute o SQL da atualização para ativar o jornal.</div>';return;} jornaisDados=r.data||[]; preencherFiltroRegiaoJornal(); renderizarJornais();
+}
+function preencherFiltroRegiaoJornal(){const s=document.getElementById('jornal-regiao');if(!s)return;const atual=s.value;const regs=[...new Set(jornaisDados.map(j=>j.regiao).filter(Boolean))].sort();s.innerHTML='<option value="">Todas as regiões</option>'+regs.map(r=>`<option value="${escaparHTML(r)}">${escaparHTML(r)}</option>`).join('');if(regs.includes(atual))s.value=atual;}
+function renderizarJornais(){
+  const busca=(document.getElementById('jornal-busca')?.value||'').toLowerCase().trim(),cat=document.getElementById('jornal-categoria')?.value||'',reg=document.getElementById('jornal-regiao')?.value||''; const lista=document.getElementById('lista-jornais'); if(!lista)return;
+  const filtrados=jornaisDados.filter(j=>(!cat||j.categoria===cat)&&(!reg||j.regiao===reg)&&(!busca||`${j.titulo} ${j.manchete} ${j.conteudo} ${j.regiao}`.toLowerCase().includes(busca)));
+  lista.innerHTML=filtrados.length?filtrados.map((j,i)=>`<article class="jornal-folha ${i===0&&!busca&&!cat&&!reg?'jornal-destaque':''}"><div class="jornal-cabecalho"><span class="jornal-marca">O CORREIO DO ÉTER</span><span>${j.publicado_em?new Date(j.publicado_em).toLocaleDateString('pt-BR'):''}</span></div><div class="jornal-meta"><span>${escaparHTML(j.categoria||'Mundo')}</span><span>${escaparHTML(j.regiao||'Mundo')}</span>${j.importancia>=4?'<b>🚨 DESTAQUE</b>':''}</div><h3>${escaparHTML(j.titulo)}</h3>${j.manchete?`<p class="jornal-manchete">${escaparHTML(j.manchete)}</p>`:''}<div class="jornal-corpo">${escaparHTML(j.conteudo||'').replace(/\n/g,'<br>')}</div>${ehMestreGlobal?`<div class="jornal-acoes"><button type="button" onclick="abrirEditorJornal('${j.id}')">✏️ Editar</button><button type="button" class="btn-perigo" onclick="excluirJornal('${j.id}')">🗑️ Apagar</button></div>`:''}</article>`).join(''):'<div class="estado-galeria">Nenhuma notícia encontrada.</div>';
+  const btn=document.getElementById('btn-novo-jornal');if(btn)btn.style.display=ehMestreGlobal&&obterCampanhaIdAtual()?'':'none';
+}
+function abrirEditorJornal(id=null){if(!ehMestreGlobal)return;const x=jornaisDados.find(v=>v.id===id)||{};const el=document.getElementById('painel-editor-jornal');if(!el)return;el.style.display='block';el.innerHTML=`<h3>${id?'✏️ Editar notícia':'📰 Nova edição'}</h3><div class="jornal-editor-grid"><label>Título<input id="jornal-titulo" maxlength="140" value="${escaparHTML(x.titulo||'')}" placeholder="Ex.: Fronteiras de Frostheim são fechadas"></label><label>Categoria<select id="jornal-cat">${['Política','Guerra','Economia','Monstros','Magia','Guildas','Reinos','Mundo','Urgente','Rumor'].map(v=>`<option ${x.categoria===v?'selected':''}>${v}</option>`).join('')}</select></label><label>Região<input id="jornal-regiao-input" maxlength="80" value="${escaparHTML(x.regiao||'Mundo')}" placeholder="Ex.: Eryndor"></label><label>Importância (1–5)<input id="jornal-importancia" type="number" min="1" max="5" value="${Number(x.importancia||3)}"></label></div><label>Manchete / subtítulo<input id="jornal-manchete" maxlength="240" value="${escaparHTML(x.manchete||'')}"></label><label>Notícia<textarea id="jornal-conteudo" rows="9" maxlength="6000" placeholder="Escreva o acontecimento que os jogadores poderão ler.">${escaparHTML(x.conteudo||'')}</textarea></label><div class="jornal-editor-acoes"><button type="button" class="btn-ficha-principal" onclick="salvarJornal('${id||''}')">📢 Publicar</button><button type="button" class="btn-secundario" onclick="fecharEditorJornal()">Cancelar</button></div>`;el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function fecharEditorJornal(){const el=document.getElementById('painel-editor-jornal');if(el){el.style.display='none';el.innerHTML='';}}
+async function salvarJornal(id=''){if(!ehMestreGlobal||!supabaseClient||!obterCampanhaIdAtual())return;const payload={campanha_id:obterCampanhaIdAtual(),titulo:normalizarTextoEconomia(document.getElementById('jornal-titulo')?.value),categoria:document.getElementById('jornal-cat')?.value||'Mundo',regiao:normalizarTextoEconomia(document.getElementById('jornal-regiao-input')?.value)||'Mundo',importancia:Math.max(1,Math.min(5,Number(document.getElementById('jornal-importancia')?.value)||3)),manchete:document.getElementById('jornal-manchete')?.value.trim()||'',conteudo:document.getElementById('jornal-conteudo')?.value.trim()||'',publicado:true,publicado_em:new Date().toISOString(),criado_por:window.usuarioAtualId};if(!payload.titulo||!payload.conteudo)return mostrarPopup('❌ Preencha o título e a notícia.');const r=id?await supabaseClient.from('jornais_campanha').update(payload).eq('id',id).eq('campanha_id',obterCampanhaIdAtual()):await supabaseClient.from('jornais_campanha').insert(payload);if(r.error)return mostrarPopup('❌ '+r.error.message);fecharEditorJornal();await carregarJornaisAtual(true);transmitirJornal();mostrarPopup('📰 Notícia publicada para a campanha.');}
+async function excluirJornal(id){if(!ehMestreGlobal||!confirm('Apagar esta notícia?'))return;const r=await supabaseClient.from('jornais_campanha').delete().eq('id',id).eq('campanha_id',obterCampanhaIdAtual());if(r.error)return mostrarPopup('❌ '+r.error.message);await carregarJornaisAtual(true);}
+function transmitirJornal(){if(canalMesa)canalMesa.send({type:'broadcast',event:'jornal_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),quando:Date.now()}});}
+function resetarDadosEconomiaJornalAoTrocarCampanha(){economiaCarregadaCampanha=null;jornaisCarregadosCampanha=null;economiaDados={mercados:[],itens:[],eventos:[]};jornaisDados=[];fecharEditorEconomia();fecharEditorJornal();}
+
+// Garante que as abas do mundo nunca sejam ocultadas por rotinas de autenticação/responsividade.
+function garantirAbasEconomiaJornaisVisiveis() {
+  ['economia','jornais'].forEach(nome => {
+    const btn = document.getElementById(`btn-aba-${nome}`);
+    if (btn) {
+      btn.style.setProperty('display', 'inline-flex', 'important');
+      btn.style.setProperty('visibility', 'visible', 'important');
+      btn.style.setProperty('opacity', '1', 'important');
+      btn.style.setProperty('pointer-events', 'auto', 'important');
+    }
+  });
+}
+
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'grupo', 'mapa', 'rolagens', 'galeria'];
+  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'economia', 'jornais', 'grupo', 'mapa', 'rolagens', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -2109,6 +2241,8 @@ function mudarAba(nomeAba, evento) {
   // Carregamento sob demanda: a mesa abre mais rápido e cada recurso é
   // consultado somente quando realmente é necessário.
   if (nomeAba === 'bestiario') { inicializarBestiarioElarion(); }
+  if (nomeAba === 'economia') { carregarEconomiaAtual(); }
+  if (nomeAba === 'jornais') { carregarJornaisAtual(); }
   if (nomeAba === 'mapa' && !abasCarregadas.mapa && supabaseClient) {
     abasCarregadas.mapa = true;
     carregarMapaAtual();
@@ -3567,6 +3701,24 @@ function mostrarPopup(texto) {
 window.alternarAcoesRapidas = alternarAcoesRapidas;
 window.acaoRapida = acaoRapida;
 window.atualizarVisibilidadeAcoesRapidas = atualizarVisibilidadeAcoesRapidas;
+window.garantirAbasEconomiaJornaisVisiveis=garantirAbasEconomiaJornaisVisiveis;
+window.carregarEconomiaAtual=carregarEconomiaAtual;
+window.recarregarEconomiaAtual=recarregarEconomiaAtual;
+window.abrirEditorMercado=abrirEditorMercado;
+window.abrirEditorMercadoria=abrirEditorMercadoria;
+window.abrirEditorEventoEconomico=abrirEditorEventoEconomico;
+window.salvarMercado=salvarMercado;
+window.salvarMercadoria=salvarMercadoria;
+window.salvarEventoEconomico=salvarEventoEconomico;
+window.excluirMercado=excluirMercado;
+window.excluirMercadoria=excluirMercadoria;
+window.excluirEventoEconomico=excluirEventoEconomico;
+window.carregarJornaisAtual=carregarJornaisAtual;
+window.abrirEditorJornal=abrirEditorJornal;
+window.fecharEditorJornal=fecharEditorJornal;
+window.salvarJornal=salvarJornal;
+window.excluirJornal=excluirJornal;
+
 window.fazerLogin = fazerLogin;
 window.fazerCadastro = fazerCadastro;
 window.fazerLogout = fazerLogout;
