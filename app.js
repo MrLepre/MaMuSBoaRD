@@ -970,6 +970,22 @@ document.addEventListener('click', (event) => {
 // Botões de dados usam listeners próprios e estritos.
 // Isso evita que um clique/toque que caia sobre outro elemento seja interpretado
 // como uma rolagem, especialmente em navegadores móveis.
+// Botões de exclusão de ficha têm prioridade absoluta sobre a Central de Ações Rápidas.
+// O listener fica na fase de captura para impedir que qualquer camada/handler
+// global transforme o toque/clique em outra ação (ex.: "Ação / Ataque").
+document.addEventListener('click', (event) => {
+  const botaoExcluir = event.target.closest('.btn-excluir-ficha[data-acao-ficha=\"excluir\"]');
+  if (!botaoExcluir || botaoExcluir.disabled) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+
+  const fichaId = botaoExcluir.getAttribute('data-ficha-id');
+  const nome = botaoExcluir.getAttribute('data-nome-personagem') || 'esta ficha';
+  excluirFichaDoGrupo(fichaId, nome);
+}, true);
+
 document.addEventListener('click', (event) => {
   const botaoDado = event.target.closest('.btn-dado[data-lados]');
   if (!botaoDado || botaoDado.disabled) return;
@@ -2220,6 +2236,8 @@ async function carregarFichasDoGrupo() {
       botaoExcluir.type = 'button';
       botaoExcluir.className = 'btn-excluir-ficha';
       botaoExcluir.setAttribute('data-acao-ficha', 'excluir');
+      botaoExcluir.setAttribute('data-ficha-id', String(item.id || ''));
+      botaoExcluir.setAttribute('data-nome-personagem', String(nomeCavaleiro || 'Esta ficha'));
       botaoExcluir.onclick = (event) => {
         // Impede que o clique do botão de excluir suba para outros
         // elementos/handlers da interface e seja interpretado como
