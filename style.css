@@ -1394,3 +1394,33 @@ body.imagem-mestre-aberta { overflow:hidden !important; }
 .diario-registro-imagens { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; margin-top:10px; }
 .diario-registro-imagens img { width:100%; height:120px; object-fit:cover; border-radius:4px; border:1px solid var(--cam-border); }
 @media (max-width:700px) { .diario-meta { grid-template-columns:1fr; } .diario-meta span { white-space:normal; } .sessao-resumo-grid { grid-template-columns:1fr; } .diario-imagens-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+/* ==========================================================
+   CORREÇÃO — NAVEGAÇÃO COMPLETA VISÍVEL
+   Em desktop, as abas agora quebram em mais de uma linha em
+   vez de ficarem escondidas além da largura da tela.
+   Em telas pequenas, mantém rolagem horizontal por toque.
+   ========================================================== */
+@media (min-width: 769px) {
+  .abas-navegacao {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    align-items: center;
+    row-gap: 4px;
+  }
+
+  .abas-navegacao button {
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .abas-navegacao {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    align-items: center;
+    white-space: nowrap;
+  }
+}
