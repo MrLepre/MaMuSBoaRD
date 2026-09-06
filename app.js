@@ -970,22 +970,6 @@ document.addEventListener('click', (event) => {
 // Botões de dados usam listeners próprios e estritos.
 // Isso evita que um clique/toque que caia sobre outro elemento seja interpretado
 // como uma rolagem, especialmente em navegadores móveis.
-// Botões de exclusão de ficha têm prioridade absoluta sobre a Central de Ações Rápidas.
-// O listener fica na fase de captura para impedir que qualquer camada/handler
-// global transforme o toque/clique em outra ação (ex.: "Ação / Ataque").
-document.addEventListener('click', (event) => {
-  const botaoExcluir = event.target.closest('.btn-excluir-ficha[data-acao-ficha=\"excluir\"]');
-  if (!botaoExcluir || botaoExcluir.disabled) return;
-
-  event.preventDefault();
-  event.stopPropagation();
-  event.stopImmediatePropagation();
-
-  const fichaId = botaoExcluir.getAttribute('data-ficha-id');
-  const nome = botaoExcluir.getAttribute('data-nome-personagem') || 'esta ficha';
-  excluirFichaDoGrupo(fichaId, nome);
-}, true);
-
 document.addEventListener('click', (event) => {
   const botaoDado = event.target.closest('.btn-dado[data-lados]');
   if (!botaoDado || botaoDado.disabled) return;
@@ -1453,7 +1437,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   // O relacionamento campanhas -> sistemas pode estar nulo/órfão em bancos
   // que foram migrados antes da criação do sistema legado de Camelot.
   // Resolva o sistema novamente pelo ID antes de abrir qualquer ficha.
-  sistemaAtual = campanha.sistemas || null;
+  sistemaAtual = campanha.sistemas || null; inicializarBestiarioElarion();
   carregarEstadoWorldTrigger();
   if (!sistemaAtual && campanha.sistema_id && supabaseClient) {
     const { data: sistemaPorId } = await supabaseClient
@@ -1949,9 +1933,68 @@ async function abrirFichaDoSistema(id){
   modal.style.display='flex';
 }
 
+
+// --- BESTIÁRIO ELARION ---
+let bestiarioElarion = [];
+let bestiarioInicializado = false;
+function bestiarioEhElarionAtivo(){
+  return !!(sistemaAtual && sistemaAtual.configuracao && sistemaAtual.configuracao.tipo === 'elarion');
+}
+async function inicializarBestiarioElarion(){
+  const btn=document.getElementById('btn-aba-bestiario');
+  if(!btn) return;
+  btn.style.display = ehMestreGlobal && bestiarioEhElarionAtivo() ? '' : 'none';
+  if(!bestiarioEhElarionAtivo() || !ehMestreGlobal) return;
+  if(bestiarioInicializado) return;
+  try{
+    const r=await fetch('bestiario-elarion.json', {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    bestiarioElarion=await r.json();
+    bestiarioInicializado=true;
+    preencherFiltrosBestiario();
+    renderizarBestiario();
+  }catch(e){
+    console.error('Erro ao carregar bestiário:',e);
+    const st=document.getElementById('bestiario-status'); if(st) st.textContent='❌ Não foi possível carregar bestiario-elarion.json.';
+  }
+}
+function preencherFiltrosBestiario(){
+  const campos=[['bestiario-reino',bestiarioElarion.map(x=>x.reino)],['bestiario-nivel',bestiarioElarion.map(x=>x.nivel)],['bestiario-papel',bestiarioElarion.map(x=>x.papel)]];
+  campos.forEach(([id,valores])=>{const el=document.getElementById(id); if(!el)return; [...new Set(valores.filter(v=>v!==undefined&&v!==null).map(String))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o)}); el.addEventListener('change',renderizarBestiario)});
+  const busca=document.getElementById('bestiario-busca'); if(busca) busca.addEventListener('input',renderizarBestiario);
+}
+function escaparBestiario(v){return escaparHTML(String(v??''));}
+function renderizarBestiario(){
+  const lista=document.getElementById('bestiario-lista'),status=document.getElementById('bestiario-status'); if(!lista)return;
+  const q=(document.getElementById('bestiario-busca')?.value||'').trim().toLowerCase();
+  const reino=document.getElementById('bestiario-reino')?.value||'',nivel=document.getElementById('bestiario-nivel')?.value||'',papel=document.getElementById('bestiario-papel')?.value||'';
+  const itens=bestiarioElarion.filter(m=>{const texto=[m.nome,m.reino,m.afinidade,m.papel].join(' ').toLowerCase();return(!q||texto.includes(q))&&(!reino||String(m.reino)===reino)&&(!nivel||String(m.nivel)===nivel)&&(!papel||String(m.papel)===papel)});
+  if(status)status.textContent=`${itens.length} criatura(s) encontrada(s) de ${bestiarioElarion.length}.`;
+  lista.innerHTML=itens.map((m,i)=>`<article class="bestiario-card"><h3>🐾 ${escaparBestiario(m.nome)}</h3><div class="bestiario-meta">${escaparBestiario(m.reino)} · Nível ${escaparBestiario(m.nivel)} · ${escaparBestiario(m.papel)}<br>${escaparBestiario(m.afinidade)}</div><div class="bestiario-recursos"><div class="bestiario-recurso"><strong>❤️ ${escaparBestiario(m.pv)}</strong><small>PV</small></div><div class="bestiario-recurso"><strong>⚡ ${escaparBestiario(m.tf)}</strong><small>TF</small></div><div class="bestiario-recurso"><strong>🛡️ ${escaparBestiario(m.df)}</strong><small>DF</small></div><div class="bestiario-recurso"><strong>🏃 ${escaparBestiario(m.movimento)}</strong><small>Mov.</small></div></div><div class="bestiario-acoes"><button type="button" class="btn-sistema-acao" onclick="abrirDetalheBestiario(${bestiarioElarion.indexOf(m)})">👁️ Ver ficha</button><button type="button" class="btn-sistema-acao" onclick="criarTokenDoBestiario(${bestiarioElarion.indexOf(m)})">⚔️ Criar Token</button></div></article>`).join('');
+}
+function abrirDetalheBestiario(idx){
+  const m=bestiarioElarion[idx]; if(!m)return;
+  document.getElementById('bestiario-detalhe-titulo').textContent='🐾 '+m.nome;
+  const attrs=Object.entries(m.atributos||{}).map(([k,v])=>`<span><strong>${escaparBestiario(k)}</strong> ${escaparBestiario(v)}</span>`).join(' · ');
+  const ataques=(m.ataques||[]).map(a=>`<div class="bestiario-ataque"><strong>⚔️ ${escaparBestiario(a.nome)}</strong><br>Teste: ${escaparBestiario(a.teste)} · Dano: ${escaparBestiario(a.dano)} · ${escaparBestiario(a.tipo)}</div>`).join('')||'<em>Nenhum ataque registrado.</em>';
+  const hab=(m.habilidades||[]).map(h=>`<li><strong>${escaparBestiario(h.nome)}:</strong> ${escaparBestiario(h.efeito)}</li>`).join('');
+  const lista=(arr)=> (arr||[]).length?'<ul>'+arr.map(x=>`<li>${escaparBestiario(x)}</li>`).join('')+'</ul>':'<em>Nenhum.</em>';
+  document.getElementById('bestiario-detalhe-corpo').innerHTML=`<div class="bestiario-meta">${escaparBestiario(m.reino)} · Nível ${escaparBestiario(m.nivel)} · ${escaparBestiario(m.papel)}<br>Afinidades: ${escaparBestiario(m.afinidade)}</div><div class="bestiario-detalhe-grid"><div class="bestiario-recurso">❤️ <strong>${escaparBestiario(m.pv)}</strong><small>PV</small></div><div class="bestiario-recurso">⚡ <strong>${escaparBestiario(m.tf)}</strong><small>TF</small></div><div class="bestiario-recurso">🛡️ <strong>${escaparBestiario(m.df)}</strong><small>DF</small></div><div class="bestiario-recurso">🏃 <strong>${escaparBestiario(m.movimento)}</strong><small>Movimento</small></div></div><div class="bestiario-bloco"><h4>📊 Atributos</h4><div>${attrs}</div></div><div class="bestiario-bloco"><h4>⚔️ Ataques</h4>${ataques}</div><div class="bestiario-bloco"><h4>✨ Habilidades</h4><ul>${hab||'<li>Nenhuma.</li>'}</ul></div><div class="bestiario-bloco"><h4>🛡️ Resistências</h4>${lista(m.resistencias)}</div><div class="bestiario-bloco"><h4>⚠️ Fraquezas</h4>${lista(m.fraquezas)}</div><div class="bestiario-bloco"><h4>💎 Loot sugerido</h4>${lista(m.loot_sugerido)}</div><div class="bestiario-acoes"><button type="button" class="btn-ficha-principal" onclick="criarTokenDoBestiario(${idx}); fecharDetalheBestiario();">⚔️ Colocar no Mapa</button></div>`;
+  document.getElementById('bestiario-detalhe').style.display='flex';
+}
+function fecharDetalheBestiario(){const el=document.getElementById('bestiario-detalhe');if(el)el.style.display='none';}
+function criarTokenDoBestiario(idx){
+  if(!ehMestreGlobal)return mostrarPopup('❌ Apenas o Mestre pode criar criaturas no mapa.');
+  const m=bestiarioElarion[idx]; if(!m)return;
+  const base='monstro_'+normalizarIdTokenWT(m.nome)+'_'+Date.now();
+  criarElementoToken(base,m.nome,10,10,55,'',Number(m.pv)||1,Number(m.pv)||1,true,{tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[],ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre'});
+  if(canalMesa) canalMesa.send({type:'broadcast',event:'vtt_mover_token',payload:{id:base,nome:m.nome,x:10,y:10,tamanho:55,imagem:'',hpAtual:Number(m.pv)||1,hpMax:Number(m.pv)||1,campanha_id:obterCampanhaIdAtual(),ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[]}});
+  mostrarPopup(`🐾 ${m.nome} foi colocado no mapa!`);
+}
+
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'grupo', 'mapa', 'rolagens', 'galeria'];
+  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'grupo', 'mapa', 'rolagens', 'galeria'];
   if (!abasValidas.includes(nomeAba)) return;
 
   const paineis = document.querySelectorAll('.painel');
@@ -1974,6 +2017,7 @@ function mudarAba(nomeAba, evento) {
 
   // Carregamento sob demanda: a mesa abre mais rápido e cada recurso é
   // consultado somente quando realmente é necessário.
+  if (nomeAba === 'bestiario') { inicializarBestiarioElarion(); }
   if (nomeAba === 'mapa' && !abasCarregadas.mapa && supabaseClient) {
     abasCarregadas.mapa = true;
     carregarMapaAtual();
@@ -2233,20 +2277,7 @@ async function carregarFichasDoGrupo() {
       const botaoExcluir = document.createElement('button');
       botaoExcluir.innerText = '🗑️ Apagar';
       botaoExcluir.style.cssText = 'background:#4a2020; color:#ffd7d7; border:1px solid #9b4b4b; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold;';
-      botaoExcluir.type = 'button';
-      botaoExcluir.className = 'btn-excluir-ficha';
-      botaoExcluir.setAttribute('data-acao-ficha', 'excluir');
-      botaoExcluir.setAttribute('data-ficha-id', String(item.id || ''));
-      botaoExcluir.setAttribute('data-nome-personagem', String(nomeCavaleiro || 'Esta ficha'));
-      botaoExcluir.onclick = (event) => {
-        // Impede que o clique do botão de excluir suba para outros
-        // elementos/handlers da interface e seja interpretado como
-        // uma Ação / Ataque da Central de Ações Rápidas.
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        excluirFichaDoGrupo(item.id, nomeCavaleiro);
-      };
+      botaoExcluir.onclick = () => excluirFichaDoGrupo(item.id, nomeCavaleiro);
       acoesDiv.appendChild(botaoExcluir);
     }
 

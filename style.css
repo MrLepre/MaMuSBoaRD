@@ -1260,3 +1260,11 @@ body.imagem-mestre-aberta { overflow:hidden !important; }
   .wt-edicao-tatica strong{width:100%}
   .wt-edicao-tatica button{flex:1;min-width:70px}
 }
+
+/* Bestiário Elarion */
+.bestiario-filtros{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.bestiario-filtros input,.bestiario-filtros select{width:100%;box-sizing:border-box;padding:11px;border-radius:8px;border:1px solid #39333f;background:#0e0d12;color:#eee}
+.bestiario-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.bestiario-card{background:linear-gradient(145deg,#19151d,#100e13);border:1px solid #3a303f;border-radius:12px;padding:15px;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.bestiario-card h3{margin:0 0 5px;color:#e3bd68}.bestiario-meta{color:#aaa;font-size:.86rem;margin-bottom:10px}.bestiario-recursos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.bestiario-recurso{background:#0d0c10;border-radius:7px;padding:7px;text-align:center}.bestiario-recurso strong{display:block;font-size:1rem}.bestiario-recurso small{color:#999}.bestiario-acoes{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.bestiario-acoes button{flex:1;min-width:110px}.bestiario-modal-conteudo{max-width:850px;max-height:88vh;overflow:auto}.bestiario-detalhe-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bestiario-bloco{background:#121016;border:1px solid #302933;border-radius:9px;padding:12px;margin-top:10px}.bestiario-bloco h4{margin:0 0 8px;color:#d6b15f}.bestiario-bloco ul{margin:6px 0 0 18px;padding:0}.bestiario-ataque{padding:8px 0;border-bottom:1px solid #2b2630}.bestiario-ataque:last-child{border-bottom:0}
+@media(max-width:700px){.bestiario-filtros{grid-template-columns:1fr}.bestiario-detalhe-grid{grid-template-columns:repeat(2,1fr)}.bestiario-grid{grid-template-columns:1fr}}

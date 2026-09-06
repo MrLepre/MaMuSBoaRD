@@ -36,6 +36,7 @@
       <button class="ativo" onclick="mudarAba('ficha', event)">Minha Ficha</button>
       <button onclick="mudarAba('campanhas', event)">Campanhas</button>
       <button id="btn-aba-sistemas" onclick="mudarAba('sistemas', event)" style="display:none;">Sistemas RPG</button>
+      <button id="btn-aba-bestiario" onclick="mudarAba('bestiario', event)" style="display:none;">📖 Bestiário</button>
       <button onclick="mudarAba('grupo', event)">Fichas do Grupo</button>
       <button onclick="mudarAba('mapa', event)">Mapa</button>
       <button onclick="mudarAba('rolagens', event)">Rolagens</button>
@@ -216,6 +217,30 @@
       <button onclick="carregarFichasDoGrupo()" style="background: #8257e5; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Atualizar Lista do Grupo</button>
       <div id="lista-fichas-grupo">
         <p style="color: #a8a8b3;">Carregando fichas...</p>
+      </div>
+    </section>
+
+    <section id="aba-bestiario" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">💎 Elarion</span>
+          <h2>📖 Bestiário</h2>
+          <p class="subtexto-galeria">Bestiário oficial de Elarion. Consulte criaturas, filtre por reino/nível/papel e coloque monstros diretamente no mapa.</p>
+        </div>
+      </div>
+      <div class="bestiario-filtros card-secao">
+        <input id="bestiario-busca" type="search" placeholder="🔎 Buscar criatura..." autocomplete="off">
+        <select id="bestiario-reino"><option value="">🌍 Todos os reinos</option></select>
+        <select id="bestiario-nivel"><option value="">⭐ Todos os níveis</option></select>
+        <select id="bestiario-papel"><option value="">🎭 Todos os papéis</option></select>
+      </div>
+      <div id="bestiario-status" class="estado-galeria">Carregando bestiário...</div>
+      <div id="bestiario-lista" class="bestiario-grid"></div>
+      <div id="bestiario-detalhe" class="modal-ficha" style="display:none;">
+        <div class="modal-ficha-conteudo bestiario-modal-conteudo">
+          <div class="modal-ficha-cabecalho"><h2 id="bestiario-detalhe-titulo">Criatura</h2><button type="button" class="btn-fechar-modal" onclick="fecharDetalheBestiario()">×</button></div>
+          <div id="bestiario-detalhe-corpo" class="modal-ficha-grupo-body"></div>
+        </div>
       </div>
     </section>
 
