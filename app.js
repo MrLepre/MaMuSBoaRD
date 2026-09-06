@@ -1150,6 +1150,9 @@ function alternarAcoesRapidas(event) {
   botao.setAttribute('aria-expanded', String(aberto));
   botao.setAttribute('aria-label', aberto ? 'Fechar ações rápidas' : 'Abrir ações rápidas');
   menu.setAttribute('aria-hidden', String(!aberto));
+  // Quando fechado, os itens ficam desabilitados de verdade (não apenas invisíveis).
+  menu.inert = !aberto;
+  menu.querySelectorAll('button').forEach(b => { b.disabled = !aberto; });
   tocarSom(aberto ? 'success' : 'click');
   vibrarPadrao([aberto ? 14 : 8]);
 }
@@ -1163,6 +1166,8 @@ function fecharAcoesRapidas() {
   botao.setAttribute('aria-expanded', 'false');
   botao.setAttribute('aria-label', 'Abrir ações rápidas');
   menu.setAttribute('aria-hidden', 'true');
+  menu.inert = true;
+  menu.querySelectorAll('button').forEach(b => { b.disabled = true; });
 }
 
 function focarElementoDepoisDoAba(id) {
@@ -1910,6 +1915,24 @@ function criarConfiguracaoElarion(){
   const attrs=[['FOR','Força'],['CON','Constituição'],['AGI','Agilidade'],['VON','Vontade'],['INT','Inteligência'],['CAR','Carisma'],['PER','Percepção'],['FÉ','Fé']];
   return {versao:1,tipo:'elarion',dados:['d10','d12'],modulos:{joias:{ativo:true,quantidade_limite:false},luvas:{ativo:true},classes:{ativo:true},racas:{ativo:true},coracao:{dados:3},inspiracao:{max:3},testes:{dados:'2d10'},fadiga:{pf_minimo:5}},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:1,max_inicial:5})),progressao_xp:[0,100,300,600,1000,1500,2100,2800,3600,4500,5500,6600,7800,9100,10500,12000,13600,15300,17100,19000],classes:['Espadachim Rúnico','Guardião Prismático','Arqueiro Elemental','Teurgo Cristalino','Sombra Lapidada','Berserker do Núcleo','Bardo da Inspiração','Místico Mentalista'],portadores_puros:['Punho Elemental','Condutor do Núcleo','Avatar do Vazio','Mestre da Luz Interior','Punho da Ruína','Tecedor Temporal'],racas:['Humano','Elfo','Orc','Khajiit','Lizardmen','Anões','Povo-Fera'],tf:'CON + VON + Nível',pf_minimo:5,teste:'2d10 + modificador vs CD',coracao:'3 dados; 1d12 para feitos impossíveis',inspiracao:'0–3'},tema:{corPrimaria:'#c89b3c',corFundo:'#09080b',corPainel:'#17121b'},ficha:'ficha-elarion.html'};
 }
+
+function criarConfiguracaoEterBrasas(){
+  const attrs=[['FOR','Força'],['AGI','Agilidade'],['VIT','Vitalidade'],['INT','Intelecto'],['VON','Vontade'],['CAR','Carisma']];
+  const pericias=['Armas Brancas','Armas de Impacto','Armas de Distância','Armas de Fogo','Artes Marciais','Montaria de Combate','Canalização Mágica','Técnica Única','Magia Elemental','Magia de Suporte','Magia de Encantamento','Magia de Invocação','Forja & Metalurgia','Arcanotécnica','Alquimia','Herborismo','Medicina','História & Tradições','Investigação','Furtividade','Percepção','Sobrevivência Selvagem','Navegação','Lábia (Blefe)','Resistência','Carisma','Diplomacia','Intimidação','Enganação','Etiqueta Nobre','Mercado & Negócios','Arte & Música','Jogos & Sorte','Acrobacia','Truques Criminosos'];
+  const armas=[['Punhal','1d6'],['Espada curta','1d8'],['Espada longa / Lança / Machado','1d10'],['Martelo pesado','1d10'],['Arco','1d8'],['Besta','1d10'],['Revólver','1d10'],['Rifle','1d12']];
+  const moedas=[['Lúmen','Ł','Brassanthium'],['Króna','Kr','Frostheim'],['Drom','Ð','Zerathis'],['Cogmark','⚙','Altherion'],['Folha','♣',"Kael'Thir"],['Astreel','✦','Astra'],['Koban','Ꝏ','Kuroshida'],['Vargr','Vm','Drosgard'],['Coroa de Ferro','IC','Valmorra'],['Lunis','☾','Lunareth'],['Dobrão','Db','Drakenshore']];
+  return {versao:1,tipo:'eter_brasas',dados:['d10','d12'],modulos:{testes_2d10:true,tecnica_magica_unica:true,guildas:true,reinos:true,inspiracao:true,impulso_pressao:true,maldição_compartilhada:true,bestiario:true,moedas:true},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:0,min_inicial:-1,max_inicial:4,modificador:'igual ao valor'})),criacao:{pontos_atributos:10,pericias_treinadas:5,bonus_treinada:2,bonus_especialista:4},testes:{formula:'2d10 + Atributo + Perícia',cds:{facil:10,moderado:14,dificil:18,lendario:22},critico_sucesso:'dois 10 (20 natural)',critico_falha:'dois 1 (2 natural)',impulso:'3d10, soma os 2 maiores',pressao:'3d10, soma os 2 menores'},combate:{acao:'1 Ação',movimento:'1 Movimento até ~9m',menor:'1 Ação Menor',reacao:'1 Reação',iniciativa:'2d10 + Agilidade',defesa:'12 + Agilidade + escudo + cobertura'},sobrevivencia:{pv_inicial:'10 + Vitalidade',pv_por_nivel:'+5 + Vitalidade',fome:'0–5',sede:'0–3',cansaco:'0–4'},pericias,armas,armaduras:[['Leve','+1'],['Média','+2'],['Pesada','+3']],moedas},tema:{corPrimaria:'#d97732',corFundo:'#100a07',corPainel:'#241712'},ficha:'ficha-generica.html',bestiario_arquivo:'bestiario-eter-brasas.json',moedas_arquivo:'moedas-eter-brasas.json'};
+}
+async function garantirSistemaEterBrasas(){
+  if(!ehMestreGlobal||!supabaseClient)return;
+  const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Éter & Brasas').limit(1);
+  if(error||data?.length)return;
+  const session=(await supabaseClient.auth.getSession()).data.session;if(!session)return;
+  const cfg=criarConfiguracaoEterBrasas();
+  const r=await supabaseClient.from('sistemas').insert({nome:'Éter & Brasas',descricao:'RPG 2d10 de mundo aberto, guildas e Técnicas Mágicas Únicas.',configuracao:cfg,criado_por:session.user.id});
+  if(r.error)console.warn('Éter & Brasas não pôde ser criado automaticamente:',r.error.message);
+}
+
 async function garantirSistemaElarion(){
   if(!ehMestreGlobal||!supabaseClient)return;
   const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Elarion — Sistema de Joias e Luvas').limit(1);
@@ -1928,7 +1951,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -1976,19 +1999,29 @@ async function abrirFichaDoSistema(id){
 let bestiarioElarion = [];
 let bestiarioInicializado = false;
 function bestiarioEhElarionAtivo(){
-  return !!(sistemaAtual && sistemaAtual.configuracao && sistemaAtual.configuracao.tipo === 'elarion');
+  const tipo=sistemaAtual?.configuracao?.tipo;
+  return tipo==='elarion'||tipo==='eter_brasas';
 }
+function bestiarioArquivoAtivo(){return sistemaAtual?.configuracao?.bestiario_arquivo || (sistemaAtual?.configuracao?.tipo==='eter_brasas'?'bestiario-eter-brasas.json':'bestiario-elarion.json');}
 async function inicializarBestiarioElarion(){
   const btn=document.getElementById('btn-aba-bestiario');
   if(!btn) return;
-  btn.style.display = ehMestreGlobal && bestiarioEhElarionAtivo() ? '' : 'none';
+  const ativo=bestiarioEhElarionAtivo();
+  btn.style.display = ehMestreGlobal && ativo ? '' : 'none';
+  const eb=sistemaAtual?.configuracao?.tipo==='eter_brasas';
+  if(eb) bestiarioInicializado=false;
   if(!bestiarioEhElarionAtivo() || !ehMestreGlobal) return;
   if(bestiarioInicializado) return;
   try{
-    const r=await fetch('bestiario-elarion.json', {cache:'no-store'});
+    const r=await fetch(bestiarioArquivoAtivo(), {cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     bestiarioElarion=await r.json();
     bestiarioInicializado=true;
+    const eb=sistemaAtual?.configuracao?.tipo==='eter_brasas';
+    const ey=document.getElementById('bestiario-eyebrow'), tt=document.getElementById('bestiario-titulo-aba'), stx=document.getElementById('bestiario-subtexto-aba');
+    if(ey)ey.textContent=eb?'🔥 Éter & Brasas':'💎 Elarion';
+    if(tt)tt.textContent=eb?'📖 Bestiário — Éter & Brasas':'📖 Bestiário — Elarion';
+    if(stx)stx.textContent=eb?'Bestiário do Éter & Brasas. Consulte criaturas, filtre por reino/nível e coloque monstros diretamente no mapa.':'Bestiário oficial de Elarion. Consulte criaturas, filtre por reino/nível/papel e coloque monstros diretamente no mapa.';
     preencherFiltrosBestiario();
     renderizarBestiario();
   }catch(e){

@@ -751,6 +751,22 @@ body::before,
   user-select: none !important;
 }
 
+/* CORREÇÃO DEFINITIVA:
+   Menu fechado não pode existir na árvore de hit-testing.
+   pointer-events/visibility sozinhos podem falhar em combinações de
+   transform, elementos sobrepostos e navegadores móveis. */
+.acoes-rapidas:not(.aberto) #menu-acoes-rapidas {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+
+.acoes-rapidas.aberto #menu-acoes-rapidas {
+  display: flex;
+}
+
 .acoes-rapidas.aberto .acao-rapida {
   pointer-events: auto !important;
   visibility: visible;

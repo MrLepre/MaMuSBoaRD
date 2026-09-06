@@ -1,0 +1,101 @@
+[
+  {
+    "Código": "LUM",
+    "Nome": "Lúmen",
+    "Reino": "Brassanthium",
+    "Símbolo": "Ł",
+    "Taxa p/ Lúmen": 1.0,
+    "1 Lúmen em Moeda Local": 1.0,
+    "Observações": null
+  },
+  {
+    "Código": "KRO",
+    "Nome": "Króna",
+    "Reino": "Frostheim",
+    "Símbolo": "Kr",
+    "Taxa p/ Lúmen": 1.4,
+    "1 Lúmen em Moeda Local": 0.71,
+    "Observações": null
+  },
+  {
+    "Código": "DRM",
+    "Nome": "Drom",
+    "Reino": "Zerathis",
+    "Símbolo": "Ð",
+    "Taxa p/ Lúmen": 0.6,
+    "1 Lúmen em Moeda Local": 1.67,
+    "Observações": null
+  },
+  {
+    "Código": "COG",
+    "Nome": "Cogmark",
+    "Reino": "Altherion",
+    "Símbolo": "⚙",
+    "Taxa p/ Lúmen": 1.2,
+    "1 Lúmen em Moeda Local": 0.83,
+    "Observações": null
+  },
+  {
+    "Código": "LEF",
+    "Nome": "Folha",
+    "Reino": "Kael'Thir",
+    "Símbolo": "♣",
+    "Taxa p/ Lúmen": 0.9,
+    "1 Lúmen em Moeda Local": 1.11,
+    "Observações": null
+  },
+  {
+    "Código": "AST",
+    "Nome": "Astreel",
+    "Reino": "Astra",
+    "Símbolo": "✦",
+    "Taxa p/ Lúmen": 1.6,
+    "1 Lúmen em Moeda Local": 0.63,
+    "Observações": null
+  },
+  {
+    "Código": "KOB",
+    "Nome": "Koban",
+    "Reino": "Kuroshida",
+    "Símbolo": "Ꝏ",
+    "Taxa p/ Lúmen": 1.3,
+    "1 Lúmen em Moeda Local": 0.77,
+    "Observações": null
+  },
+  {
+    "Código": "VMR",
+    "Nome": "Vargr",
+    "Reino": "Drosgard",
+    "Símbolo": "Vm",
+    "Taxa p/ Lúmen": 0.7,
+    "1 Lúmen em Moeda Local": 1.43,
+    "Observações": null
+  },
+  {
+    "Código": "ICR",
+    "Nome": "Coroa de Ferro",
+    "Reino": "Valmorra",
+    "Símbolo": "IC",
+    "Taxa p/ Lúmen": 1.1,
+    "1 Lúmen em Moeda Local": 0.91,
+    "Observações": null
+  },
+  {
+    "Código": "LUN",
+    "Nome": "Lunis",
+    "Reino": "Lunareth",
+    "Símbolo": "☾",
+    "Taxa p/ Lúmen": 1.5,
+    "1 Lúmen em Moeda Local": 0.67,
+    "Observações": null
+  },
+  {
+    "Código": "DBL",
+    "Nome": "Dobrão",
+    "Reino": "Drakenshore",
+    "Símbolo": "Db",
+    "Taxa p/ Lúmen": 0.5,
+    "1 Lúmen em Moeda Local": 2.0,
+    "Observações": null
+  }
+]
