@@ -1,0 +1,28 @@
+SOBREVIVENTES DA FRONTEIRA — INTEGRAÇÃO VTT
+
+Fonte autoritativa: manual enviado pelo usuário.
+
+Integração:
+- Novo sistema selecionável: Sobreviventes da Fronteira.
+- Ficha dedicada: ficha-sobreviventes.html.
+- Preserva os demais sistemas e funcionalidades do VTT.
+- Sem nova tabela SQL: usa a arquitetura existente de sistemas/campanhas/fichas.
+
+Regras centrais incorporadas da fonte:
+- 7 atributos: FOR, AGI, CON, INT, PER, VON, FUR.
+- Criação com 20 pontos e teto inicial 5.
+- Testes: 1d20 + atributo puro, limitado pelo Grau de Linhagem.
+- Graus 1–5: +3; 6–10: +5; 11–15: +8; 16–19: +12; 20: ilimitado.
+- Rompimentos 5→6, 10→11, 15→16 com 50/100/200 treinos e requisitos 5/8/12.
+- Combate com Ação Principal, Movimento, Bônus e Reação.
+- CA, Postura, Guarda Quebrada, PV, PF, PM e Exaustão.
+- Ciclos temporais, Pontos de Memória, Loucura, Estresse e Miasma.
+- Órbitas da Matriz com 5 Frequências periféricas + Núcleo Vazio (Eixo Distorcido), mapa radial não hexagonal e conexões oficiais de 1/2 Saltos.
+- Frequências: Supremacia Corpórea, Alquimia Vibracional, Arquitetura Conveniente, Projeção Vetorial e Pulso de Submissão.
+- Técnicas Formadas e Técnicas Livres com PP e 9D6 de Conceitos.
+- Armas, armaduras, modificações e consumíveis do manual.
+- Classes e raças descritas no manual recebido.
+
+Observação de fidelidade:
+- O manual não fixa, nas seções recebidas, uma tabela numérica de XP; por isso XP permanece campo manual na ficha.
+- Não foi inventado um bestiário, lista de magias fechadas ou regras adicionais não presentes na fonte.

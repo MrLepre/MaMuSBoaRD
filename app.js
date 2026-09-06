@@ -2150,6 +2150,42 @@ async function garantirSistemaEterBrasas(){
   if(r.error)console.warn('Éter & Brasas não pôde ser criado automaticamente:',r.error.message);
 }
 
+function criarConfiguracaoSobreviventes(){
+  return {
+    versao:1,
+    tipo:'sobreviventes_fronteira',
+    descricao:'Sistema de alta letalidade com progressão dupla, Grau de Linhagem, treinamento, ciclos temporais e Moldagem de Mana.',
+    dados:['d4','d6','d8','d10','d12','d20'],
+    modulos:{atributos:true,racas:true,classes:true,linhagem:true,treinamento:true,combate:true,postura:true,ciclo_temporal:true,memoria:true,miasma:true,moldagem_mana:true,orbita_matriz:true,pontos_presenca:true,equipamentos:true,mercado_negro:true},
+    atributos:[['FOR','Força'],['AGI','Agilidade'],['CON','Constituição'],['INT','Inteligência'],['PER','Percepção'],['VON','Vontade'],['FUR','Furtividade']],
+    racas:['Humano','Homens-Rã','Gigante','Meio-Dragão','Fada','Anão','Homem-Fera','Meio-Humano'],
+    classes:['Assassino Mecânico','Bárbaro da Vanguarda','Inquisidor Pugilista','Rompe-Linhas','Guerreiro Preguiçoso','Ladino das Sombras','Pioneiro','Mágico','Curandeiro','O Sem Talento'],
+    regras:{
+      testes:'1d20 + valor puro do atributo, limitado pelo teto do Grau de Linhagem',
+      criacao:{pontos_atributos:20,teto_inicial:5},
+      grau:{faixas:[{graus:'1-5',teto:3,titulo:'Soldado Raso'},{graus:'6-10',teto:5,titulo:'Escudeiro'},{graus:'11-15',teto:8,titulo:'Proto-Cavaleiro'},{graus:'16-19',teto:12,titulo:'Cavaleiro da Fronteira'},{graus:'20',teto:null,titulo:'O Ápice'}]},
+      muralhas:[{transicao:'5->6',nome:'Muralha de Aço',treinos:50,atributo:5},{transicao:'10->11',nome:'Barreira Biológica',treinos:100,atributo:8},{transicao:'15->16',nome:'Muralha Conceitual',treinos:200,atributo:12}],
+      combate:{acoes:['Ação Principal','Ação de Movimento','Ação Bônus','Reação'],ca:'10 + Modificador de Agilidade + Armadura + Escudo + Bônus Racial',postura:'CON + VON',guarda_quebrada:'CA -4, sem Reações; crítico automático possível para Assassino Mecânico/Ladino'},
+      recursos:{pf:'10 + (CON + VON) * 2',pm:'10 + (INT + VON) * 2'},
+      ciclo:{retorno:true,memoria:true,tipe_wipe:true},
+      orbita:{titulo:'ÓRBITAS DA MATRIZ: FREQUÊNCIAS DO SOBREVIVENTE',regra_geral:'NÃO UTILIZE FORMATOS HEXAGONAIS',centro:'O NÚCLEO VAZIO (EIXO DISTORCIDO)',frequencias:[{nome:'SUPREMACIA CORPOREAL',posicao_visual:'Topo / Norte',conexoes:[['ALQUIMIA VIBRACIONAL',1,'Afinidade Vizinhança'],['PROJEÇÃO VETORIAL',1,'Afinidade Vizinhança'],['ARQUITETURA CONVENIENTE',2,'Afinidade Distante'],['PULSO DE SUBMISSÃO',2,'Afinidade Distante']]},{nome:'ALQUIMIA VIBRACIONAL',posicao_visual:'Esquerda Superior / Noroeste',conexoes:[['SUPREMACIA CORPOREAL',1,'Afinidade Vizinhança'],['ARQUITETURA CONVENIENTE',1,'Afinidade Vizinhança'],['PROJEÇÃO VETORIAL',2,'Afinidade Distante']]},{nome:'ARQUITETURA CONVENIENTE',posicao_visual:'Esquerda Inferior / Sudoeste',conexoes:[['ALQUIMIA VIBRACIONAL',1,'Afinidade Vizinhança'],['SUPREMACIA CORPOREAL',2,'Afinidade Distante'],['PULSO DE SUBMISSÃO',2,'Afinidade Distante']]},{nome:'PROJEÇÃO VETORIAL',posicao_visual:'Direita Superior / Nordeste',conexoes:[['SUPREMACIA CORPOREAL',1,'Afinidade Vizinhança'],['PULSO DE SUBMISSÃO',1,'Afinidade Vizinhança'],['ALQUIMIA VIBRACIONAL',2,'Afinidade Distante']]},{nome:'PULSO DE SUBMISSÃO',posicao_visual:'Direita Inferior / Sudeste',conexoes:[['PROJEÇÃO VETORIAL',1,'Afinidade Vizinhança'],['SUPREMACIA CORPOREAL',2,'Afinidade Distante'],['ARQUITETURA CONVENIENTE',2,'Afinidade Distante']]}],propriedades:5,conceitos_d6:9,friccao:{vizinha:'+1 PM / +1 Fricção',distante:'+3 PM / +3 Fricção / -3 no Dado'}},
+      tecnicas:{formadas:true,livres:true,pp_simples:2,pp_complexas:4},
+      sem_talento:{retorno:true,obsessao_treino:true,esponja:{basicas:5,intermediarias:15,avancadas:30,supremas:50}}
+    },
+    ficha:'ficha-sobreviventes.html',
+    tema:{corPrimaria:'#c6a15b',corFundo:'#090c0a',corPainel:'#131814'}
+  };
+}
+async function garantirSistemaSobreviventes(){
+  if(!ehMestreGlobal||!supabaseClient)return;
+  const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Sobreviventes da Fronteira').limit(1);
+  if(error||data?.length)return;
+  const session=(await supabaseClient.auth.getSession()).data.session;if(!session)return;
+  const cfg=criarConfiguracaoSobreviventes();
+  const r=await supabaseClient.from('sistemas').insert({nome:'Sobreviventes da Fronteira',descricao:'Alta letalidade, Grau de Linhagem, treinamento, ciclos temporais e Moldagem de Mana.',configuracao:cfg,criado_por:session.user.id});
+  if(r.error)console.warn('Sobreviventes da Fronteira não pôde ser criado automaticamente:',r.error.message);
+}
+
 function criarConfiguracaoOlimpia(){
   const attrs=[['FOR','Força'],['DES','Destreza'],['INT','Inteligência'],['SAB','Sabedoria'],['CAR','Carisma'],['CON','Constituição']];
   const pericias=[
@@ -2238,7 +2274,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -2276,7 +2312,7 @@ async function abrirFichaDoSistema(id){
   const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
   sistemaAtual=data;
   const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
-  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
+  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
   const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
   modal.style.display='flex';
 }
@@ -2800,6 +2836,7 @@ function mudarAba(nomeAba, evento) {
         await garantirSistemaEterBrasas();
         await garantirSistemaNoctavell();
         await garantirSistemaOlimpia();
+      await garantirSistemaSobreviventes();
       }
       await carregarSistemas();
     })();
@@ -2899,7 +2936,9 @@ function renderizarFichaNaTela(dados) {
   const nivel = dados?.nivel || 1;
   const xp = dados?.xp_atual ?? 0;
   const sistemaTipo = sistemaAtual?.configuracao?.tipo;
-  const resumoContexto = sistemaTipo === 'olimpia_pangeia'
+  const resumoContexto = sistemaTipo === 'sobreviventes_fronteira'
+    ? `<p><strong>Classe:</strong> ${escaparHTML(dados?.classe || '-')} &nbsp;|&nbsp; <strong>Raça:</strong> ${escaparHTML(dados?.raca || '-')} &nbsp;|&nbsp; <strong>Grau:</strong> ${escaparHTML(dados?.grau_linhagem || 1)}</p>`
+    : sistemaTipo === 'olimpia_pangeia'
     ? `<p><strong>Classe:</strong> ${escaparHTML(dados?.classe || '-')} &nbsp;|&nbsp; <strong>Raça:</strong> ${escaparHTML(dados?.raca || '-')} &nbsp;|&nbsp; <strong>Reino:</strong> ${escaparHTML(dados?.reino || '-')}</p>`
     : `<p><strong>Tipo Humano:</strong> ${escaparHTML(dados?.tipo_humano || dados?.raca || '-')} &nbsp;|&nbsp; <strong>Antecedente:</strong> ${escaparHTML(dados?.antecedente || '-')}</p>`;
   container.innerHTML = `
@@ -2928,7 +2967,7 @@ function abrirCriadorFicha() {
   if (ehFichaLegadaAtual()) {
     iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-generica.html')));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html'))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, null, 'criacao');
   }
   const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
@@ -2947,7 +2986,7 @@ function abrirEditorFichaAtual() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-generica.html'));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html')));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dadosFichaAtual, 'edicao');
   }
   modal.style.display = 'flex';
@@ -2966,7 +3005,7 @@ function abrirEditorFicha(dados, userId = null) {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-generica.html'));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html')));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dados, 'edicao');
   }
   modal.style.display = 'flex';
@@ -2983,7 +3022,7 @@ function abrirFichaCompletaNoIframe(dados) {
   const conteudoModal = document.getElementById('modal-conteudo-ficha');
   if (!conteudoModal) return;
   const tipo = sistemaAtual?.configuracao?.tipo;
-  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-editor.html')));
+  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-editor.html'))));
   const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(sistemaAtual?.id||'')}&t=${Date.now()}`;
   conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="${src}"></iframe>`;
   const iframe = document.getElementById('iframe-ficha-visualizacao');
@@ -4318,6 +4357,7 @@ window.fazerLogout = fazerLogout;
 window.mudarAba = mudarAba;
 window.garantirSistemaNoctavell = garantirSistemaNoctavell;
 window.garantirSistemaOlimpia = garantirSistemaOlimpia;
+window.garantirSistemaSobreviventes = garantirSistemaSobreviventes;
 window.abrirAbaRolagensSegura = abrirAbaRolagensSegura;
 window.selecionarCampanha = selecionarCampanha;
 window.abrirNovaCampanha = abrirNovaCampanha;
