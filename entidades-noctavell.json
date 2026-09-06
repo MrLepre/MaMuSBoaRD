@@ -1,0 +1,902 @@
+[
+  {
+    "nivel": 1,
+    "nome": "O Fragmento Mudo",
+    "dominio": "Silêncio",
+    "corrupcao": "Baixo",
+    "manifestacao": "Voz abafada no ouvido",
+    "promessa_beneficio": "Enquanto não usar certas palavras, será ignorado por inimigos.",
+    "estilo_contrato": "Proíbe palavras-chave"
+  },
+  {
+    "nivel": 1,
+    "nome": "A Mão Que Marca",
+    "dominio": "Promessas",
+    "corrupcao": "Baixo",
+    "manifestacao": "Tatuagem que pulsa",
+    "promessa_beneficio": "Enquanto manter promessas feitas, não será enganado.",
+    "estilo_contrato": "Marca visível para cada quebra"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Sussurro Leve",
+    "dominio": "Segredos",
+    "corrupcao": "Baixo",
+    "manifestacao": "Sopro na nuca",
+    "promessa_beneficio": "Enquanto entregar segredos, descobre verdades alheias.",
+    "estilo_contrato": "Exige troca de segredos"
+  },
+  {
+    "nivel": 1,
+    "nome": "Luz Que Vê Tudo",
+    "dominio": "Percepção",
+    "corrupcao": "Baixo",
+    "manifestacao": "Reflexos borrados",
+    "promessa_beneficio": "Enquanto os olhos estiverem abertos, verá o que está oculto.",
+    "estilo_contrato": "Não pode fechar os olhos ao dormir"
+  },
+  {
+    "nivel": 1,
+    "nome": "A Dama da Tinta",
+    "dominio": "Escrita/Registros",
+    "corrupcao": "Baixo",
+    "manifestacao": "Manchas de tinta em sonhos",
+    "promessa_beneficio": "Tudo o que escrever se torna arcano e indeletável.",
+    "estilo_contrato": "Palavras ditas se tornam selos"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Guardião Sem Nome",
+    "dominio": "Lealdade",
+    "corrupcao": "Baixo",
+    "manifestacao": "Símbolo queimado na palma",
+    "promessa_beneficio": "Enquanto seguir ordens, recebe intuição sobrenatural.",
+    "estilo_contrato": "Contrato obriga fidelidade por 24h"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Relicário Vazio",
+    "dominio": "Emoções",
+    "corrupcao": "Baixo",
+    "manifestacao": "Objeto que absorve sentimentos",
+    "promessa_beneficio": "Enquanto abdicar de uma emoção, ganha resistência a manipulação.",
+    "estilo_contrato": "Impede acesso a uma emoção específica"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Menestrel do Sopro",
+    "dominio": "Som",
+    "corrupcao": "Baixo",
+    "manifestacao": "Notas flutuantes no ar",
+    "promessa_beneficio": "Enquanto cantar, influencia emoções de quem ouve.",
+    "estilo_contrato": "Ganha talento musical, mas não pode mentir"
+  },
+  {
+    "nivel": 1,
+    "nome": "A Chave Risonha",
+    "dominio": "Passagens/Portas",
+    "corrupcao": "Baixo",
+    "manifestacao": "Portas se destrancam sozinhas",
+    "promessa_beneficio": "Enquanto compartilhar segredos, pode abrir qualquer porta.",
+    "estilo_contrato": "Impede manter segredos fechados"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Dedo do Medo",
+    "dominio": "Intuição",
+    "corrupcao": "Baixo",
+    "manifestacao": "Arrepios leves nos momentos certos",
+    "promessa_beneficio": "Enquanto confiar no medo, evita emboscadas e armadilhas.",
+    "estilo_contrato": "Impede negar pressentimentos"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Ladrão de Passos",
+    "dominio": "Movimento",
+    "corrupcao": "Baixo",
+    "manifestacao": "Pisadas não fazem som",
+    "promessa_beneficio": "Enquanto não for visto, move-se sem deixar rastro.",
+    "estilo_contrato": "Perde completamente o senso de direção"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Brilho Noturno",
+    "dominio": "Luz/Escuridão",
+    "corrupcao": "Baixo",
+    "manifestacao": "Pupilas que brilham no escuro",
+    "promessa_beneficio": "Enquanto na escuridão, vê como se fosse dia.",
+    "estilo_contrato": "Não pode dormir durante o dia"
+  },
+  {
+    "nivel": 1,
+    "nome": "A Voz Que Acompanha",
+    "dominio": "Presença",
+    "corrupcao": "Baixo",
+    "manifestacao": "Voz familiar quando sozinho",
+    "promessa_beneficio": "Enquanto estiver com alguém, sente seus pensamentos.",
+    "estilo_contrato": "Nunca pode estar sozinho voluntariamente"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Eco do Nome",
+    "dominio": "Identidade",
+    "corrupcao": "Baixo",
+    "manifestacao": "Nome ecoa ao ser pronunciado",
+    "promessa_beneficio": "Enquanto usar o nome completo, tem presença amplificada.",
+    "estilo_contrato": "Deve dizer nome completo ao entrar em lugares"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Riso Esquecido",
+    "dominio": "Alegria",
+    "corrupcao": "Baixo",
+    "manifestacao": "Riso involuntário em silêncio",
+    "promessa_beneficio": "Enquanto estiver sorrindo, ignora efeitos mágicos menores.",
+    "estilo_contrato": "Perde a capacidade de fingir tristeza"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Observador de Telhados",
+    "dominio": "Vigilância",
+    "corrupcao": "Baixo",
+    "manifestacao": "Silhuetas observando à distância",
+    "promessa_beneficio": "Enquanto vigiar em silêncio, pode prever o próximo perigo.",
+    "estilo_contrato": "Não pode ignorar injustiças"
+  },
+  {
+    "nivel": 1,
+    "nome": "A Teia dos Pequenos Fatos",
+    "dominio": "Coincidência",
+    "corrupcao": "Baixo",
+    "manifestacao": "Pequenos eventos se alinham",
+    "promessa_beneficio": "Enquanto relatar trivialidades, encontra pistas ocultas.",
+    "estilo_contrato": "Deve compartilhar fatos triviais"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Guia dos Perdidos",
+    "dominio": "Orientação",
+    "corrupcao": "Baixo",
+    "manifestacao": "Bússola que gira sozinha",
+    "promessa_beneficio": "Enquanto ajudar perdidos, encontra caminhos ocultos.",
+    "estilo_contrato": "Deve ajudar qualquer perdido que encontrar"
+  },
+  {
+    "nivel": 1,
+    "nome": "O Guardião da Última Palavra",
+    "dominio": "Conversas",
+    "corrupcao": "Baixo",
+    "manifestacao": "Última palavra dita ecoa por horas",
+    "promessa_beneficio": "Enquanto encerrar as conversas, influencia o desfecho delas.",
+    "estilo_contrato": "Sempre precisa encerrar conversas"
+  },
+  {
+    "nivel": 1,
+    "nome": "A Semente do Silêncio",
+    "dominio": "Crescimento/Segredo",
+    "corrupcao": "Baixo",
+    "manifestacao": "Broto nasce no corpo",
+    "promessa_beneficio": "Enquanto guardar um segredo, sua força cresce lentamente.",
+    "estilo_contrato": "Não pode revelar a existência do contrato"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Cobrador Cego",
+    "dominio": "Dívida",
+    "corrupcao": "Médio",
+    "manifestacao": "Homem de terno com olhos costurados",
+    "promessa_beneficio": "Enquanto pagar com dor, pode tomar o que desejar.",
+    "estilo_contrato": "Exige dor física como pagamento"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Chama Sem Nome",
+    "dominio": "Vontade",
+    "corrupcao": "Médio",
+    "manifestacao": "Fumaça saindo da pele",
+    "promessa_beneficio": "Enquanto alimentar obsessões, ignora efeitos de controle mental.",
+    "estilo_contrato": "Requer queimar algo importante periodicamente"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Eco Trêmulo",
+    "dominio": "Tempo",
+    "corrupcao": "Médio",
+    "manifestacao": "Ecos temporais distorcidos",
+    "promessa_beneficio": "Enquanto guardar silêncio, pode revisitar memórias alheias.",
+    "estilo_contrato": "Fragmentação de memória própria"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Corvo de Farpas",
+    "dominio": "Escolha",
+    "corrupcao": "Médio",
+    "manifestacao": "Som de asas metálicas",
+    "promessa_beneficio": "Enquanto renunciar a certezas, pode manipular decisões próximas.",
+    "estilo_contrato": "Sacrifício emocional a cada favor recebido"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Mãe do Medo",
+    "dominio": "Proteção/Medo",
+    "corrupcao": "Médio",
+    "manifestacao": "Sombra acolhedora",
+    "promessa_beneficio": "Enquanto sentir medo, torna-se invisível a olhos humanos.",
+    "estilo_contrato": "Não pode agir se não estiver com medo"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Acordo Vazio",
+    "dominio": "Barganha",
+    "corrupcao": "Médio",
+    "manifestacao": "Documento em branco",
+    "promessa_beneficio": "Enquanto seguir o contrato, pode selar acordos com um toque.",
+    "estilo_contrato": "Cada quebra torna o contrato mais rígido"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Olhar do Espelho",
+    "dominio": "Reflexo",
+    "corrupcao": "Médio",
+    "manifestacao": "Imagens que agem sozinhas",
+    "promessa_beneficio": "Enquanto encarar seu reflexo, vê mentiras refletidas dos outros.",
+    "estilo_contrato": "Começa a desconfiar da própria imagem"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Estalo que Fere",
+    "dominio": "Som/Dano",
+    "corrupcao": "Médio",
+    "manifestacao": "Estalos no ar",
+    "promessa_beneficio": "Enquanto ferir com som, o alvo não pode gritar.",
+    "estilo_contrato": "Fala torna-se dolorosa se usada para insultos"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Dançarina de Ferro",
+    "dominio": "Movimento/Ritual",
+    "corrupcao": "Médio",
+    "manifestacao": "Corpo se move sozinho em combate",
+    "promessa_beneficio": "Enquanto dançar, ataques se tornam imprevisíveis.",
+    "estilo_contrato": "Exige realizar danças ritualísticas diariamente"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Regente Sem Cetro",
+    "dominio": "Comando/Orgulho",
+    "corrupcao": "Médio",
+    "manifestacao": "Voz com eco imperativo",
+    "promessa_beneficio": "Enquanto dar ordens diretas, os outros hesitam em desobedecer.",
+    "estilo_contrato": "Perde a capacidade de pedir com gentileza"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Poço de Cobre",
+    "dominio": "Riqueza/Peso",
+    "corrupcao": "Médio",
+    "manifestacao": "Moedas surgem da boca",
+    "promessa_beneficio": "Enquanto gastar o que ganha, nunca fica sem dinheiro.",
+    "estilo_contrato": "Qualquer economia se desfaz como areia"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Tecedor de Dor",
+    "dominio": "Dor & Conexão",
+    "corrupcao": "Médio",
+    "manifestacao": "Fios invisíveis entre corpos",
+    "promessa_beneficio": "Enquanto suportar dor, pode curar outro à distância.",
+    "estilo_contrato": "A dor não pode ser aliviada"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Boca do Desacordo",
+    "dominio": "Confusão/Palavras",
+    "corrupcao": "Médio",
+    "manifestacao": "Voz múltipla e desconexa",
+    "promessa_beneficio": "Enquanto falar em enigmas, desorganiza as ideias dos ouvintes.",
+    "estilo_contrato": "Perde a capacidade de comunicação linear"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Primeiro Ladrão",
+    "dominio": "Roubo/Esperança",
+    "corrupcao": "Médio",
+    "manifestacao": "Tudo que toca esfria",
+    "promessa_beneficio": "Enquanto não for notado, pode roubar memórias pequenas.",
+    "estilo_contrato": "É esquecido por aqueles que ama"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Acorde do Fim",
+    "dominio": "Música/Tragédia",
+    "corrupcao": "Médio",
+    "manifestacao": "Sons trágicos ecoando",
+    "promessa_beneficio": "Enquanto cantar despedidas, sela o destino de alguém.",
+    "estilo_contrato": "Esquece o rosto do afetado"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Teia Sussurrante",
+    "dominio": "Rumores/Influência",
+    "corrupcao": "Médio",
+    "manifestacao": "Vozes vindas das paredes",
+    "promessa_beneficio": "Enquanto espalhar boatos, descobre verdades enterradas.",
+    "estilo_contrato": "Torna-se alvo de intrigas inevitáveis"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Máscara de Sal",
+    "dominio": "Emoções/Ocultação",
+    "corrupcao": "Médio",
+    "manifestacao": "Rosto se cristaliza quando mente",
+    "promessa_beneficio": "Enquanto usar a máscara, pode mentir com perfeição.",
+    "estilo_contrato": "Sente dor física por cada mentira"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Hóspede Sem Corpo",
+    "dominio": "Possessão",
+    "corrupcao": "Médio",
+    "manifestacao": "Presença invisível em objetos",
+    "promessa_beneficio": "Enquanto hospedar, pode enxergar por objetos inanimados.",
+    "estilo_contrato": "Riscos de perder o próprio corpo temporariamente"
+  },
+  {
+    "nivel": 2,
+    "nome": "A Lâmina do Julgamento",
+    "dominio": "Justiça/Execução",
+    "corrupcao": "Médio",
+    "manifestacao": "Sombra forma lâmina em sua mão",
+    "promessa_beneficio": "Enquanto julgar com firmeza, seus golpes ignoram defesas.",
+    "estilo_contrato": "Se errar o julgamento, sofre ferimento reverso"
+  },
+  {
+    "nivel": 2,
+    "nome": "O Portador de Portais",
+    "dominio": "Espaço & Limite",
+    "corrupcao": "Médio",
+    "manifestacao": "Portas se movem sozinhas",
+    "promessa_beneficio": "Enquanto carregar um mapa arcano, pode dobrar caminhos.",
+    "estilo_contrato": "Perde senso de distância e orientação normal"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Julgamento Silente",
+    "dominio": "Justiça Arcana",
+    "corrupcao": "Alto",
+    "manifestacao": "Vozes sem fonte aparente",
+    "promessa_beneficio": "Enquanto agir com imparcialidade, seus julgamentos têm efeito físico.",
+    "estilo_contrato": "Exige voto de obediência a um código rígido"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Senhora do Véu",
+    "dominio": "Ilusão/Verdade",
+    "corrupcao": "Médio",
+    "manifestacao": "Roupas que desaparecem na luz direta",
+    "promessa_beneficio": "Enquanto esconder verdades, pode manipular memórias alheias.",
+    "estilo_contrato": "Troca segredos por ilusões tangíveis"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Pastor das Correntes",
+    "dominio": "Controle/Servidão",
+    "corrupcao": "Alto",
+    "manifestacao": "Correntes invisíveis nos braços",
+    "promessa_beneficio": "Enquanto obedecer uma entidade, outros devem obedecer você.",
+    "estilo_contrato": "Deve prender partes de si mesmo a cada ordem dada"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Coral de Ossos",
+    "dominio": "Morte/Luto",
+    "corrupcao": "Alto",
+    "manifestacao": "Música feita de ossos rangendo",
+    "promessa_beneficio": "Enquanto tocar a melodia do luto, pode controlar os mortos.",
+    "estilo_contrato": "Perde memória de cada morto controlado"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Lua Partida",
+    "dominio": "Insanidade/Profecia",
+    "corrupcao": "Alto",
+    "manifestacao": "Metade do rosto aparece lunar",
+    "promessa_beneficio": "Enquanto confiar em sua loucura, vê futuros possíveis.",
+    "estilo_contrato": "Vê mentiras como verdades e vice-versa"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Engenheiro da Carne",
+    "dominio": "Mutação/Corpo",
+    "corrupcao": "Alto",
+    "manifestacao": "Mãos com articulações extras",
+    "promessa_beneficio": "Enquanto moldar carne, pode regenerar ou transformar formas vivas.",
+    "estilo_contrato": "Perde lentamente a própria forma original"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Arraial das Sombras",
+    "dominio": "Sonhos/Comunicação",
+    "corrupcao": "Médio",
+    "manifestacao": "Vozes familiares durante o sono",
+    "promessa_beneficio": "Enquanto sonhar profundamente, influencia os sonhos dos outros.",
+    "estilo_contrato": "Tem pesadelos vívidos ao acordar"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Fome Velada",
+    "dominio": "Desejo/Compulsão",
+    "corrupcao": "Alto",
+    "manifestacao": "Olhos sempre abertos, mesmo dormindo",
+    "promessa_beneficio": "Enquanto suprimir desejos, absorve desejos alheios.",
+    "estilo_contrato": "Se ceder a um, torna-se escravo dele"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Comediante de Sal",
+    "dominio": "Ironia/Destino",
+    "corrupcao": "Médio",
+    "manifestacao": "Risos nervosos ecoam ao fundo",
+    "promessa_beneficio": "Enquanto zombar da própria tragédia, altera pequenos eventos do destino.",
+    "estilo_contrato": "Tudo o que ama tende ao fracasso"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Aranha do Compasso",
+    "dominio": "Tempo/Precisão",
+    "corrupcao": "Alto",
+    "manifestacao": "Linhas e círculos nas paredes",
+    "promessa_beneficio": "Enquanto seguir o ritmo exato, pode prever eventos em segundos.",
+    "estilo_contrato": "Qualquer erro no tempo causa perda de memória"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Pescador do Invisível",
+    "dominio": "Caça/Instinto",
+    "corrupcao": "Médio",
+    "manifestacao": "Ganchos invisíveis no ar",
+    "promessa_beneficio": "Enquanto perseguir algo oculto, pode detectar o que está além do véu.",
+    "estilo_contrato": "Perde parte da própria empatia"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Mão dos Espinhos",
+    "dominio": "Proteção/Agressão",
+    "corrupcao": "Alto",
+    "manifestacao": "Sangue que brota ao tocar os outros",
+    "promessa_beneficio": "Enquanto sofrer dano, reflete parte dele no agressor.",
+    "estilo_contrato": "Não pode ser curado enquanto o pacto durar"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Arquiteto de Pregos",
+    "dominio": "Dor/Estabilidade",
+    "corrupcao": "Alto",
+    "manifestacao": "Unhas viradas ao contrário",
+    "promessa_beneficio": "Enquanto suportar dor contínua, pode reforçar estruturas ou armaduras.",
+    "estilo_contrato": "Causa dor crônica crescente"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Filho do Fim",
+    "dominio": "Ruína/Transição",
+    "corrupcao": "Alto",
+    "manifestacao": "Tudo que toca apodrece lentamente",
+    "promessa_beneficio": "Enquanto encerrar ciclos, ganha poder sobre começos.",
+    "estilo_contrato": "Tudo o que começa sob sua presença está fadado a terminar mal"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Cortina que Sussurra",
+    "dominio": "Segredo/Revelação",
+    "corrupcao": "Médio",
+    "manifestacao": "Cortinas se movem sozinhas",
+    "promessa_beneficio": "Enquanto ocultar informações, escuta o que se fala em outros cômodos.",
+    "estilo_contrato": "Não pode falar de si mesmo"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Serpente com Rosto Humano",
+    "dominio": "Manipulação/Memória",
+    "corrupcao": "Alto",
+    "manifestacao": "Língua dupla que fala com duas vozes",
+    "promessa_beneficio": "Enquanto convencer alguém, altera pequenas lembranças dele.",
+    "estilo_contrato": "Perde acesso a memórias antigas próprias"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Inventário Proibido",
+    "dominio": "Conhecimento",
+    "corrupcao": "Médio",
+    "manifestacao": "Livros que sussurram ao abrir",
+    "promessa_beneficio": "Enquanto estudar com ele, aprende o impossível.",
+    "estilo_contrato": "Cada nova leitura apaga uma crença antiga"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Construtor da Desordem",
+    "dominio": "Realidade/Entropia",
+    "corrupcao": "Alto",
+    "manifestacao": "Tudo em volta começa a se mover sozinho",
+    "promessa_beneficio": "Enquanto aceitar o caos, molda matéria bruta ao seu desejo.",
+    "estilo_contrato": "Causa colapsos em objetos que toca"
+  },
+  {
+    "nivel": 3,
+    "nome": "A Rosa que Fala",
+    "dominio": "Beleza/Sedução",
+    "corrupcao": "Médio",
+    "manifestacao": "Flores que crescem nos pulmões",
+    "promessa_beneficio": "Enquanto alguém o amar, pode comandar suas emoções.",
+    "estilo_contrato": "Nunca pode revelar seus verdadeiros sentimentos"
+  },
+  {
+    "nivel": 3,
+    "nome": "O Velho que Desaparece",
+    "dominio": "Esquecimento/Tempo",
+    "corrupcao": "Alto",
+    "manifestacao": "Toda lembrança dele se apaga em 1h",
+    "promessa_beneficio": "Enquanto estiver ausente da memória de alguém, observa-o livremente.",
+    "estilo_contrato": "Começa a esquecer-se de si mesmo"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Relógio Sem Ponteiros",
+    "dominio": "Tempo/Destino",
+    "corrupcao": "Alto",
+    "manifestacao": "Ponteiros do relógio que param",
+    "promessa_beneficio": "Enquanto renunciar futuros, pode alterar eventos passados.",
+    "estilo_contrato": "Abdicar futuros possíveis"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Colecionadora de Nomes",
+    "dominio": "Identidade",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Vozes sussurram seu nome constantemente",
+    "promessa_beneficio": "Enquanto doar parte da identidade, pode assumir outras.",
+    "estilo_contrato": "Roubos parciais de identidade"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Arquiteto Inverso",
+    "dominio": "Realidade",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Espaços dobram e se distorcem",
+    "promessa_beneficio": "Enquanto manipular a realidade, dobra as leis físicas.",
+    "estilo_contrato": "Perde a percepção da realidade estável"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Árvore de Carne",
+    "dominio": "Vida/Mutação",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Galhos com olhos e bocas crescem no corpo",
+    "promessa_beneficio": "Enquanto modificar carne, pode criar vida sintética.",
+    "estilo_contrato": "Corrompe o corpo permanentemente"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Véu Vivo",
+    "dominio": "O Véu em si",
+    "corrupcao": "Extrema",
+    "manifestacao": "O ambiente reage ao seu toque",
+    "promessa_beneficio": "Enquanto viver em harmonia, pode controlar o Véu Inferior.",
+    "estilo_contrato": "Pacto instintivo sem cláusula clara"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Donzela do Caos",
+    "dominio": "Entropia/Transformação",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Roupas se desfazem em pó",
+    "promessa_beneficio": "Enquanto aceitar o caos, pode transformar matéria e energia.",
+    "estilo_contrato": "Tudo que tocar tende à desintegração"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Juramento Partilhado",
+    "dominio": "Aliança/Juramento",
+    "corrupcao": "Alto",
+    "manifestacao": "Vozes de múltiplos ecos em seu ouvido",
+    "promessa_beneficio": "Enquanto cumprir juramentos, ganha força em grupo.",
+    "estilo_contrato": "Falha de um quebra todos os contratos"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Olho que Tudo Vê",
+    "dominio": "Conhecimento/Visão",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Um olho gigante aparece no céu",
+    "promessa_beneficio": "Enquanto observar, nada escapa ao seu olhar.",
+    "estilo_contrato": "Torna-se alvo de entidades ocultas"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Caminhante dos Véus",
+    "dominio": "Transição/Subplano",
+    "corrupcao": "Alto",
+    "manifestacao": "Passos que não tocam o chão",
+    "promessa_beneficio": "Enquanto viajar, pode atravessar planos sutis.",
+    "estilo_contrato": "Se perde entre as realidades"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Coroa da Meia-Noite",
+    "dominio": "Poder/Sombra",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Coroa negra flutua sobre sua cabeça",
+    "promessa_beneficio": "Enquanto usar, pode comandar sombras e influências.",
+    "estilo_contrato": "Sombra cresce, ameaçando consumir a alma"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Semeador de Segredos",
+    "dominio": "Mistério/Informação",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Sementes que sussurram ao vento",
+    "promessa_beneficio": "Enquanto plantar segredos, controla o fluxo da informação.",
+    "estilo_contrato": "Informação pode escapar, gerando caos"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Mão de Ferro",
+    "dominio": "Controle/Dominação",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Mão metálica aparece e some no braço",
+    "promessa_beneficio": "Enquanto dominar, influencia mentes e corpos.",
+    "estilo_contrato": "Corpo torna-se rígido e insensível"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Coração Que Sangra",
+    "dominio": "Dor/Paixão",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Sangue pulsa como um coração externo",
+    "promessa_beneficio": "Enquanto amar, pode causar dor aos inimigos.",
+    "estilo_contrato": "Sofre as dores dos outros em dobro"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Invólucro das Sombras",
+    "dominio": "Proteção/Engano",
+    "corrupcao": "Alto",
+    "manifestacao": "Um manto de sombras que se move",
+    "promessa_beneficio": "Enquanto se esconder, pode se tornar intangível.",
+    "estilo_contrato": "Perde sentido de existência"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Fogueira das Almas",
+    "dominio": "Purificação/Fogo",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Chamas azuis queimam sem consumir",
+    "promessa_beneficio": "Enquanto queimar pecados, purifica almas em sofrimento.",
+    "estilo_contrato": "Risco de consumir inocentes"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Sussurro dos Ancestrais",
+    "dominio": "Memória/História",
+    "corrupcao": "Alto",
+    "manifestacao": "Vozes antigas narram segredos",
+    "promessa_beneficio": "Enquanto ouvir, aprende saberes esquecidos.",
+    "estilo_contrato": "Torna-se prisioneiro da história"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Mestre dos Contratos",
+    "dominio": "Ordem/Leis",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Manuscritos flutuam em seu redor",
+    "promessa_beneficio": "Enquanto escrever, pode alterar regras da realidade.",
+    "estilo_contrato": "Regras tornam-se rígidas e cruéis"
+  },
+  {
+    "nivel": 4,
+    "nome": "A Dama da Névoa",
+    "dominio": "Ilusão/Desorientação",
+    "corrupcao": "Alto",
+    "manifestacao": "Névoa espessa segue seus passos",
+    "promessa_beneficio": "Enquanto andar, cria ilusões e confusão ao redor.",
+    "estilo_contrato": "Perde contato com o mundo real"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Guardião da Chave",
+    "dominio": "Segredos/Poder",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Chave gigantesca brilha na mão",
+    "promessa_beneficio": "Enquanto guardar segredos, ganha proteção e poder.",
+    "estilo_contrato": "Segredos podem virar prisões"
+  },
+  {
+    "nivel": 4,
+    "nome": "O Andarilho Sem Rosto",
+    "dominio": "Anonimato/Passagem",
+    "corrupcao": "Muito Alto",
+    "manifestacao": "Rosto ausente, somente sombras",
+    "promessa_beneficio": "Enquanto permanecer oculto, pode atravessar barreiras invisíveis.",
+    "estilo_contrato": "Perde sua identidade visível"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Eterno Esquecido",
+    "dominio": "Tempo/Esquecimento",
+    "corrupcao": "Extrema",
+    "manifestacao": "Ausência completa de sombra",
+    "promessa_beneficio": "Enquanto for esquecido, pode apagar eventos do passado.",
+    "estilo_contrato": "Torna-se invisível para todos, inclusive aliados"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Voz do Abismo",
+    "dominio": "Loucura/Profundezas",
+    "corrupcao": "Extrema",
+    "manifestacao": "Voz cavernosa que ecoa sem fonte",
+    "promessa_beneficio": "Enquanto ouvir, pode invocar terrores insondáveis.",
+    "estilo_contrato": "Risco de insanidade irreversível"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Sussurro das Ruínas",
+    "dominio": "Destruição/Recuperação",
+    "corrupcao": "Extrema",
+    "manifestacao": "Poeira e cacos flutuam em sua presença",
+    "promessa_beneficio": "Enquanto destruir, pode reconstruir em formas novas.",
+    "estilo_contrato": "O passado nunca é totalmente apagado"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Rainha das Correntes",
+    "dominio": "Prisão/Liberdade",
+    "corrupcao": "Extrema",
+    "manifestacao": "Correntes vivas que se movem sozinhas",
+    "promessa_beneficio": "Enquanto aprisionar, controla o livre arbítrio de outros.",
+    "estilo_contrato": "Liberdade própria é perdida gradualmente"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Guardião dos Vácuos",
+    "dominio": "Ausência/Vazio",
+    "corrupcao": "Extrema",
+    "manifestacao": "Espaço vazio se forma em torno",
+    "promessa_beneficio": "Enquanto afastar presença, pode consumir entidades e memórias.",
+    "estilo_contrato": "Esvazia partes de si mesmo ao agir"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Serpente dos Mil Olhos",
+    "dominio": "Vigilância/Segredo",
+    "corrupcao": "Extrema",
+    "manifestacao": "Olhos surgem e desaparecem na pele",
+    "promessa_beneficio": "Enquanto observar, desvenda qualquer segredo escondido.",
+    "estilo_contrato": "Torna-se incapaz de confiar em ninguém"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Devoto da Chama Negra",
+    "dominio": "Purificação/Destruição",
+    "corrupcao": "Extrema",
+    "manifestacao": "Chamas negras queimam sem consumir",
+    "promessa_beneficio": "Enquanto queimar impurezas, devora até mesmo aliados.",
+    "estilo_contrato": "Fogo cresce e consome corpo e alma"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Mão do Juízo Final",
+    "dominio": "Justiça/Execução",
+    "corrupcao": "Extrema",
+    "manifestacao": "Mão gigante que julga do céu",
+    "promessa_beneficio": "Enquanto julgar, pode decretar destinos irrevogáveis.",
+    "estilo_contrato": "Suas decisões nunca podem ser revertidas"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Viajante das Fraturas",
+    "dominio": "Espaço/Quebra",
+    "corrupcao": "Extrema",
+    "manifestacao": "Corpo se desfaz em fragmentos",
+    "promessa_beneficio": "Enquanto atravessar planos, fragmenta sua existência.",
+    "estilo_contrato": "Perde partes do eu em cada transição"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Sombra que Engole Luz",
+    "dominio": "Escuridão/Consumo",
+    "corrupcao": "Extrema",
+    "manifestacao": "Ausência total de luz ao redor",
+    "promessa_beneficio": "Enquanto abraçar a escuridão, absorve forças alheias.",
+    "estilo_contrato": "Perde conexão com luz e esperança"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Rainha do Silêncio",
+    "dominio": "Silêncio/Segredo",
+    "corrupcao": "Extrema",
+    "manifestacao": "Voz silenciada para sempre",
+    "promessa_beneficio": "Enquanto não falar, pode ouvir tudo ao seu redor.",
+    "estilo_contrato": "Perda permanente da fala"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Ancião dos Véus",
+    "dominio": "Véu/Origem",
+    "corrupcao": "Extrema",
+    "manifestacao": "Corpo feito de névoa e sombras",
+    "promessa_beneficio": "Enquanto existir, mantém o equilíbrio do Véu Inferior.",
+    "estilo_contrato": "Nunca pode ser destruído"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Fera de Mil Rostos",
+    "dominio": "Identidade/Ilusão",
+    "corrupcao": "Extrema",
+    "manifestacao": "Rosto se multiplica constantemente",
+    "promessa_beneficio": "Enquanto mudar aparência, engana qualquer um.",
+    "estilo_contrato": "Perde o sentido do próprio eu"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Mestre dos Fios",
+    "dominio": "Destino/Controle",
+    "corrupcao": "Extrema",
+    "manifestacao": "Fios invisíveis conectam tudo",
+    "promessa_beneficio": "Enquanto manipular destinos, controla vidas e eventos.",
+    "estilo_contrato": "Torna-se prisioneiro dos fios"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Voz do Abandono",
+    "dominio": "Solidão/Esquecimento",
+    "corrupcao": "Extrema",
+    "manifestacao": "Voz ecoa em vazio absoluto",
+    "promessa_beneficio": "Enquanto estiver só, pode apagar laços afetivos.",
+    "estilo_contrato": "Torna-se irreconhecível para todos"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Rei das Cinzas",
+    "dominio": "Morte/Ressurreição",
+    "corrupcao": "Extrema",
+    "manifestacao": "Cinzas caem onde pisa",
+    "promessa_beneficio": "Enquanto controlar morte, pode ressuscitar os caídos.",
+    "estilo_contrato": "Ressuscitados são marcados para a perdição"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Dançarina da Desgraça",
+    "dominio": "Sorte/Desventura",
+    "corrupcao": "Extrema",
+    "manifestacao": "Passos que atraem azar",
+    "promessa_beneficio": "Enquanto dançar, pode desviar desgraças de si e dos outros.",
+    "estilo_contrato": "Sorte se torna negativa para quem ama"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Guardião do Tempo Quebrado",
+    "dominio": "Tempo/Fragilidade",
+    "corrupcao": "Extrema",
+    "manifestacao": "Relógio quebrado que nunca para",
+    "promessa_beneficio": "Enquanto controlar tempo, pode congelar momentos cruciais.",
+    "estilo_contrato": "Seu tempo de vida diminui drasticamente"
+  },
+  {
+    "nivel": 5,
+    "nome": "A Fala que Engana",
+    "dominio": "Mentira/Ilusão",
+    "corrupcao": "Extrema",
+    "manifestacao": "Voz que muda conforme a verdade",
+    "promessa_beneficio": "Enquanto mentir, pode convencer qualquer um.",
+    "estilo_contrato": "Nunca sabe o que é verdade para si"
+  },
+  {
+    "nivel": 5,
+    "nome": "O Filho do Abismo",
+    "dominio": "Caos/Origem",
+    "corrupcao": "Extrema",
+    "manifestacao": "Corpo feito de sombras em movimento",
+    "promessa_beneficio": "Enquanto abraçar o caos, cria e destrói realidades.",
+    "estilo_contrato": "Risco de perder o controle da própria existência"
+  }
+]

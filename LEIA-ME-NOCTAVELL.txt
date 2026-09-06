@@ -1,0 +1,24 @@
+NOCTAVELL — INTEGRAÇÃO VTT
+
+Esta versão adiciona Noctavell como sistema RPG selecionável.
+
+Incluído:
+- Sistema Noctavell criado automaticamente na aba Sistemas RPG quando o Mestre a abre.
+- Ficha dedicada ficha-noctavell.html.
+- 5 atributos: Presença, Vontade, Instinto, Ocultismo e Corrupção.
+- Nome Público, Nome Verdadeiro e formas de proteção.
+- Pacto Interno/Juramento da Alma.
+- Contratos externos e graus I–V.
+- Entidades catalogadas a partir do arquivo pactos.docx, 100 entradas.
+- Artefatos Jurados.
+- Sanidade e Traumas.
+- Fôlego e Feridas.
+- Dado do Véu (d6 simbólico).
+- Pontos de Imersão e Moedas de Arcântria.
+- Magias Básicas e espaço para sacrifícios.
+
+Fontes usadas:
+- NOCTAVELL.pdf
+- pactos.docx
+
+Observação: o sistema foi transcrito conforme os materiais fornecidos. Onde o material apresenta regras narrativas ou campos abertos, a ficha mantém esses campos editáveis em vez de inventar uma regra adicional.

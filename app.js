@@ -1993,6 +1993,20 @@ function criarConfiguracaoElarion(){
   return {versao:1,tipo:'elarion',dados:['d10','d12'],modulos:{joias:{ativo:true,quantidade_limite:false},luvas:{ativo:true},classes:{ativo:true},racas:{ativo:true},coracao:{dados:3},inspiracao:{max:3},testes:{dados:'2d10'},fadiga:{pf_minimo:5}},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:1,max_inicial:5})),progressao_xp:[0,100,300,600,1000,1500,2100,2800,3600,4500,5500,6600,7800,9100,10500,12000,13600,15300,17100,19000],classes:['Espadachim Rúnico','Guardião Prismático','Arqueiro Elemental','Teurgo Cristalino','Sombra Lapidada','Berserker do Núcleo','Bardo da Inspiração','Místico Mentalista'],portadores_puros:['Punho Elemental','Condutor do Núcleo','Avatar do Vazio','Mestre da Luz Interior','Punho da Ruína','Tecedor Temporal'],racas:['Humano','Elfo','Orc','Khajiit','Lizardmen','Anões','Povo-Fera'],tf:'CON + VON + Nível',pf_minimo:5,teste:'2d10 + modificador vs CD',coracao:'3 dados; 1d12 para feitos impossíveis',inspiracao:'0–3'},tema:{corPrimaria:'#c89b3c',corFundo:'#09080b',corPainel:'#17121b'},ficha:'ficha-elarion.html'};
 }
 
+function criarConfiguracaoNoctavell(){
+  const attrs=[['PRES','Presença'],['VON','Vontade'],['INS','Instinto'],['OCU','Ocultismo'],['COR','Corrupção']];
+  return {versao:1,tipo:'noctavell',dados:['d6'],modulos:{dado_do_veu:true,nome_verdadeiro:true,pactos:true,contratos:true,entidades:true,artefatos_jurados:true,sanidade:true,feridas_folego:true,imersao:true,arcântria:true},regras:{atributos:{pontos_iniciais:15,minimo:1,maximo:5,modificador:'valor do atributo conforme interpretação'},pacto_interno:{limite_ativo:1,niveis:4},contratos:{simultaneos:3,graus:['I — Sussurros','II — Cicatrizes Leves','III — Pactos em Perigo','IV — Contrapromessas','V — Peso do Véu']},nome_verdadeiro:{efeitos:['contrato profundo mais poderoso e permanente','rastreamento/compulsão sem resistência','maldições e selamentos dobram de intensidade','artefatos jurados ligados à alma','convocação arcana','permite selar promessas contra o portador'],troca:{custo_minimo:3,local:'Corte de Cera',invalidar_promessas:true,resetar_corrupcao:true}},dado_veu:{faces:{1:'⚖️ Equilíbrio — sucesso parcial com custo',2:'🔥 Ruptura — sucesso forte com tensão ou risco oculto',3:'🌑 Silêncio — falha',4:'🔯 Eco — efeito secundário inesperado',5:'🔑 Verdade — sucesso total',6:'👁️ Olho do Véu — sucesso crítico + revelação'}},magia_basica:{usos_por_cena:3,alcance:'até 5m/toque/visão próxima',limites_minimos:2},pactos:{limite_interno:1},folego:{inicial:5,maximo:8,recuperacao:'1 por descanso leve ou alívio narrativo'},feridas:{tipos:['Leve','Grave','Mortal'],mortal_sem_tratamento:'morte em minutos'},sanidade:{inicial:6,colapso:0,apos_colapso:3},imersao:{maximo:3,ganho_por_cena:1},moedas_arcantria:{ganhos:['cumprir contrato temporário +1','manter contrato fixo (3 sessões) +1','cumprir termo oculto sem quebrar +1','renegociar com sucesso +1','salvar outro jogador de pacto fatal +1 compartilhado'],gastos:['1 +1 atributo (máx 5)','1 adicionar cláusula','2 novo pacto','2 reduzir 1 Corrupção','3 contrato personalizado','3 ritual avançado','4 Marca do Véu permanente']}},tema:{corPrimaria:'#9b7b48',corFundo:'#09090c',corPainel:'#15141a'},ficha:'ficha-noctavell.html',entidades_arquivo:'entidades-noctavell.json'};
+}
+async function garantirSistemaNoctavell(){
+  if(!ehMestreGlobal||!supabaseClient)return;
+  const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Noctavell').limit(1);
+  if(error||data?.length)return;
+  const session=(await supabaseClient.auth.getSession()).data.session;if(!session)return;
+  const cfg=criarConfiguracaoNoctavell();
+  const r=await supabaseClient.from('sistemas').insert({nome:'Noctavell',descricao:'RPG contemporâneo ocultista de pactos, contratos, entidades e consequências do Véu.',configuracao:cfg,criado_por:session.user.id});
+  if(r.error)console.warn('Noctavell não pôde ser criado automaticamente:',r.error.message);
+}
+
 function criarConfiguracaoEterBrasas(){
   const attrs=[['FOR','Força'],['AGI','Agilidade'],['VIT','Vitalidade'],['INT','Intelecto'],['VON','Vontade'],['CAR','Carisma']];
   const pericias=['Armas Brancas','Armas de Impacto','Armas de Distância','Armas de Fogo','Artes Marciais','Montaria de Combate','Canalização Mágica','Técnica Única','Magia Elemental','Magia de Suporte','Magia de Encantamento','Magia de Invocação','Forja & Metalurgia','Arcanotécnica','Alquimia','Herborismo','Medicina','História & Tradições','Investigação','Furtividade','Percepção','Sobrevivência Selvagem','Navegação','Lábia (Blefe)','Resistência','Carisma','Diplomacia','Intimidação','Enganação','Etiqueta Nobre','Mercado & Negócios','Arte & Música','Jogos & Sorte','Acrobacia','Truques Criminosos'];
@@ -2028,7 +2042,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -2066,7 +2080,7 @@ async function abrirFichaDoSistema(id){
   const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
   sistemaAtual=data;
   const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
-  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
+  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
   const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
   modal.style.display='flex';
 }
@@ -2346,6 +2360,7 @@ function mudarAba(nomeAba, evento) {
       if (ehMestreGlobal) {
         await garantirSistemaElarion();
         await garantirSistemaEterBrasas();
+        await garantirSistemaNoctavell();
       }
       await carregarSistemas();
     })();
@@ -2472,7 +2487,7 @@ function abrirCriadorFicha() {
   if (ehFichaLegadaAtual()) {
     iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : 'ficha-generica.html');
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : 'ficha-generica.html'));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, null, 'criacao');
   }
   const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
@@ -2491,7 +2506,7 @@ function abrirEditorFichaAtual() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : 'ficha-generica.html';
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : 'ficha-generica.html');
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dadosFichaAtual, 'edicao');
   }
   modal.style.display = 'flex';
@@ -2510,7 +2525,7 @@ function abrirEditorFicha(dados, userId = null) {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : 'ficha-generica.html';
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : 'ficha-generica.html');
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dados, 'edicao');
   }
   modal.style.display = 'flex';
@@ -3813,6 +3828,7 @@ window.fazerLogin = fazerLogin;
 window.fazerCadastro = fazerCadastro;
 window.fazerLogout = fazerLogout;
 window.mudarAba = mudarAba;
+window.garantirSistemaNoctavell = garantirSistemaNoctavell;
 window.abrirAbaRolagensSegura = abrirAbaRolagensSegura;
 window.selecionarCampanha = selecionarCampanha;
 window.abrirNovaCampanha = abrirNovaCampanha;
