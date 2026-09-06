@@ -1980,7 +1980,9 @@ function abrirDetalheBestiario(idx){
   const hab=(m.habilidades||[]).map(h=>`<li><strong>${escaparBestiario(h.nome)}:</strong> ${escaparBestiario(h.efeito)}</li>`).join('');
   const lista=(arr)=> (arr||[]).length?'<ul>'+arr.map(x=>`<li>${escaparBestiario(x)}</li>`).join('')+'</ul>':'<em>Nenhum.</em>';
   document.getElementById('bestiario-detalhe-corpo').innerHTML=`<div class="bestiario-meta">${escaparBestiario(m.reino)} · Nível ${escaparBestiario(m.nivel)} · ${escaparBestiario(m.papel)}<br>Afinidades: ${escaparBestiario(m.afinidade)}</div><div class="bestiario-detalhe-grid"><div class="bestiario-recurso">❤️ <strong>${escaparBestiario(m.pv)}</strong><small>PV</small></div><div class="bestiario-recurso">⚡ <strong>${escaparBestiario(m.tf)}</strong><small>TF</small></div><div class="bestiario-recurso">🛡️ <strong>${escaparBestiario(m.df)}</strong><small>DF</small></div><div class="bestiario-recurso">🏃 <strong>${escaparBestiario(m.movimento)}</strong><small>Movimento</small></div></div><div class="bestiario-bloco"><h4>📊 Atributos</h4><div>${attrs}</div></div><div class="bestiario-bloco"><h4>⚔️ Ataques</h4>${ataques}</div><div class="bestiario-bloco"><h4>✨ Habilidades</h4><ul>${hab||'<li>Nenhuma.</li>'}</ul></div><div class="bestiario-bloco"><h4>🛡️ Resistências</h4>${lista(m.resistencias)}</div><div class="bestiario-bloco"><h4>⚠️ Fraquezas</h4>${lista(m.fraquezas)}</div><div class="bestiario-bloco"><h4>💎 Loot sugerido</h4>${lista(m.loot_sugerido)}</div><div class="bestiario-acoes"><button type="button" class="btn-ficha-principal" onclick="criarTokenDoBestiario(${idx}); fecharDetalheBestiario();">⚔️ Colocar no Mapa</button></div>`;
-  document.getElementById('bestiario-detalhe').style.display='flex';
+  const modal = document.getElementById('bestiario-detalhe');
+  if (!modal) { console.error('Modal do Bestiário não encontrado.'); return; }
+  modal.style.display='flex';
 }
 function fecharDetalheBestiario(){const el=document.getElementById('bestiario-detalhe');if(el)el.style.display='none';}
 function criarTokenDoBestiario(idx){

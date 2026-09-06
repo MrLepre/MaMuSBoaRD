@@ -1268,3 +1268,11 @@ body.imagem-mestre-aberta { overflow:hidden !important; }
 .bestiario-card{background:linear-gradient(145deg,#19151d,#100e13);border:1px solid #3a303f;border-radius:12px;padding:15px;box-shadow:0 8px 20px rgba(0,0,0,.2)}
 .bestiario-card h3{margin:0 0 5px;color:#e3bd68}.bestiario-meta{color:#aaa;font-size:.86rem;margin-bottom:10px}.bestiario-recursos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.bestiario-recurso{background:#0d0c10;border-radius:7px;padding:7px;text-align:center}.bestiario-recurso strong{display:block;font-size:1rem}.bestiario-recurso small{color:#999}.bestiario-acoes{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.bestiario-acoes button{flex:1;min-width:110px}.bestiario-modal-conteudo{max-width:850px;max-height:88vh;overflow:auto}.bestiario-detalhe-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bestiario-bloco{background:#121016;border:1px solid #302933;border-radius:9px;padding:12px;margin-top:10px}.bestiario-bloco h4{margin:0 0 8px;color:#d6b15f}.bestiario-bloco ul{margin:6px 0 0 18px;padding:0}.bestiario-ataque{padding:8px 0;border-bottom:1px solid #2b2630}.bestiario-ataque:last-child{border-bottom:0}
 @media(max-width:700px){.bestiario-filtros{grid-template-columns:1fr}.bestiario-detalhe-grid{grid-template-columns:repeat(2,1fr)}.bestiario-grid{grid-template-columns:1fr}}
+
+
+/* Bestiário Elarion — modal de ficha da criatura */
+#bestiario-detalhe { position:fixed; inset:0; z-index:10050; background:rgba(3,5,9,.92); align-items:center; justify-content:center; padding:10px; }
+#bestiario-detalhe[style*="display: flex"] { display:flex !important; }
+#bestiario-detalhe .bestiario-modal-conteudo { width:min(1000px,100%); max-height:min(94vh,1000px); overflow:auto; background:#080a0f; border:2px solid var(--cam-gold,#d4af37); border-radius:8px; box-shadow:0 0 40px rgba(0,0,0,.9); }
+#bestiario-detalhe .modal-ficha-grupo-body { overflow:auto !important; padding:16px !important; }
+@media (max-width:768px){ #bestiario-detalhe{padding:0;} #bestiario-detalhe .bestiario-modal-conteudo{width:100%;height:100%;max-height:none;border-radius:0;border-left:0;border-right:0;} }
