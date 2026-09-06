@@ -2217,7 +2217,18 @@ async function carregarFichasDoGrupo() {
       const botaoExcluir = document.createElement('button');
       botaoExcluir.innerText = '🗑️ Apagar';
       botaoExcluir.style.cssText = 'background:#4a2020; color:#ffd7d7; border:1px solid #9b4b4b; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold;';
-      botaoExcluir.onclick = () => excluirFichaDoGrupo(item.id, nomeCavaleiro);
+      botaoExcluir.type = 'button';
+      botaoExcluir.className = 'btn-excluir-ficha';
+      botaoExcluir.setAttribute('data-acao-ficha', 'excluir');
+      botaoExcluir.onclick = (event) => {
+        // Impede que o clique do botão de excluir suba para outros
+        // elementos/handlers da interface e seja interpretado como
+        // uma Ação / Ataque da Central de Ações Rápidas.
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        excluirFichaDoGrupo(item.id, nomeCavaleiro);
+      };
       acoesDiv.appendChild(botaoExcluir);
     }
 
