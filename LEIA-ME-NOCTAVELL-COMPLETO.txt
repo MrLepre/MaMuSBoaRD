@@ -1,0 +1,30 @@
+NOCTAVELL — INTEGRAÇÃO COMPLETA V1
+
+Esta versão transforma Noctavell em um sistema jogável dentro da Mesa RPG sem substituir os demais sistemas.
+
+IMPLEMENTADO
+- Criação com 15 pontos e 5 atributos (1–5).
+- Nome Verdadeiro, proteção, perda/roubo e troca na Corte de Cera.
+- Dado do Véu d6 com os 6 resultados simbólicos oficiais.
+- Pactos Internos: 1 ativo, níveis 1–4, declaração/risco/recompensa/sinal.
+- Contratos externos: máximo 3 simultâneos, graus I–V e modelo detalhado de cláusulas.
+- Catálogo de 100 entidades do arquivo pactos.docx.
+- Artefatos Jurados e criação personalizada.
+- Fluxo Vivo: 3 magias básicas por cena, limites naturais e sacrifícios leve/médio/forte/crítico.
+- Combate narrativo sem iniciativa fixa.
+- Fôlego 5 (máx. 8), Feridas Leve/Grave/Mortal e resistência à morte por Vontade + Dado do Véu.
+- Sanidade 6, testes, Colapso Mental, Traumas e recuperação.
+- Pontos de Imersão (máx. 3), Batidas do Véu, Marcadores de Interesse e Diário.
+- Arcântria com locais e regras de neutralidade.
+- Moedas de Arcântria e tabela de progressão/gastos.
+- Quadro de Trabalhos do Submundo por campanha para o Mestre.
+- Central Noctavell na Mesa, visível somente em campanhas cujo sistema é Noctavell.
+- Integração preservando Camelot, Elarion, Éter & Brasas e World Trigger.
+
+SUPABASE
+1. Execute sql-noctavell.sql no SQL Editor do projeto Supabase.
+2. A tabela noctavell_trabalhos é usada pelo Quadro de Trabalhos da Central do Véu.
+3. Se o SQL ainda não for aplicado, a ficha continua funcional e o quadro informa que precisa da tabela.
+
+OBSERVAÇÃO DE FIDELIDADE
+As regras implementadas nesta versão foram derivadas do NOCTAVELL.pdf e do catálogo pactos.docx fornecidos. Não foram criadas regras alternativas para resolver lacunas do material.

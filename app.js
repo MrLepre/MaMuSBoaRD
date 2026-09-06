@@ -1995,7 +1995,29 @@ function criarConfiguracaoElarion(){
 
 function criarConfiguracaoNoctavell(){
   const attrs=[['PRES','Presença'],['VON','Vontade'],['INS','Instinto'],['OCU','Ocultismo'],['COR','Corrupção']];
-  return {versao:1,tipo:'noctavell',dados:['d6'],modulos:{dado_do_veu:true,nome_verdadeiro:true,pactos:true,contratos:true,entidades:true,artefatos_jurados:true,sanidade:true,feridas_folego:true,imersao:true,arcântria:true},regras:{atributos:{pontos_iniciais:15,minimo:1,maximo:5,modificador:'valor do atributo conforme interpretação'},pacto_interno:{limite_ativo:1,niveis:4},contratos:{simultaneos:3,graus:['I — Sussurros','II — Cicatrizes Leves','III — Pactos em Perigo','IV — Contrapromessas','V — Peso do Véu']},nome_verdadeiro:{efeitos:['contrato profundo mais poderoso e permanente','rastreamento/compulsão sem resistência','maldições e selamentos dobram de intensidade','artefatos jurados ligados à alma','convocação arcana','permite selar promessas contra o portador'],troca:{custo_minimo:3,local:'Corte de Cera',invalidar_promessas:true,resetar_corrupcao:true}},dado_veu:{faces:{1:'⚖️ Equilíbrio — sucesso parcial com custo',2:'🔥 Ruptura — sucesso forte com tensão ou risco oculto',3:'🌑 Silêncio — falha',4:'🔯 Eco — efeito secundário inesperado',5:'🔑 Verdade — sucesso total',6:'👁️ Olho do Véu — sucesso crítico + revelação'}},magia_basica:{usos_por_cena:3,alcance:'até 5m/toque/visão próxima',limites_minimos:2},pactos:{limite_interno:1},folego:{inicial:5,maximo:8,recuperacao:'1 por descanso leve ou alívio narrativo'},feridas:{tipos:['Leve','Grave','Mortal'],mortal_sem_tratamento:'morte em minutos'},sanidade:{inicial:6,colapso:0,apos_colapso:3},imersao:{maximo:3,ganho_por_cena:1},moedas_arcantria:{ganhos:['cumprir contrato temporário +1','manter contrato fixo (3 sessões) +1','cumprir termo oculto sem quebrar +1','renegociar com sucesso +1','salvar outro jogador de pacto fatal +1 compartilhado'],gastos:['1 +1 atributo (máx 5)','1 adicionar cláusula','2 novo pacto','2 reduzir 1 Corrupção','3 contrato personalizado','3 ritual avançado','4 Marca do Véu permanente']}},tema:{corPrimaria:'#9b7b48',corFundo:'#09090c',corPainel:'#15141a'},ficha:'ficha-noctavell.html',entidades_arquivo:'entidades-noctavell.json'};
+  return {
+    versao:2,tipo:'noctavell',dados:['d6'],
+    modulos:{dado_do_veu:true,nome_verdadeiro:true,pactos:true,contratos:true,entidades:true,artefatos_jurados:true,fluxo_vivo:true,sanidade:true,feridas_folego:true,imersao:true,arcântria:true,trabalhos:true,batidas_do_veu:true,marcadores_interesse:true,diario:true},
+    regras:{
+      atributos:{pontos_iniciais:15,minimo:1,maximo:5,lista:attrs.map(x=>({sigla:x[0],nome:x[1]}))},
+      dado_veu:{tipo:'d6',faces:{1:{simbolo:'⚖️',nome:'Equilíbrio',efeito:'Sucesso parcial com custo.'},2:{simbolo:'🔥',nome:'Ruptura',efeito:'Sucesso forte, mas com tensão ou risco oculto.'},3:{simbolo:'🌑',nome:'Silêncio',efeito:'Falha. Nada acontece ou o efeito se anula.'},4:{simbolo:'🔯',nome:'Eco',efeito:'Efeito secundário inesperado.'},5:{simbolo:'🔑',nome:'Verdade',efeito:'Sucesso total com elegância.'},6:{simbolo:'👁️',nome:'Olho do Véu',efeito:'Sucesso crítico + revelação ou conhecimento oculto.'}}},
+      nome_verdadeiro:{efeitos:['Contrato profundo mais poderoso e permanente','Rastreamento/compulsão sem resistência','Maldições e selamentos dobram de intensidade','Artefatos jurados ligados à alma','Convocação arcana da alma','Traição permite selar promessas contra o portador'],protecao:['Esconder','Selar em objeto','Trocar parcialmente','Escrever em código'],troca:{custo_minimo:3,local:'Corte de Cera',invalidar_promessas:true,resetar_corrupcao:true}},
+      pacto_interno:{limite_ativo:1,niveis:{1:{risco:'Fôlego/inconsciência',poder:'bônus específico/resistência momentânea'},2:{risco:'atributo/memória',poder:'magias exclusivas/sentidos arcanos'},3:{risco:'voz/visão/identidade',poder:'forças elementais ou emocionais'},4:{risco:'morte/alma aprisionada',poder:'manipular o Véu/desafiar entidades'}}},
+      contratos:{simultaneos:3,graus:{I:'Sussurros',II:'Cicatrizes Leves',III:'Pactos em Perigo',IV:'Contrapromessas',V:'Peso do Véu'},campos_oficiais:['beneficio','gatilho','limites','alvos_alcance','custo','risco','proibicoes','prova_validacao','quebra_penalidade','excecoes','preco','prazo']},
+      magia_basica:{nome:'Fluxo Vivo',usos_por_cena:3,extra_com_custo:true,limites_minimos:2,limites:['Alcance curto','Curta duração','Afeta apenas 1 coisa','Precisa de gesto ou palavra','Interrompível'],nao_causa_dano_significativo:true,nao_supera_arma_comum:true},
+      sacrificios:{leve:'1 ponto de Vida/sangue ou objeto querido — +1 dado ou vantagem simbólica',medio:'memória ou segredo — estende duração ou torna ritual',forte:'mutilação, juramento grave ou quebra de laço — equivale a magia de pacto por 1 cena',critico:'valor/princípio/parte da alma — efeito épico com marca ou trauma permanente'},
+      combate:{iniciativa_fixa:false,estrutura:'declaração de intenção + Dado do Véu',resistencia_morte:'Vontade + Dado do Véu',foco:'narrativo'},
+      folego:{inicial:5,maximo:8,recuperacao:1,regra_zero:'próximo acerto real gera Ferida'},
+      feridas:{tipos:{Leve:'corte/contusão/queimadura superficial',Grave:'fratura/perfuração/hemorragia/queimadura ampla',Mortal:'órgão atingido/hemorragia interna/trauma cerebral'},regra_morte:'3 Feridas ou 1 Mortal matam humano sem ajuda imediata'},
+      sanidade:{inicial:6,colapso:0,apos_colapso:3,causas:['entidade verdadeira','Ferida Mortal','verdade proibida','quebra de contrato mental','magia além da compreensão','sonho de Arcântria sem preparo'],colapso:['Catatonia','Paranoia','Delírio','Autodestruição','Possessão Passiva'],recuperacao:['Descanso profundo +1','Conexão emocional +1 (1x/sessão)','Ritual de purificação +2','Quebrar pacto mentalmente corrosivo +1']},
+      imersao:{maximo:3,ganho_por_cena:1,usos:['Rerrolagem','Bônus Narrativo','Insight Arcano','Mitigação de Consequência']},
+      arcântria:{locais:['Saguão do Véu','Arquivo das Quebras','Contrafluxo','Corte de Cera','Portaria das Entidades'],regras:['Promessas ditas ali têm validade','Nenhuma agressão direta','O Véu escuta sempre']},
+      moedas_arcantria:{ganhos:['Cumprir contrato temporário +1','Manter contrato fixo (3 sessões) +1','Cumprir termo oculto +1','Renegociar com sucesso +1','Salvar outro jogador de pacto fatal +1 compartilhado'],gastos:['1 +1 atributo (máx 5)','1 adicionar cláusula','2 novo pacto','2 reduzir 1 Corrupção','3 contrato personalizado','3 ritual avançado','4 Marca do Véu permanente']},
+      trabalhos:{recebimento:['envelope selado','símbolo em sonho','telefonema sem voz','murmúrio nas paredes'],graus:{I:'Sussurros',II:'Cicatrizes Leves',III:'Pactos em Perigo',IV:'Contrapromessas',V:'Peso do Véu'},quebra:{Leve:'Marca do Véu/perda de influência',Média:'maldição menor/dívida com Arcântria',Grave:'caçado pela Corte de Cera ou entidade',Total:'perda do Nome Verdadeiro ou alma selada'}},
+      imersao_roleplay:{batidas:['Preparação','Confronto','Clímax','Desfecho'],interesse_limite:3,ganho_interesse:1,gancho_em:3,diario:['medo','memoria','eco']}
+    },
+    tema:{corPrimaria:'#9b7b48',corFundo:'#09090c',corPainel:'#15141a'},ficha:'ficha-noctavell.html',entidades_arquivo:'entidades-noctavell.json'
+  };
 }
 async function garantirSistemaNoctavell(){
   if(!ehMestreGlobal||!supabaseClient)return;
@@ -2294,16 +2316,59 @@ function garantirAbasEconomiaJornaisVisiveis() {
     }
   });
 
-  // Se o usuário estava em uma dessas abas e trocou para outra campanha/sistema,
-  // não deixamos a tela antiga continuar aberta.
-  if (!disponiveis && (abaAtual === 'economia' || abaAtual === 'jornais')) {
-    mudarAba('ficha');
+  const btnNoct = document.getElementById('btn-aba-noctavell');
+  const disponivelNoct = Boolean(campanhaAtual && sistemaAtual?.configuracao?.tipo === 'noctavell');
+  if (btnNoct) {
+    if (disponivelNoct) {
+      btnNoct.style.setProperty('display','inline-flex','important'); btnNoct.style.setProperty('visibility','visible','important'); btnNoct.style.setProperty('opacity','1','important'); btnNoct.style.setProperty('pointer-events','auto','important'); btnNoct.removeAttribute('aria-hidden');
+    } else {
+      btnNoct.style.setProperty('display','none','important'); btnNoct.style.setProperty('visibility','hidden','important'); btnNoct.style.setProperty('opacity','0','important'); btnNoct.style.setProperty('pointer-events','none','important'); btnNoct.setAttribute('aria-hidden','true'); btnNoct.classList.remove('ativo');
+    }
   }
+  if (!disponiveis && (abaAtual === 'economia' || abaAtual === 'jornais')) mudarAba('ficha');
+  if (!disponivelNoct && abaAtual === 'noctavell') mudarAba('ficha');
+}
+
+
+// --- CENTRAL NOCTAVELL ---
+const NOCTAVELL_FACES = {
+  1:['⚖️ Equilíbrio','Sucesso parcial com custo.'],2:['🔥 Ruptura','Sucesso forte, mas com tensão ou risco oculto.'],
+  3:['🌑 Silêncio','Falha; nada acontece ou o efeito se anula.'],4:['🔯 Eco','O Véu responde com efeito secundário inesperado.'],
+  5:['🔑 Verdade','Sucesso total com elegância.'],6:['👁️ Olho do Véu','Sucesso crítico + revelação ou conhecimento oculto.']
+};
+function sistemaEhNoctavell(){ return Boolean(campanhaAtual && sistemaAtual?.configuracao?.tipo === 'noctavell'); }
+function rolarDadoNoctavell(){
+  if(!sistemaEhNoctavell()) return mostrarPopup('🕯️ Selecione uma campanha Noctavell.');
+  const n=1+Math.floor(Math.random()*6), f=NOCTAVELL_FACES[n], el=document.getElementById('noctavell-resultado-dado');
+  if(el) el.innerHTML=`<b>${f[0]}</b><br><span class="texto-vazio">${f[1]}</span>`;
+  try{ supabaseClient?.channel?.('sala-rpg-geral')?.send({type:'broadcast',event:'noctavell_dado',payload:{campanha_id:obterCampanhaIdAtual(),resultado:n,rotulo:f[0]}}); }catch(e){}
+  return n;
+}
+function batidaNoctavell(nome){
+  if(!sistemaEhNoctavell()) return;
+  localStorage.setItem('noctavell_batida_'+obterCampanhaIdAtual(),nome);
+  mostrarPopup('🕯️ Batida atual: '+nome);
+}
+async function carregarTrabalhosNoctavell(){
+  const box=document.getElementById('noctavell-trabalhos-lista'); if(!box||!sistemaEhNoctavell()) return;
+  if(!supabaseClient){box.innerHTML='<p class="texto-vazio">Supabase indisponível.</p>';return;}
+  const {data,error}=await supabaseClient.from('noctavell_trabalhos').select('*').eq('campanha_id',obterCampanhaIdAtual()).order('criado_em',{ascending:false});
+  if(error){box.innerHTML='<p class="texto-vazio">Aplique o SQL Noctavell para ativar o quadro compartilhado.</p>';return;}
+  box.innerHTML=data?.length?data.map(t=>`<div class="item-galeria"><strong>Grau ${escaparHTML(t.grau)} · ${escaparHTML(t.titulo)}</strong><p>${escaparHTML(t.descricao||'')}</p><small>Recompensa: ${escaparHTML(t.recompensa||'—')} · Prazo: ${escaparHTML(t.prazo||'—')}</small><br><small>Status: ${escaparHTML(t.status)}</small></div>`).join(''):'<p class="texto-vazio">Nenhum trabalho disponível.</p>';
+}
+async function novoTrabalhoNoctavell(){
+  if(!ehMestreGlobal||!sistemaEhNoctavell()) return mostrarPopup('👑 Apenas o Mestre pode criar trabalhos Noctavell.');
+  const titulo=prompt('Título do trabalho'); if(!titulo)return;
+  const grau=prompt('Grau I–V','I')||'I', descricao=prompt('Descrição')||'', recompensa=prompt('Recompensa')||'', penalidade=prompt('Penalidade por quebra/falha')||'', prazo=prompt('Prazo')||'';
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {error}=await supabaseClient.from('noctavell_trabalhos').insert({campanha_id:obterCampanhaIdAtual(),titulo,grau,descricao,recompensa,penalidade,prazo,criado_por:session?.user?.id});
+  if(error)return mostrarPopup('❌ Quadro Noctavell não configurado: '+error.message);
+  mostrarPopup('📜 Trabalho criado.'); carregarTrabalhosNoctavell();
 }
 
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'economia', 'jornais', 'grupo', 'mapa', 'rolagens', 'galeria'];
+  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'economia', 'jornais', 'noctavell', 'grupo', 'mapa', 'rolagens', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -2347,6 +2412,7 @@ function mudarAba(nomeAba, evento) {
   if (nomeAba === 'bestiario') { inicializarBestiarioElarion(); }
   if (nomeAba === 'economia') { carregarEconomiaAtual(); }
   if (nomeAba === 'jornais') { carregarJornaisAtual(); }
+  if (nomeAba === 'noctavell') { carregarTrabalhosNoctavell(); }
   if (nomeAba === 'mapa' && !abasCarregadas.mapa && supabaseClient) {
     abasCarregadas.mapa = true;
     carregarMapaAtual();

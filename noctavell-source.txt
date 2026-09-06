@@ -1,0 +1,1209 @@
+                                NOCTAVELL
+                   Onde até a alma tem preço — se você souber a quem vendê-la.
+
+
+
+
+✡ Introdução ao Mundo
+Noctavell é um RPG ambientado em um mundo alternativo da atualidade. A tecnologia existe,
+mas não é o foco: o verdadeiro poder está por trás do Véu Inferior, um submundo oculto de
+magia, pactos e contratos místicos que só os "Despertos" conhecem. A magia é considerada
+mitologia pela sociedade moderna, mas age nas sombras através de acordos secretos,
+palavras seladas e entidades inomináveis.
+
+
+
+
+✡ Arcântria: O Hotel dos Pactos
+Arcântria é um espaço entre o real e o simbólico. Inspirado no Hotel Continental de John
+Wick, é um local neutro onde entidades, humanos e conceitos vivos firmam contratos com
+peso real. Todos que têm um pacto ativo podem acessá-lo.
+
+Locais notáveis:
+
+   ●​ Saguão do Véu: negociações e contratos.​
+
+   ●​ Arquivo das Quebras: biblioteca que guarda promessas rompidas.​
+
+   ●​ Contrafluxo: bar que serve memórias líquidas.​
+
+   ●​ Corte de Cera: tribunal para disputas arcanas.​
+
+   ●​ Portaria das Entidades: onde se agenda audiências com forças ocultas.​
+
+
+Regras de Arcântria:
+
+   ●​ Toda promessa dita ali tem validade.​
+
+   ●​ Nenhuma agressão direta pode ocorrer no local.​
+
+   ●​ O Véu escuta. Sempre.​
+
+
+
+
+✡ Criação de Personagem
+Atributos
+
+Você tem 15 pontos para distribuir entre os seguintes atributos (de 1 a 5):
+
+
+ Atributo      Descrição
+
+ Presença      Influência social e arcana. Convencer, intimidar, comandar.
+
+ Vontade       Resistência mental e espiritual. Manter promessas e suportar o Véu.
+
+ Instinto      Reação, percepção e reflexo. Agir sob pressão.
+
+ Ocultismo     Conhecimento dos pactos, rituais, entidades.
+
+ Corrupção     Influência do Véu sobre o personagem. Quanto maior, mais efeitos negativos.
+
+
+
+✡ O Nome Verdadeiro: A Chave da Alma
+      “Tudo que é nomeado pode ser encontrado. Tudo que é nomeado pode ser
+      amarrado.”
+
+Em Noctavell, o nome verdadeiro de um personagem é um dos seus maiores ativos arcanos —
+e também sua maior vulnerabilidade. Ele não é apenas um registro civil: é a forma verbal da
+sua existência. Magias, contratos, rastreamento, selamentos e maldições poderosas só são
+possíveis (ou multiplicadas em força) quando o nome verdadeiro é conhecido.
+
+
+
+
+🧠 O Que é o Nome Verdadeiro?
+É o nome com o qual sua alma foi marcada ao despertar para o Véu. Ele pode ou não ser o
+nome usado socialmente, mas é o que vibra no plano oculto. Muitos personagens o
+escondem, alteram ou selam por segurança.
+
+
+
+
+📖 Mecânica do Nome
+Na criação do personagem, o jogador define:
+
+   ●​ Nome público: como é conhecido.​
+
+   ●​ Nome verdadeiro: revelado apenas se desejar ou se for descoberto.​
+
+   ●​ Forma de proteção: o personagem pode guardar seu nome em um objeto, escrevê-lo
+      em código, selá-lo em um contrato, etc.​
+📌 Efeitos do Nome Verdadeiro em Jogo
+              Ação ou Evento                        Se o Nome for Conhecido
+
+ Contrato profundo                        Mais poderoso e permanente
+
+ Magias de rastreamento ou compulsão      Funcionam sem resistência
+
+ Maldições e selamentos                   Dobram de intensidade
+
+ Artefatos jurados                        Podem ser ligados diretamente à alma
+
+ Convocação arcana                        A alma do personagem pode ser chamada
+
+ Traição                                  Permite selar promessas contra ele sem
+                                          aviso
+
+
+
+🧷 Mecanismos de Proteção
+O jogador pode proteger seu nome de várias formas:
+
+
+           Método                                   Efeito
+
+ Esconder                 Nome não está registrado em Arcântria. Risco baixo.
+
+ Selar em objeto          Se o objeto for destruído, o nome é revelado.
+
+ Trocar parcialmente      Criar uma “versão falsa” do nome para contratos menores.
+
+ Escrever em código       Nome só pode ser lido com ritual específico.
+
+
+
+
+💀 Riscos da Perda do Nome
+Se o nome for:
+
+   ●​ Descoberto por inimigos: podem invocar maldições, selos ou ameaças diretas.​
+
+   ●​ Usado contra você: parte da alma pode ser extraída em rituais.​
+
+   ●​ Esquecido por você mesmo: o personagem entra em colapso de identidade, sofrendo
+      penalidades severas.​
+
+
+      Quando um personagem esquece ou tem seu nome roubado, ele sofre:
+
+   ●​ Desvantagem em rolagens envolvendo magia ou presença​
+
+   ●​ Incapacidade de firmar novos pactos​
+          ●​ Potencial de se tornar um “Eco sem Nome” — uma sombra viva, sem destino​
+
+
+
+
+       🔄 Troca de Nome
+       Em casos raros, é possível renomear-se, mas:
+
+          ●​ Custa no mínimo 3 moedas de Arcântria​
+
+          ●​ Requer um ritual profundo na Corte de Cera​
+
+          ●​ Toda promessa anterior é invalidada​
+
+          ●​ Toda corrupção volta ao nível inicial​
+
+
+
+
+       Tabela de Contratos Iniciais
+
+       Cada contrato tem um nome simbólico, uma entidade ligada, cláusula principal, preço e um
+       termo oculto. A interpretação das cláusulas e a criação de habilidades únicas ficam a cargo do
+       jogador e do mestre.
+
+
+#   Nome          do   Entidade         Cláusula       Primária   Preço Inicial        Termo Oculto
+    Contrato           Ligada           (Promessa)
+
+1   O Sussurro    de   Entidade    do   "Enquanto eu nunca        Incapacidade    de   Alguém próximo começa a
+    Marfim             Silêncio         mentir, saberei quando    mentir               mentir para você.
+                                        mentem para mim."
+
+2   O Cobrador Cego    Espírito    da   "Enquanto eu pagar        Perda do sentido     A dor que você causa vira
+                       Dívida           com dor o que tiro dos    do prazer            vício.
+                                        outros, posso tirar o
+                                        que quiser."
+
+3   O    Eco      da   Vozes       do   "Enquanto eu lembrar      Perda gradual da     Uma memória      esquecida
+    Promessa           Passado          das promessas feitas,     memória recente      tenta voltar.
+                                        posso          recordar
+                                        qualquer coisa."
+
+4   A Chama que        Espírito   do    "Enquanto eu alimentar    Queimar    algo      A chama pode crescer
+    Nunca Apaga        Fogo Eterno      a    chama,     minha     precioso a cada      sozinha se negligenciada.
+                                        vontade           será    noite
+                                        inquebrável."
+
+5   O Guardião    do   Sentinela   do   "Enquanto eu proteger     Exposição            Uma entidade rival passa a
+    Véu                Véu              o segredo, posso ver      constante ao Véu     observá-lo.
+                                        através das mentiras."
+6   O      Julgamento   Juiz              "Enquanto eu nunca       Não pode negar      Um favor grande        será
+    Silente             Esquecido         quebre uma promessa,     pedidos             cobrado futuramente.
+                                          minhas decisões serão
+                                          justas."
+
+7   O Caminho      da   Entidade das      "Enquanto eu andar na    Perda da visão      Você começa a desaparecer
+    Meia-Noite          Sombras           escuridão,    ninguém    em     ambientes    da memória alheia.
+                                          saberá onde estou."      claros
+
+8   O Véu da Verdade    Aquele      que   "Enquanto eu buscar a    Incapaz de mentir   Verdades indesejadas    se
+                        Tudo Vê           verdade,        minhas   para se proteger    revelam sozinhas.
+                                          palavras terão peso."
+
+
+
+
+       ✧ Pactos Consigo Mesmo (Juramentos da Alma)
+       🜃 Conceito:
+
+       Um personagem faz uma promessa inquebrável com o Véu, selando sua alma com um
+       princípio absoluto.​
+        Esse pacto é voluntário, pessoal e vigiado pela própria Arcântria — e o Véu cobra seu preço
+       com rigor.
+
+
+
+
+       🎴 Estrutura do Pacto
+       Um Pacto Interno possui:
+
+           1.​ Declaração: A regra absoluta (ex: "Jamais mentirei.")​
+
+           2.​ Risco: O que acontece se quebrar (ex: "Perco minha voz.")​
+
+           3.​ Recompensa: O poder concedido enquanto mantido (ex: "Vejo as mentiras dos
+               outros.")​
+
+           4.​ Sinal do Véu: Um efeito visual ou sensorial constante (ex: os olhos brilham quando
+               alguém mente)​
+
+
+
+
+       ⚖️ Mecânica
+           ●​ Cada jogador pode ter 1 Pacto Interno ativo por vez.​
+
+           ●​ O mestre deve aprovar o equilíbrio entre promessa, risco e poder.​
+   ●​ Pactos são registrados na ficha, com cláusula clara e literal.​
+
+   ●​ Quebrar o pacto ativa imediatamente o Risco, sem salvação — a única forma de evitar
+      é renegociar com o Véu (custo narrativo e mágico alto).​
+
+
+
+
+🔮 Exemplo de Pactos Consigo Mesmo
+     Declaração          Risco (ao quebrar)          Recompensa             Sinal do Véu
+
+
+
+ "Protegerei todos os    Morte instantânea     Pode sentir sofrimento    Pele que esquenta
+ inocentes."                                   em 1km, teleportar até    ao se aproximar de
+                                               ele                       dor
+
+
+
+ "Nunca aceitarei uma    Fica cego por uma     Enxerga   a  verdade      Íris em forma de
+ mentira."               sessão                oculta por trás das       selo arcano
+                                               palavras
+
+
+
+ "Jamais matarei por     Se    mata     por    Ataques          sempre   Voz     calma    e
+ raiva."                 impulso na próxima    causam           apenas   cortante      como
+                         cena                  inconsciência             lâmina
+
+
+
+ "Não         deixarei   Fica mudo e imóvel    Pode           intervir   Eco constante ao
+ ninguém         lutar   até   o   fim  do     livremente, mesmo fora    falar
+ sozinho."               combate               de turno
+
+
+
+ "Oferecerei metade      Tudo o que possui     Pode duplicar objetos     Mãos que pingam
+ do que tenho."          vira cinzas           ou recursos por 1 cena    tinta ou sangue
+
+
+
+ "Jamais abandonarei     Perde memória de      Ganha força, foco e +1    Tatuagem viva no
+ um pedido de ajuda."    quem pediu            dado ao agir pela         braço
+                                               pessoa
+
+
+
+
+🧷 Níveis de Juramento
+Você pode classificar Pactos Internos por sua Gravidade (Risco) e Poder (Recompensa):
+ Nível           Exemplo de Risco                        Exemplo de Recompensa
+
+
+
+ 1       Perder Fôlego, ficar inconsciente     +1  em   testes     específicos,      resistência
+                                               momentânea
+
+
+
+ 2       Perder um      atributo,   esquecer   Acesso a magias exclusivas, sentidos arcanos
+         alguém
+
+
+
+ 3       Perder voz, visão, identidade         Controlar forças elementais ou emocionais
+
+
+
+ 4       Morte física, alma aprisionada        Manipular o Véu, desafiar entidades
+
+
+      Quanto maior o poder, mais catastrófico deve ser o risco.
+
+
+
+
+✠ ARTEFATOS JURADOS
+Objetos que selam promessas e canalizam pactos.
+
+
+
+
+❖ Conceito
+
+Um Artefato Jurado é um objeto físico ligado direta ou simbolicamente a um pacto — seja com
+uma entidade, com o Véu ou com o próprio personagem.
+
+Ele é mágico não por encantamento comum, mas porque faz parte de uma promessa selada.​
+ Enquanto o pacto está ativo e cumprido, o item revela efeitos sobrenaturais ou arcanos. Se a
+promessa for quebrada... o artefato reage.
+
+
+
+
+🕯 Tipos de Artefatos Jurados
+     Tipo                     Exemplos                              Vinculado a...
+ Armas         Adaga do      Silêncio,   Revólver   dos   Pactos   de   execução,   proteção,
+               Nomes                                      sangue
+
+
+
+ Roupas        Terno de Cera, Véu do Perdão               Pactos de identidade, ocultamento
+
+
+
+ Acessório     Anel da Promessa, Máscara do Juízo         Pactos de silêncio, máscaras sociais
+ s
+
+
+
+ Objetos       Grimório Partido, Relógio Sem Horas        Pactos com tempo, saber, memória
+
+
+
+
+⚖️ Mecânica
+   1.​ Todo Artefato Jurado precisa de:​
+
+             ○​ Uma Promessa Ativa (ex: "Nunca matarei um inocente")​
+
+             ○​ Um Efeito enquanto cumprido (ex: "Causa medo em assassinos")​
+
+             ○​ Uma Consequência ao ser quebrado (ex: "Torna-se imóvel e queima o usuário")​
+
+   2.​ Artefatos são ativados automaticamente quando a promessa está sendo cumprida.
+       Não requerem ação.​
+
+   3.​ Artefatos podem ser:​
+
+             ○​ Recebidos de entidades como parte de um pacto.​
+
+             ○​ Criados ao selar juramentos pessoais com objetos marcantes.​
+
+             ○​ Forjados com ajuda de mestres do Véu ou alquimistas jurados.​
+
+
+
+
+🔥 Exemplo de Artefatos Jurados
+1. A Espada do Último Gesto
+
+   ●​ Tipo: Arma / Lâmina fina e de aço negro​
+
+   ●​ Promessa: "Só a empunharei em defesa de alguém."​
+   ●​ Efeito: Quando usada para proteger, ignora armaduras e corta a alma.​
+
+   ●​ Quebra: Se for usada para matar por interesse próprio, se parte ao meio e causa 1
+      Ferida Mortal ao portador.​
+
+
+
+
+2. Máscara do Pesar Silencioso
+
+   ●​ Tipo: Acessório / Máscara branca sem boca​
+
+   ●​ Promessa: "Nunca direi uma palavra enquanto outros sofrem em silêncio."​
+
+   ●​ Efeito: Permite ouvir pensamentos de quem sofre perto.​
+
+   ●​ Quebra: A máscara se funde ao rosto do usuário até que ele confesse uma verdade
+      profunda.​
+
+
+
+
+3. Relógio Sem Horas
+
+   ●​ Tipo: Objeto / Relógio de bolso sem ponteiros​
+
+   ●​ Promessa: "Jamais me esquecer de quem fui."​
+
+   ●​ Efeito: Pode reviver memórias apagadas ou roubadas por entidades.​
+
+   ●​ Quebra: Todas as lembranças do personagem se embaralham (perde um Segredo e 1
+      ponto de Ocultismo).​
+
+
+
+
+4. Grimório das Promessas Falhadas
+
+   ●​ Tipo: Livro / Capa de pele e tinta viva​
+
+   ●​ Promessa: "Escreverei toda promessa que ouvir ou fizer."​
+
+   ●​ Efeito: Sempre revela se uma promessa foi quebrada, mesmo de outras pessoas.​
+
+   ●​ Quebra: O livro passa a escrever sozinho, revelando segredos do portador sem
+      controle.​
+
+
+
+
+✍ Criação de Artefatos Personalizados
+Passo a passo para jogadores e mestres:
+
+   1.​ Escolha o Objeto: Deve ter valor simbólico ou emocional.​
+
+   2.​ Defina a Promessa: Algo que possa ser interpretado e testado narrativamente.​
+
+   3.​ Escolha um Efeito: Sutil ou poderoso, mas coerente com a promessa.​
+
+   4.​ Defina a Consequência da Quebra: Dura, narrativa ou mecânica — deve ser sentida.​
+
+   5.​ Aprovação do Mestre: Para manter equilíbrio.​
+
+
+
+
+☠ Corrupção e Artefatos
+
+   ●​ Alguns artefatos podem acumular Corrupção: quanto mais são usados, mais o objeto
+      se funde ao Véu.​
+
+   ●​ Artefatos muito antigos podem tornar-se sencientes, sussurrando, interferindo ou
+      barganhando.​
+
+
+
+
+✦ MAGIA BÁSICA LIVRE (Fluxo Vivo)
+     "A própria vida é um pacto — e dela brota o poder."
+
+
+
+
+🜄 Fundamento
+
+Todo personagem Desperto pode manipular, de forma limitada, aspectos da realidade ligados
+ao Fluxo Vital. Essa magia não vem de entidades, mas da própria existência consciente em
+contato com o Véu.
+
+
+
+
+📌 Regras Gerais
+   ●​ Magia Básica não requer pacto.​
+
+   ●​ É fraca, sutil, simbólica, mas extremamente livre em criatividade.​
+
+   ●​ Cada jogador pode descrever qualquer magia básica, contanto que:​
+
+          ○​ Não cause dano direto significativo.​
+
+          ○​ Não seja mais eficaz que uma arma comum.​
+            ○​ Tenha limite sensorial, emocional ou físico.​
+
+
+
+
+📏 Limites Naturais
+Toda magia básica deve respeitar ao menos 2 dos limites abaixo:
+
+
+
+                 Limite                               Exemplo narrativo
+
+
+
+ Alcance curto                         Até 5 metros, toque ou visão próxima
+
+
+
+ Curta duração                         Dura alguns segundos ou 1 cena narrativamente
+
+
+
+ Afeta apenas 1 coisa                  Um objeto, um som, uma sombra, uma memória
+
+
+
+ Precisa de um gesto ou palavra        Requer intenção ritualística simples
+
+
+
+ Interrompível                         Se o usuário for distraído, a magia falha
+
+
+
+
+🎴 Criação Livre: Estrutura Narrativa
+Jogador descreve sua magia básica seguindo esta lógica:
+
+"Eu canalizo o fluxo da vida para... [intenção sutil e simbólica], causando... [efeito limitado,
+sensorial ou indireto]."
+
+Exemplos:
+
+   ●​ “Eu canalizo o fluxo da vida para fazer a poeira subir e encobrir meus passos, como se
+      a terra respirasse comigo.”​
+
+   ●​ “Uso o fluxo para criar um eco da última palavra dita aqui, para que alguém acredite
+      que ela voltou.”​
+
+   ●​ “Toco a parede e a água próxima treme — eu sinto a presença de alguém do outro
+      lado.”​
+   ●​ “Faço meu sangue ressoar com o calor ao redor, e meus dedos começam a brilhar
+      como brasas vivas.”​
+
+
+
+
+🎲 Rolagem e Resolução
+Use o Dado do Véu (d6 especial) para resolver magias básicas.
+
+   ●​ Atributo envolvido depende da natureza da magia (Instinto, Vontade, Ocultismo, etc.).​
+
+   ●​ O mestre interpreta o impacto narrativo com base no resultado e no contexto.​
+
+
+
+
+♾ Usos por Cena
+
+   ●​ 3 magias básicas por cena, recarregadas com descanso narrativo.​
+
+   ●​ Jogadores podem usar 1 extra se incorporarem um gesto ou custo emocional (ex:
+      lembrar algo doloroso, tocar a terra com sangue, sacrificar um objeto simbólico).
+
+
+
+✦ Magias Base + Sacrifício
+Transforme sopros em tempestades, se estiver disposto a pagar.
+
+
+
+
+🜄 Conceito
+
+Magias Básicas são frágeis, mas qualquer Desperto pode entregar algo importante ao Véu
+para torná-las temporariamente tão poderosas quanto magias de pacto.
+
+      O sacrifício é o catalisador. O Véu escuta. E responde.
+
+
+
+
+⚖️ Regras Gerais
+   ●​ Cada magia básica pode ser amplificada com um Sacrifício.​
+
+   ●​ O efeito torna-se mais forte, duradouro ou impactante — o narrador e o jogador
+      definem juntos como.​
+
+   ●​ O sacrifício precisa ser espontâneo, significativo e narrativamente justificado.​
+   ●​ O jogador declara o sacrifício antes ou depois de lançar a magia, mas nunca depois de
+      saber o resultado.​
+
+
+
+
+🔥 Níveis de Sacrifício
+Escolha ou improvise de acordo com o nível de poder desejado.
+
+
+
+  Nível               Sacrifício Exemplo                     Efeito Amplificador
+
+
+
+ 🜁 Leve    Derramar sangue (1 ponto de Vida),       +1 dado ou vantagem simbólica
+           perder objeto querido
+
+
+
+ 🜂         Queimar uma memória, revelar um          Estende duração ou       transforma   a
+ Médio     segredo em voz alta                      magia em versão ritual
+
+
+
+ 🜃 Forte   Mutilar-se, jurar algo grave, quebrar    Equivale a uma magia de pacto por 1
+           laço pessoal                             cena
+
+
+
+ 🜄         Sacrificar algo essencial (um valor,     Cria efeito épico, mas deixa marca ou
+ Crítico   princípio, parte da alma)                trauma permanente
+
+
+
+
+🧪 Exemplos Práticos
+🎴 Magia Original:
+"Névoa Rala" — Gera névoa leve por alguns metros.
+
+✧ Com Sacrifício Leve:
+
+Você derrama seu próprio sangue no chão antes de conjurar.
+
+      A névoa cobre toda a área e fica densa como fumaça mágica, obscurecendo visão
+      e dificultando movimentos.
+
+
+
+
+🎴 Magia Original:
+"Reflexo Cego" — Emite um clarão para confundir.
+✧ Com Sacrifício Forte:
+
+Você recita em voz alta um nome que jurou esquecer, expondo sua vulnerabilidade ao Véu.
+
+         O clarão se transforma em um lampejo que queima os olhos de quem mentiu
+         recentemente — uma luz que pune.
+
+
+
+
+🎴 Magia Original:
+"Intuição Pura" — Faz uma pergunta simples ao Véu.
+
+✧ Com Sacrifício Crítico:
+
+Você queima um diário com todas as suas dúvidas escritas à mão.
+
+         O Véu responde não com palavras, mas com uma visão simbólica intensa, capaz
+         de mudar o rumo da campanha.
+
+
+
+
+✡ Sistema de Dados: O Dado do Véu (d6 simbólico)
+Toda a ação relevante é resolvida com 1 d6 especial, onde cada face representa um símbolo
+arcano com significado narrativo:
+
+
+ Valor     Símbolo           Significado
+
+ 1         ⚖️ Equilíbrio     Sucesso parcial com custo.
+
+ 2         🔥 Ruptura         Sucesso forte, mas com tensão ou risco oculto.
+
+ 3         🌑 Silêncio        Falha. Nada acontece ou o efeito se anula.
+
+ 4         🔯 Eco             O Véu responde com efeito secundário inesperado.
+
+ 5         🔑 Verdade         Sucesso total com elegância.
+
+ 6         👁️ Olho do Véu    Sucesso crítico + revelação ou conhecimento oculto.
+
+
+A interpretação do resultado é feita em conjunto com o mestre. O atributo relacionado
+influencia a credibilidade e o impacto da ação.
+
+
+
+
+✡ Contratos e Pactos
+Cada personagem pode manter até 3 contratos simultâneos. Todo contrato inclui:
+     ●​ Entidade envolvida (ex: O Cobrador Cego)​
+
+     ●​ Cláusula principal (ex: "Enquanto eu pagar com dor... posso tirar o que quiser")​
+
+     ●​ Preço inicial (ex: Perda do prazer)​
+
+     ●​ Termo oculto (descoberto com o tempo)​
+
+     ●​ Condição de quebra (o que acontece se o contrato for violado)​
+
+
+Exemplo de contrato inicial:
+
+O Sussurro de Marfim​
+Entidade: Entidade do Silêncio​
+Cláusula: "Enquanto eu nunca mentir, saberei quando mentem para mim."​
+Preço: Incapacidade de mentir.​
+Termo oculto: Alguém próximo passa a mentir compulsivamente para você.
+
+Jogadores criam habilidades personalizadas dentro da interpretação das cláusulas.
+
+
+
+
+✡ Moedas de Arcântria: Progressão
+Progresso é medido por Moedas de Arcântria, concedidas por cumprir ou manter contratos.
+
+Ganho de Moedas:
+
+     ●​ Cumprir contrato temporário: +1​
+
+     ●​ Manter contrato fixo (3 sessões): +1​
+
+     ●​ Cumprir termo oculto sem quebrar o pacto: +1​
+
+     ●​ Renegociar contrato com sucesso: +1​
+
+     ●​ Salvar outro jogador de um pacto fatal: +1 compartilhado​
+
+
+
+Gasto de Moedas:
+ Custo     Efeito
+
+ 1         +1 ponto de atributo (máx 5)
+
+ 1         Adicionar cláusula a contrato
+
+ 2         Firmar novo pacto
+
+ 2         Reduzir 1 Corrupção
+3         Criar contrato personalizado
+
+3         Aprender ritual avançado
+
+4         Marca do Véu permanente
+
+
+Moedas podem ser corrompidas, roubadas ou usadas como moeda entre entidades.
+
+
+
+
+✡ Combate e Roleplay
+    ●​ O combate é narrativo e fluido, sem iniciativa fixa.​
+
+    ●​ Cada turno é uma declaração com intenção + rolagem do Dado do Véu.​
+
+    ●​ Interpretações fortes e coerentes podem gerar rerrolagens ou bônus simbólicos.​
+
+    ●​ Pactos podem ser ativados ou violados durante combate.​
+
+    ●​ Corrupção alta afeta decisões e percepções.​
+
+
+
+
+✡ Sistema de Vida: “Feridas e Fôlego”
+🩸 Conceito Central
+Em Noctavell, qualquer combate é potencialmente letal. Em vez de “pontos de vida”, os
+personagens têm:
+
+    ●​ Fôlego (resistência física e adrenalina)​
+
+    ●​ Feridas (nível de trauma físico)​
+
+    ●​ Estados Críticos (condições de incapacidade ou morte)​
+
+
+
+
+🛡 Fôlego (⚬⚬⚬⚬⚬)
+Todo personagem começa com 5 pontos de Fôlego (representados como círculos). Isso
+representa resistência, reflexo, sorte e evasão momentânea — não vida real.
+
+    ●​ Quando sofre dano leve ou não-letal (soco, queda, arranhão), perde Fôlego.​
+
+    ●​ Quando Fôlego chega a 0, o próximo acerto real gera Feridas reais.​
+🧱 Aumentar Fôlego: Pode ser aumentado com pactos, habilidades ou rituais (até máx. 8).​
+📉 Recuperar: Recupere 1 Fôlego por descanso leve ou alívio narrativo (segurança, cura
+emocional, magia restauradora).
+
+
+
+
+💀 Feridas
+Após o Fôlego cair a 0, qualquer dano letal ou crítico gera uma Ferida, registrada diretamente
+na ficha.
+
+Feridas podem ser:
+
+   ●​ 🩹 Leve – Corte, contusão, queimadura superficial.​
+   ●​ 💉 Grave – Fratura, perfuração, hemorragia, queimadura ampla.​
+
+   ●​      Mortal – Órgão atingido, hemorragia interna severa, trauma cerebral.​
+
+
+        ⚠️ Três Feridas (ou uma Mortal) matam qualquer personagem humano sem ajuda
+        imediata.
+
+
+
+
+📌 Exemplo de Feridas e Efeitos
+  Tipo              Exemplo                       Efeito Narrativo                 Tratamento
+
+ Leve      Corte      de       faca,   -1 Fôlego temporário, dor moderada      Curativo
+           escoriação                                                          simples
+
+ Grave     Tiro no braço, fratura      Incapacita membro, teste de Vontade     Cirurgia, magia
+                                       p/ resistir
+
+ Mortal    Tiro no    peito,   corte   Morte em minutos se não for tratado     Ritual,
+           profundo                                                            sacrifício
+
+
+
+
+⚔️ Combate Letal e Realista
+   ●​ Um golpe de faca em área vital → ferida mortal imediata.​
+
+   ●​ Um tiro pode causar Ferida Grave ou Mortal dependendo da rolagem.​
+
+   ●​ Ataques são narrativos: o jogador declara intenção, rola o Dado do Véu, e o narrador
+      julga o impacto com base na situação.​
+
+
+
+
+🧠 Vontade como resistência à morte
+Teste de Vontade (atributo) + rolagem de Véu para resistir à dor, manter consciência ou adiar a
+morte por Ferida Mortal.
+
+                      ⚖️): Fica consciente, mas em choque.​
+   ●​ Sucesso parcial (
+
+   ●​ Sucesso total (🔑): Age por 1 rodada antes de colapsar.​
+
+   ●​ Falha (🌑): Perde consciência.​
+
+   ●​ Olho do Véu (👁️): Retoma o controle e ganha uma “última ação” épica.​
+
+
+
+
+🧍 NPCs
+   ●​ Civis, cultistas menores: 2–3 Fôlegos, 1 Ferida = mortos ou fora de combate.​
+
+   ●​ Soldados, agentes: 4–5 Fôlegos, resistem a 1 Ferida Grave.​
+
+   ●​ Entidades/Servos Arcanos: Ignoram regras humanas. Cada entidade tem sua própria
+      anatomia e sistema de colapso (ex: dispersão mágica, quebra de vínculo, corrupção
+      acumulada).​
+
+
+
+
+🩸 Marcas do Véu e Fôlego Extra
+Alguns contratos permitem:
+
+   ●​ Ganhar Fôlego extra temporário ao custo de Corrupção.​
+
+   ●​ Ignorar uma Ferida Mortal com um Termo Oculto ativado.​
+
+   ●​ Trocar Ferida por memória, voz ou sanidade.​
+
+
+
+
+✹ SANIDADE E TRAUMAS
+🧠 SANIDADE: O Peso de Enxergar Demais
+Todo personagem começa com 6 pontos de Sanidade (        🧠🧠🧠🧠🧠🧠), representando sua
+estabilidade mental e emocional frente ao que o mundo oculta.
+
+Perde-se Sanidade ao:
+
+   ●​ Ver entidades em sua forma verdadeira​
+
+   ●​ Sofrer uma Ferida Mortal​
+   ●​ Descobrir verdades proibidas​
+
+   ●​ Quebrar um contrato com cláusula mental​
+
+   ●​ Usar magia além da própria compreensão​
+
+   ●​ Sonhar com Arcântria sem preparo​
+
+
+      Perder todos os pontos de Sanidade significa Colapso Mental.
+
+
+
+
+🧩 TESTES DE SANIDADE
+Ao enfrentar algo que abala a mente, o jogador faz um Teste de Vontade + Dado do Véu.
+
+
+ Resultado do Dado                       Efeito (com falha)
+
+ 🌑 Silêncio            Perde 1 Sanidade e sofre Trauma leve
+
+ 🔯 Eco                 Perde 1 Sanidade e escuta vozes, memórias distorcidas
+
+ ⚖️ Equilíbrio         Perde 1 Sanidade, mas age normalmente
+
+ 🔥 Ruptura             Resiste, mas sente náusea, confusão, visões breves
+
+ 🔑 Verdade             Aprende algo, mas fica obcecado
+
+ 👁️ Olho do Véu        Transforma perda em ganho (pode converter 1 Trauma)
+
+
+
+
+🌀 COLAPSO MENTAL (Sanidade = 0)
+Quando chega a 0, o personagem sofre um dos seguintes estados (sorteado ou escolhido
+com base no roleplay):
+
+
+       Estado                                        Efeito
+
+ Catatonia           Não reage a estímulos por uma cena inteira
+
+ Paranoia            Não confia em nenhum aliado, age sozinho
+
+ Delírio             Confunde real com Véu. Recebe ordens de entidades imaginárias
+
+ Autodestruição      Busca risco, pacto perigoso, ou suicídio simbólico
+
+ Possessão           Uma entidade     menor   se   aloja   temporariamente   no corpo do
+ Passiva             personagem
+Após o Colapso, o personagem ganha 1 Trauma permanente e volta a 3 Sanidade.
+
+
+
+
+💥 TRAUMAS
+Traumas são efeitos mentais persistentes, que moldam roleplay e decisões. São visíveis na
+ficha e devem ser interpretados.
+
+
+         Trauma                                  Efeito narrativo
+
+ Vozes do Véu              Escuta murmúrios mesmo em silêncio absoluto
+
+ Fobia Arcana              Reage com pânico a qualquer ritual, mesmo simples
+
+ Obsessão por Controle     Tenta manipular tudo, desconfia de aliados
+
+ Culpa Fantasma            Vê ou ouve alguém que não existe mais
+
+ Apagamento                Esquece eventos recentes ou importantes
+
+ Riso Involuntário         Ri sempre que algo trágico acontece
+
+ Olhar Duplo               Vê duas       realidades    simultaneamente,   confunde
+                           decisões
+
+
+🎭 Traumas podem ser “ativados” em momentos críticos, para ganhar 1 rerrolagem ou bônus
+narrativo, mas causam 1 Corrupção.
+
+
+
+
+🛡 RECUPERAÇÃO DE SANIDADE
+   ●​ Descanso profundo e seguro: +1​
+
+   ●​ Conexão emocional verdadeira: +1 (1x por sessão)​
+
+   ●​ Ritual de purificação do Véu: +2 (raro)​
+
+   ●​ Quebrar um pacto mentalmente corrosivo: +1​
+
+
+⚠️ Traumas não somem com tempo — apenas com intervenções arcanas, pactos de
+restauração ou sacrifícios simbólicos.
+
+
+✡ Contratos & Trabalhos: A Mecânica do Submundo
+      “O mundo humano acredita que magia não existe. Ainda assim, algo precisa
+      pagar as contas.”
+No mundo de Noctavell, onde a magia vive oculta sob o tecido da realidade, os Contratos são
+a principal forma de movimentação e sobrevivência entre os despertos. São missões oficiais,
+ritualizadas, intermediadas por entidades ou autoridades arcanas — especialmente por meio
+da Portaria das Entidades em Arcântria.
+
+Além dos trabalhos fachada no mundo humano (como segurança privada, restauradores,
+ocultistas de luxo, hackers espirituais ou médiums de elite), é pelos Contratos que os magos
+conseguem:
+
+   ●​ Dinheiro humano para manter uma vida comum​
+
+   ●​ Reputação entre os iniciados​
+
+   ●​ Favores perigosos ou valiosos​
+
+   ●​ Acesso a itens e verdades ocultas​
+
+   ●​ Moedas de Arcântria (em missões de nível elevado)​
+
+
+
+
+🎴 Como Funcionam os Contratos
+   1.​ Recebimento​
+
+           ○​ Envelopes selados, símbolos deixados em sonhos, telefonemas sem voz,
+              murmúrios nas paredes de Arcântria.​
+
+           ○​ O mago pode aceitar ou recusar — mas toda recusa tem consequências
+              sociais, especialmente se feita várias vezes.​
+
+   2.​ Cláusulas​
+
+           ○​ Cada contrato vem com instruções claras (ou enigmáticas) e condições de
+              conclusão.​
+
+           ○​ Alguns possuem restrições mágicas ou éticas (ex: “não derrame sangue”,
+              “não fale com o alvo”, “faça antes do amanhecer”).​
+
+   3.​ Selagem​
+
+           ○​ Aceitar um contrato sela a promessa. Abandoná-lo causa Marcas do Véu,
+              penalidades ou ações da Corte de Cera.​
+
+
+
+
+🕯️ Classificações de Contrato
+ Grau    Nome Submundo       Perigo           Recompensas
+ I          Sussurros             Baixo     Dinheiro, segredos, favores
+
+ II         Cicatrizes Leves      Médio     Riqueza, influência, itens
+
+ III        Pactos em Perigo      Alto      Talismãs, rituais, selos
+
+ IV         Contrapromessas       Crítico   Moedas de Arcântria, essência
+
+ V          Peso do Véu           Mortal    Revelações,           contratos
+                                            maiores
+
+
+
+📦 Tipos de Recompensa
+Missões Grau I–III (humanas/ocultas):
+
+       ●​ Dinheiro vivo (maletas, depósitos, criptomoedas)​
+
+       ●​ Documentos falsos, coberturas, permissões​
+
+       ●​ Favores sociais ou espirituais (acesso, proteção)​
+
+       ●​ Segredos — sobre pessoas, locais ou pactos​
+
+
+Missões Grau IV–V (arcano-reais):
+
+       ●​ Moedas de Arcântria (único meio de evolução mágica direta)​
+
+       ●​ Fragmentos de entidades (usados em rituais)​
+
+       ●​ Contratos lacrados prontos para uso​
+
+       ●​ Novos nomes verdadeiros (trocando identidade metafísica)​
+
+
+
+
+🔐 Consequências da Quebra
+Romper um contrato selado é violar uma promessa com o Véu — isso deixa cicatrizes reais.
+Possíveis penalidades:
+
+
+ Quebra                        Consequência
+
+ Leve         Marca do Véu, perda de influência
+
+ Média        Maldição menor, dívida com Arcântria
+
+ Grave        Caçado pela Corte de Cera ou pela entidade
+ Total       Perda de nome verdadeiro ou alma selada
+
+
+
+
+🎭 Trabalhos de Fachada
+Fora dos Contratos, muitos magos mantêm atividades paralelas no mundo humano:
+
+   ●​ Psicólogos especializados em “reconexão existencial”​
+
+   ●​ Detetives de eventos paranormais não assumidos​
+
+   ●​ Consultores de segurança para organizações secretas​
+
+   ●​ Artistas, criptógrafos, analistas de dados que leem o Véu​
+
+
+Essas ocupações pagam bem o bastante para manter uma aparência normal — mas não
+oferecem evolução mágica.
+
+
+
+
+📜 Quadro de Contratos
+A Portaria das Entidades atualiza os pedidos diariamente. Alguns são públicos (pregados em
+madeira viva no Saguão do Véu), outros são entregues apenas a certos juradores.
+
+Os mestres podem incluir um quadro rotativo com contratos temáticos, sorteados
+semanalmente, divididos por grau.
+
+
+
+
+🗝️ Conclusão
+Os contratos em Noctavell são mais que missões: são juramentos vivos, que moldam a
+história do personagem e afetam a estrutura simbólica do mundo. Ao aceitar um contrato, o
+mago não apenas ganha dinheiro ou poder — ele alinha sua alma com uma promessa maior.
+
+         Afinal, neste mundo, até a mais simples entrega carrega o risco de uma nova
+         maldição.
+
+
+✡ Mecânicas de Imersão e Roleplay
+Para tornar cada sessão uma experiência verdadeiramente ritualística e sensorial, Noctavell
+inclui mecânicas que recompensam a interpretação, a criatividade e o envolvimento dos
+jogadores:
+
+
+1. Batidas do Véu
+
+   ●​ Estrutura de Cena: Divida cenas tensas em quatro “batidas” narrativas:
+          1.​ Preparação: escolha de gestos, sacrifícios simbólicos, preparação mental.
+         2.​ Confronto: trocas de palavras mágicas, invocações, atos decisivos.
+         3.​ Clímax: ativação de contratos, uso de artefatos ou sacrifícios mais intensos.
+         4.​ Desfecho: consequências imediatas, marcas do Véu, revelações.
+   ●​ Recompensa: a cada batida, jogadores que descreverem detalhes sensoriais (cheiro,
+      sensação física, memória) recebem 1 Ponto de Imersão.
+
+
+2. Marcadores de Interesse
+
+   ●​ Tokens de Foco: utilize fichas ou marcadores para NPCs, contratos e locais-chave.
+   ●​ Acúmulo de Interesse: mencionar ou desenvolver criativamente um elemento focado
+      rende +1 Interessa.
+   ●​ Gancho Oculto: ao atingir 3 pontos num marcador, o mestre pode conceder um
+      gancho narrativo (pista, atalho, vantagem)
+   ●​ Apagão Narrativo: se um marcador permanecer esquecido por toda a sessão,
+      introduza um pequeno evento que “esquece” algo relevante até ser recuperado.
+
+
+3. Notas de Diário
+
+   ●​ Ao fim de cada sessão, cada jogador anota em 1–2 linhas:
+          ○​ Um medo despertado
+          ○​ Um fragmento de memória que emergiu
+          ○​ Um eco do Véu que persiste
+   ●​ Integração: na próxima sessão, incorporar uma dessas notas gera 1 rerrolagem
+      gratuita ou 1 Insight Arcano.
+
+
+4. Objetivos de Cena Dinâmicos
+
+   ●​ Além do Objetivo Oculto, cada cena pode ter um mini-objetivo:
+         ○​ Reunir evidência de quebra de pacto
+         ○​ Impedir um sacrifício em andamento
+         ○​ Recuperar um Token de Identidade
+   ●​ Bônus: cumprir esse mini-objetivo rende 1 Ponto de Interesse ou ½ Moeda de
+      Arcântria simbólica (não contabiliza para gastos).
+
+
+5. Ferramentas de Ambiência
+
+   ●​ Mapas Parcialmente Revelados: cubra e descubra áreas conforme a investigação
+      avança.
+   ●​ Cartas de Contrato: entregue cartas físicas com lacres que o jogador rompe para ativar
+      — revele cláusulas gradualmente.
+   ●​ Trilha Sonora Temática: selecione curtas atmosferas sonoras para cenas de Arcântria,
+      sacrifícios, confrontos e investigações.
+
+
+6. Uso dos Pontos de Imersão
+
+Pontos de Imersão são recompensas narrativas que podem ser trocadas por pequenas
+vantagens mecânicas, fortalecendo o roleplay sem desequilibrar o jogo:
+
+   ●​ Rerrolagem: gaste 1 ponto para rerrolar um Dado do Véu antes de confirmar o
+      resultado.
+●​ Bônus Narrativo: gaste 1 ponto para adicionar um detalhe sensorial ou elemento
+   simbólico extra que influencie a cena (a critério do mestre).
+●​ Insight Arcano: gaste 1 ponto para solicitar ao mestre uma pista ou pergunta sobre o
+   desenvolvimento do contrato ou a cena atual.
+●​ Mitigação de Consequência: gaste 1 ponto para reduzir em um nível a gravidade de
+   uma penalidade de contrato ou falha de ação.
+
+  Limite: 1 ponto de Imersão por cena, acumula até 3 pontos simultâneos.
+

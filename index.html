@@ -37,6 +37,7 @@
       <button onclick="mudarAba('campanhas', event)">Campanhas</button>
       <button id="btn-aba-sistemas" onclick="mudarAba('sistemas', event)" style="display:none;">Sistemas RPG</button>
       <button id="btn-aba-bestiario" onclick="mudarAba('bestiario', event)" style="display:none;">📖 Bestiário</button>
+      <button id="btn-aba-noctavell" class="aba-mundo" onclick="mudarAba('noctavell', event)" style="display:none;">🕯️ Véu</button>
       <button id="btn-aba-economia" class="aba-mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo">💰 Economia</button>
       <button id="btn-aba-jornais" class="aba-mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo">📰 Jornais</button>
       <button onclick="mudarAba('grupo', event)">Fichas do Grupo</button>
@@ -190,6 +191,22 @@
         </div>
       </div>
       <div id="lista-sistemas" class="lista-campanhas"><div class="estado-galeria">Faça login para carregar os sistemas.</div></div>
+    </section>
+
+    <section id="aba-noctavell" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">🕯️ NOCTAVELL</span>
+          <h2>Central do Véu</h2>
+          <p class="subtexto-galeria">Quadro de trabalhos, batidas narrativas e ferramentas do submundo.</p>
+        </div>
+      </div>
+      <div class="grid-campanhas">
+        <div class="card-secao"><h3>🎲 Dado do Véu</h3><p>1d6 simbólico: Equilíbrio · Ruptura · Silêncio · Eco · Verdade · Olho do Véu.</p><button type="button" class="btn-ficha-principal" onclick="rolarDadoNoctavell()">Rolar 1d6</button><div id="noctavell-resultado-dado" style="margin-top:10px;font-size:1.1rem;"></div></div>
+        <div class="card-secao"><h3>🕯️ Batidas da Cena</h3><div class="toolbar-noctavell"><button type="button" class="btn-secundario" onclick="batidaNoctavell('Preparação')">Preparação</button><button type="button" class="btn-secundario" onclick="batidaNoctavell('Confronto')">Confronto</button><button type="button" class="btn-secundario" onclick="batidaNoctavell('Clímax')">Clímax</button><button type="button" class="btn-secundario" onclick="batidaNoctavell('Desfecho')">Desfecho</button></div><p class="texto-vazio">Preparação → Confronto → Clímax → Desfecho. Detalhes sensoriais podem render Ponto de Imersão.</p></div>
+        <div class="card-secao"><h3>📜 Quadro de Trabalhos</h3><div id="noctavell-trabalhos-lista"><p class="texto-vazio">Carregando trabalhos...</p></div><button type="button" class="btn-secundario" onclick="novoTrabalhoNoctavell()">＋ Novo trabalho</button></div>
+        <div class="card-secao"><h3>⚖️ Consequências de Contratos</h3><p><b>Leve:</b> Marca do Véu / perda de influência.</p><p><b>Média:</b> maldição menor / dívida com Arcântria.</p><p><b>Grave:</b> caçado pela Corte de Cera ou entidade.</p><p><b>Total:</b> perda do Nome Verdadeiro ou alma selada.</p></div>
+      </div>
     </section>
 
     <section id="aba-ficha" class="painel ativo">
