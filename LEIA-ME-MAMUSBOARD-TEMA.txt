@@ -8,3 +8,6 @@ Alterações desta versão:
 - Ao sair da campanha ou fazer logout, a interface volta ao tema vermelho/preto/dourado.
 - A cor do meta theme-color do navegador também acompanha o tema ativo.
 - A mecânica do mapa, tokens, zoom, pan, dados, sessões, galeria e demais sistemas não foi alterada.
+
+
+ATUALIZAÇÃO V3 — Paleta corrigida: Crônicas de Camelot = azul e dourado; Noctavell = roxo e prata.

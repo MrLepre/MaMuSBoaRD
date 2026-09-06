@@ -1511,3 +1511,106 @@ body.tema-base {
 @media (prefers-reduced-motion: reduce) {
   body { transition: none; }
 }
+
+/* ==========================================================
+   MaMuSBoaRD — SINCRONIZAÇÃO VISUAL COM A FICHA DO SISTEMA
+   A campanha ativa passa a usar a mesma identidade cromática
+   definida pela ficha/configuração do sistema.
+   ========================================================== */
+body.tema-sistema {
+  --cam-bg: var(--tema-fundo);
+  --cam-panel: var(--tema-painel);
+  --cam-panel-alt: var(--tema-painel-2, var(--tema-painel));
+  --cam-primary: var(--tema-primaria);
+  --cam-primary-rgb: var(--tema-primary-rgb);
+  --cam-gold: var(--tema-primaria);
+  --cam-gold-light: color-mix(in srgb, var(--tema-primaria) 68%, white);
+  --cam-gold-dark: color-mix(in srgb, var(--tema-primaria) 58%, black);
+  --cam-border: color-mix(in srgb, var(--tema-primaria) 38%, var(--tema-painel));
+  --tema-accent: var(--tema-secundaria, var(--tema-primaria));
+}
+
+body.tema-sistema .card-secao,
+body.tema-sistema .card-campanha,
+body.tema-sistema .card-sistema,
+body.tema-sistema .card-secao-campanha,
+body.tema-sistema .painel,
+body.tema-sistema .modal-conteudo,
+body.tema-sistema .bloco,
+body.tema-sistema .resultado,
+body.tema-sistema .historico-item,
+body.tema-sistema .diario-registro {
+  border-color: var(--cam-border) !important;
+  background-color: var(--cam-panel) !important;
+}
+
+body.tema-sistema input,
+body.tema-sistema select,
+body.tema-sistema textarea,
+body.tema-sistema .campo-input,
+body.tema-sistema .campo-select {
+  background-color: color-mix(in srgb, var(--cam-bg) 88%, var(--cam-primary)) !important;
+  border-color: var(--cam-border) !important;
+  color: var(--cam-text, #eee8df) !important;
+}
+
+body.tema-sistema input:focus,
+body.tema-sistema select:focus,
+body.tema-sistema textarea:focus {
+  border-color: var(--cam-gold) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cam-primary) 22%, transparent) !important;
+}
+
+body.tema-sistema .abas-navegacao,
+body.tema-sistema .topo-mesa,
+body.tema-sistema #contexto-campanha {
+  background-color: var(--cam-panel) !important;
+  border-color: var(--cam-border) !important;
+}
+
+body.tema-sistema .abas-navegacao button.ativo,
+body.tema-sistema .abas-navegacao button:hover,
+body.tema-sistema button.btn-primary,
+body.tema-sistema .btn-primary,
+body.tema-sistema .btn-blue,
+body.tema-sistema .builder-chip.ativo {
+  background: color-mix(in srgb, var(--tema-primaria) 34%, var(--cam-panel)) !important;
+  border-color: var(--cam-gold) !important;
+  color: var(--cam-gold-light) !important;
+}
+
+body.tema-sistema button,
+body.tema-sistema .btn {
+  border-color: var(--cam-gold) !important;
+}
+
+body.tema-sistema h1,
+body.tema-sistema h2,
+body.tema-sistema h3,
+body.tema-sistema .titulo-secao,
+body.tema-sistema .card-sistema h3,
+body.tema-sistema .card-campanha h3 {
+  color: var(--cam-gold-light) !important;
+}
+
+body.tema-sistema .card-sistema .sistema-icone,
+body.tema-sistema .badge-sistema,
+body.tema-sistema .pill,
+body.tema-sistema .tag,
+body.tema-sistema .status-badge {
+  border-color: var(--cam-border) !important;
+  background: color-mix(in srgb, var(--tema-secundaria, var(--tema-primaria)) 16%, var(--cam-panel)) !important;
+}
+
+body.tema-sistema a,
+body.tema-sistema .link,
+body.tema-sistema .texto-destaque {
+  color: var(--tema-secundaria, var(--cam-gold-light));
+}
+
+body.tema-sistema .barra-progresso > div,
+body.tema-sistema .progress > div,
+body.tema-sistema .vida-fill,
+body.tema-sistema .xp-fill {
+  background: var(--tema-primaria) !important;
+}

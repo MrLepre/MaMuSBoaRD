@@ -1339,12 +1339,27 @@ function hexParaRgb(valor) {
   return `${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)}`;
 }
 
+function obterTemaSistemaParaMesa() {
+  const cfg = sistemaAtual?.configuracao || {};
+  const tipo = String(cfg.tipo || '').toLowerCase();
+  const temasPorTipo = {
+    elarion: { corPrimaria:'#c89b3c', corSecundaria:'#9d6cff', corFundo:'#09080b', corPainel:'#17121b', corPainel2:'#0e0b12' },
+    eter_brasas: { corPrimaria:'#d97732', corSecundaria:'#f1a15d', corFundo:'#0b0806', corPainel:'#1d130f', corPainel2:'#120e0c' },
+    noctavell: { corPrimaria:'#9b5de5', corSecundaria:'#d9d9e6', corFundo:'#0d0912', corPainel:'#1a1222', corPainel2:'#100c16' },
+    olimpia_pangeia: { corPrimaria:'#c9a85b', corSecundaria:'#6da8d8', corFundo:'#0b0d14', corPainel:'#151923', corPainel2:'#0d111a' },
+    sobreviventes_fronteira: { corPrimaria:'#c6a15b', corSecundaria:'#a94d42', corFundo:'#0a0d0b', corPainel:'#131814', corPainel2:'#0d120f' },
+    world_trigger: { corPrimaria:'#39b8ff', corSecundaria:'#7fd7ff', corFundo:'#071018', corPainel:'#0d1822', corPainel2:'#09131b' },
+    legado: { corPrimaria:'#3f8cff', corSecundaria:'#d4af37', corFundo:'#070b14', corPainel:'#101725', corPainel2:'#0b101b' }
+  };
+  return cfg.tema || temasPorTipo[tipo] || null;
+}
+
 function aplicarTemaMesa() {
   const root = document.documentElement;
   const body = document.body;
   if (!root || !body) return;
 
-  const tema = sistemaAtual?.configuracao?.tema || null;
+  const tema = campanhaAtual ? obterTemaSistemaParaMesa() : null;
   if (!campanhaAtual || !tema) {
     body.classList.remove('tema-sistema');
     body.classList.add('tema-base');
@@ -1358,20 +1373,26 @@ function aplicarTemaMesa() {
     root.style.setProperty('--cam-primary', '#c21f32');
     root.style.setProperty('--cam-primary-rgb', '194,31,50');
     root.style.setProperty('--cam-gold-rgb', '212,175,55');
+    root.style.setProperty('--tema-secondary', '#d4af37');
     atualizarMetaThemeColor('#100609');
     return;
   }
 
-  const primaria = /^#[0-9a-f]{6}$/i.test(String(tema.corPrimaria || '')) ? tema.corPrimaria : '#c5a059';
-  const fundo = /^#[0-9a-f]{6}$/i.test(String(tema.corFundo || '')) ? tema.corFundo : '#090a0f';
-  const painel = /^#[0-9a-f]{6}$/i.test(String(tema.corPainel || '')) ? tema.corPainel : '#151821';
+  const valida = v => /^#[0-9a-f]{6}$/i.test(String(v || ''));
+  const primaria = valida(tema.corPrimaria) ? tema.corPrimaria : '#c5a059';
+  const secundaria = valida(tema.corSecundaria) ? tema.corSecundaria : primaria;
+  const fundo = valida(tema.corFundo) ? tema.corFundo : '#090a0f';
+  const painel = valida(tema.corPainel) ? tema.corPainel : '#151821';
+  const painel2 = valida(tema.corPainel2) ? tema.corPainel2 : painel;
   const rgb = hexParaRgb(primaria);
 
   body.classList.remove('tema-base');
   body.classList.add('tema-sistema');
   root.style.setProperty('--tema-primaria', primaria);
+  root.style.setProperty('--tema-secundaria', secundaria);
   root.style.setProperty('--tema-fundo', fundo);
   root.style.setProperty('--tema-painel', painel);
+  root.style.setProperty('--tema-painel-2', painel2);
   root.style.setProperty('--tema-primary-rgb', rgb);
   root.style.setProperty('--cam-gold-rgb', rgb);
   atualizarMetaThemeColor(fundo);
