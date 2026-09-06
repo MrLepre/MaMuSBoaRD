@@ -2150,6 +2150,76 @@ async function garantirSistemaEterBrasas(){
   if(r.error)console.warn('Éter & Brasas não pôde ser criado automaticamente:',r.error.message);
 }
 
+function criarConfiguracaoOlimpia(){
+  const attrs=[['FOR','Força'],['DES','Destreza'],['INT','Inteligência'],['SAB','Sabedoria'],['CAR','Carisma'],['CON','Constituição']];
+  const pericias=[
+    ['Acrobatics','DES'],['Animal Handling','SAB'],['Arcana','INT'],['Athletics','FOR'],['Deception','CAR'],['History','INT'],['Insight','SAB'],['Intimidation','CAR'],['Investigation','INT'],['Medicine','SAB'],['Nature','INT'],['Perception','SAB'],['Performance','CAR'],['Persuasion','CAR'],['Religion','SAB'],['Sleight of Hand','DES'],['Stealth','DES'],['Survival','SAB']
+  ];
+  const reinos=[
+    {nome:'Olímpia',descricao:'Reino dos deuses e ascendidos, cercado por uma barreira divina impenetrável a seres sem pelo menos um artefato de rank S.'},
+    {nome:'Lumier',descricao:'Limite dos mortais, cidade extremamente devota ao deus rei Taric.',exclusivas:['Templário']},
+    {nome:'Cluvant',descricao:'Reino especializado em caça e pesca e núcleo cultural da Pangeia.',exclusivas:['Dançarino','Caçador']},
+    {nome:'Bel',descricao:'Reino de magia extremamente forte e lapidada.',exclusivas:['Feiticeiro','Alquimista']},
+    {nome:'Fenrir',descricao:'Reino meritocrático e guerreiro, conhecido pela dureza e impiedade.',exclusivas:['Necromante','Berserker']},
+    {nome:'Long Bunker',descricao:'Cidade do crime, assolada pela fome e violência.',exclusivas:['Trapaceiro Arcano']},
+    {nome:'Cassiantopia',descricao:'Reino fiel às tradições, lar de grandes espadachins.',exclusivas:['Ninja'],estilo_exclusivo:'Sumo'},
+    {nome:'Magistar',descricao:'Reino de monges e budistas, criador de grandes marcialistas.',exclusivas:['Monge']},
+    {nome:'Deviation',descricao:'Reino extremamente forte e preconceituoso contra magos.'}
+  ];
+  const classes=['Guerreiro','Cavaleiro','Atirador','Arqueiro','Caçador','Ranger','Mago','Bruxo','Elementalista','Assassino','Trapaceiro Arcano','Ladrão','Ninja','Clérigo','Alquimista','Templário','Paladino','Feiticeiro','Invocador','Necromante','Druida','Xamã','Monge','Lutador','Bardo','Dançarino','Bárbaro','Berserker'];
+  const estilos={
+    Guerreiro:['Deus do ataque','Deus da defesa','Deus do equilíbrio'],
+    Cavaleiro:['Lanceiro','Arqueiro montado','Porta estandarte'],
+    Atirador:['Armadilheiro','Usuário de besta','Arco longo'],
+    Ninja:['Adagas invisíveis','Arqueiro furtivo','Sabotador'],
+    Alquimista:['Box'],
+    Templário:['Escudos da fé','Exorcista','Arqueiro da fé'],
+    Paladino:['Escudos da fé','Exorcista','Arqueiro da fé'],
+    Druida:['Companheiros de corpo e alma','Mestre do terreno'],
+    Xamã:['Arte marcial + arma'],
+    Lutador:['Box','Sumo','Taekwondo','Capoeira','Muay Thai','Judô'],
+    Dançarino:['Taekwondo','Capoeira'],
+    Bárbaro:['Fúria das bestas','Procurar e destruir','Corrida das armas'],
+    Berserker:['Fúria das bestas','Procurar e destruir','Corrida das armas']
+  };
+  return {
+    versao:1,
+    tipo:'olimpia_pangeia',
+    descricao:'RPG de Pangeia com reinos, classes, estilos de combate, atributos, perícias, Jóias e progressão por níveis.',
+    dados:['d4','d6','d8','d10','d12','d20'],
+    atributos:attrs.map(x=>({sigla:x[0],nome:x[1],regra:'A cada 3 pontos, +1 de multiplicador; atributo 6 = multiplicador 2.'})),
+    pericias:pericias.map(x=>({nome:x[0],atributo:x[1]})),
+    recursos:['Vida','Mana','XP'],
+    racas:[
+      {nome:'Humano',efeito:'Ao encontrar uma Jóia, gira um dado para obter uma Jóia adicional.',populares:['Feiticeiro','Guerreiro','Ladino']},
+      {nome:'Elfo',efeito:'Sempre que fizer um teste de Destreza, ganha +2 no dado.',populares:['Mago','Arqueiro','Druida']},
+      {nome:'Orc',efeito:'Sempre que girar um dado de dano por Força, ganha +2.',populares:['Tanque','Berserker','Lutador']}
+    ],
+    reinos,
+    classes,
+    estilos,
+    habilidades:{estrutura:['Passiva','Habilidade 1','Habilidade 2','Habilidade 3','Ultimate'],observacao:'O Guia afirma 3 habilidades iniciais e uma habilidade de estilo; os textos das três habilidades iniciais não foram fornecidos na fonte.'},
+    progressao:{xp_formula:'100 * 2^(nivel-1)',xp_niveis:Array.from({length:20},(_,i)=>100*Math.pow(2,i)),habilidade_classe_niveis:[5,10,15],classe_secundaria_nivel:20},
+    cooldown:{habilidades_iniciais_turnos:5,reducao_por_nivel:1,minimo_turnos:2,minimo_mana:3},
+    combate:{ordem:'maior iniciativa começa atacando',acerto:'dado de dano precisa ser maior que a Constituição do alvo',movimento:'peso reduz deslocamento; habilidades de mobilidade podem aumentar',furtivo:'ataques furtivos retiram dado de defesa e reflexo, mas ainda podem falhar contra Constituição'},
+    guerra:{principio:'estratégia e trabalho em equipe são mais valiosos que habilidades individuais'},
+    politica:['Economia','Alimentação','Alianças','Guerras','Salários','Imposto','Alistamento'],
+    joias:{tem_almas_de_dragao:true,equipadas_em_itens:true,mais_do_mesmo_elemento_fortalece:true,itens_vinculados_ao_dono:true,destruicao_do_item_remove:true,podem_buffar:['habilidades marciais','habilidades de classe','magias'],compartilham_cooldown:true,nao_consumem_mana:true},
+    ficha:'ficha-olimpia.html',
+    tema:{corPrimaria:'#c9a85b',corFundo:'#0b0d14',corPainel:'#151923'}
+  };
+}
+
+async function garantirSistemaOlimpia(){
+  if(!ehMestreGlobal||!supabaseClient)return;
+  const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Olímpia — Pangeia').limit(1);
+  if(error||data?.length)return;
+  const session=(await supabaseClient.auth.getSession()).data.session;if(!session)return;
+  const cfg=criarConfiguracaoOlimpia();
+  const r=await supabaseClient.from('sistemas').insert({nome:'Olímpia — Pangeia',descricao:'Sistema de fantasia de Pangeia com classes, estilos de combate, Jóias e progressão por níveis.',configuracao:cfg,criado_por:session.user.id});
+  if(r.error)console.warn('Olímpia — Pangeia não pôde ser criado automaticamente:',r.error.message);
+}
+
 async function garantirSistemaElarion(){
   if(!ehMestreGlobal||!supabaseClient)return;
   const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Elarion — Sistema de Joias e Luvas').limit(1);
@@ -2168,7 +2238,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -2206,7 +2276,7 @@ async function abrirFichaDoSistema(id){
   const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
   sistemaAtual=data;
   const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
-  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
+  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
   const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
   modal.style.display='flex';
 }
@@ -2729,6 +2799,7 @@ function mudarAba(nomeAba, evento) {
         await garantirSistemaElarion();
         await garantirSistemaEterBrasas();
         await garantirSistemaNoctavell();
+        await garantirSistemaOlimpia();
       }
       await carregarSistemas();
     })();
@@ -2825,15 +2896,17 @@ function renderizarFichaNaTela(dados) {
   const container = document.getElementById('container-ficha-carregada');
   if (!container) return;
   const nome = dados?.nome || dados?.personagem_nome || 'Sem Nome';
-  const tipo = dados?.tipo_humano || dados?.raca || '-';
-  const antecedente = dados?.antecedente || '-';
   const nivel = dados?.nivel || 1;
   const xp = dados?.xp_atual ?? 0;
+  const sistemaTipo = sistemaAtual?.configuracao?.tipo;
+  const resumoContexto = sistemaTipo === 'olimpia_pangeia'
+    ? `<p><strong>Classe:</strong> ${escaparHTML(dados?.classe || '-')} &nbsp;|&nbsp; <strong>Raça:</strong> ${escaparHTML(dados?.raca || '-')} &nbsp;|&nbsp; <strong>Reino:</strong> ${escaparHTML(dados?.reino || '-')}</p>`
+    : `<p><strong>Tipo Humano:</strong> ${escaparHTML(dados?.tipo_humano || dados?.raca || '-')} &nbsp;|&nbsp; <strong>Antecedente:</strong> ${escaparHTML(dados?.antecedente || '-')}</p>`;
   container.innerHTML = `
     <div style="background:linear-gradient(135deg,#10141f,#161b2c);padding:1rem;border-radius:6px;border:1px solid #d4af37;">
       <h3 style="color:#f3d075;font-family:Cinzel,serif;">${escaparHTML(nome)}</h3>
       <p><strong>Nível:</strong> ${escaparHTML(nivel)} &nbsp;|&nbsp; <strong>XP:</strong> ${escaparHTML(xp)}</p>
-      <p><strong>Tipo Humano:</strong> ${escaparHTML(tipo)} &nbsp;|&nbsp; <strong>Antecedente:</strong> ${escaparHTML(antecedente)}</p>
+      ${resumoContexto}
       <p style="color:#a8a8b3;">Ficha carregada. Abra a ficha completa para visualizar todos os campos e detalhes.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
         <button onclick="abrirFichaAtualCompleta()">📖 Abrir Ficha Completa</button>
@@ -2855,7 +2928,7 @@ function abrirCriadorFicha() {
   if (ehFichaLegadaAtual()) {
     iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : 'ficha-generica.html'));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-generica.html')));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, null, 'criacao');
   }
   const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
@@ -2874,7 +2947,7 @@ function abrirEditorFichaAtual() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : 'ficha-generica.html');
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-generica.html'));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dadosFichaAtual, 'edicao');
   }
   modal.style.display = 'flex';
@@ -2893,7 +2966,7 @@ function abrirEditorFicha(dados, userId = null) {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : 'ficha-generica.html');
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-generica.html'));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dados, 'edicao');
   }
   modal.style.display = 'flex';
@@ -2909,11 +2982,15 @@ function fecharCriadorFicha() {
 function abrirFichaCompletaNoIframe(dados) {
   const conteudoModal = document.getElementById('modal-conteudo-ficha');
   if (!conteudoModal) return;
-  conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="ficha-editor.html?modo=visualizacao&t=${Date.now()}"></iframe>`;
+  const tipo = sistemaAtual?.configuracao?.tipo;
+  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : 'ficha-editor.html')));
+  const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(sistemaAtual?.id||'')}&t=${Date.now()}`;
+  conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="${src}"></iframe>`;
   const iframe = document.getElementById('iframe-ficha-visualizacao');
   iframe.addEventListener('load', () => {
-    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dados }, window.location.origin);
-  });
+    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-sistema', sistema: sistemaAtual }, window.location.origin);
+    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dados, modo: 'visualizacao' }, window.location.origin);
+  }, { once: true });
 }
 
 function abrirFichaAtualCompleta() {
@@ -3810,10 +3887,15 @@ async function fazerUploadImagem() {
   if (!supabaseClient) return mostrarPopup('❌ Supabase não conectado.');
   if (!ehMestreGlobal) return mostrarPopup('❌ Apenas o Mestre pode organizar a biblioteca.');
 
+  const campanhaId = obterCampanhaIdAtual();
+  if (!campanhaId) return mostrarPopup('❌ Selecione uma campanha antes de enviar imagens.');
+  if (campanhaAtual?.status === 'encerrada') return mostrarPopup('🔒 Esta campanha está encerrada.');
+
   const input = document.getElementById('arquivo-imagem');
   const nomeInput = document.getElementById('nome-imagem');
   const pastaInput = document.getElementById('pasta-imagem');
   const visibilidadeInput = document.getElementById('visibilidade-imagem');
+  const status = document.getElementById('status-galeria');
   if (!input || !input.files || input.files.length === 0) return mostrarPopup('❌ Selecione uma imagem.');
 
   const file = input.files[0];
@@ -3825,55 +3907,91 @@ async function fazerUploadImagem() {
   const publica = (visibilidadeInput?.value || 'publica') === 'publica';
   const extensao = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
   const identificador = (window.crypto?.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-  const campanhaId = obterCampanhaIdAtual();
-  if (!campanhaId) return mostrarPopup('❌ Selecione uma campanha antes de enviar imagens.');
   const storagePath = `${campanhaId}/${pasta}/${Date.now()}_${identificador}.${extensao}`;
   const bucketGaleria = publica ? 'galeria' : 'galeria-privada';
 
   const btn = document.querySelector('.btn-publicar-galeria');
-  if (btn) { btn.disabled = true; btn.dataset.textoOriginal = btn.textContent; btn.textContent = '⏳ Enviando...'; }
+  const textoOriginal = btn?.textContent || '📤 Adicionar à Biblioteca';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando imagem...'; }
+  if (status) status.textContent = 'Enviando arquivo...';
 
+  let arquivoEnviado = false;
   try {
-    const { error: uploadError } = await supabaseClient.storage.from(bucketGaleria).upload(storagePath, file, { cacheControl: '3600', upsert: false });
-    if (uploadError) throw uploadError;
+    // 1) Arquivo físico no Storage.
+    const { error: uploadError } = await supabaseClient.storage
+      .from(bucketGaleria)
+      .upload(storagePath, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+    if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
+    arquivoEnviado = true;
 
+    if (status) status.textContent = 'Salvando registro da imagem...';
+
+    // 2) URL que será usada pela galeria.
     let imageUrl = null;
     if (publica) {
       const { data: publicData } = supabaseClient.storage.from('galeria').getPublicUrl(storagePath);
       imageUrl = publicData?.publicUrl || null;
     } else {
-      const { data: signedData, error: signedError } = await supabaseClient.storage.from('galeria-privada').createSignedUrl(storagePath, 3600);
-      if (signedError) throw signedError;
+      const { data: signedData, error: signedError } = await supabaseClient.storage
+        .from('galeria-privada').createSignedUrl(storagePath, 3600);
+      if (signedError) throw new Error(`URL privada: ${signedError.message}`);
       imageUrl = signedData?.signedUrl || null;
     }
     if (!imageUrl) throw new Error('Não foi possível obter a URL da imagem.');
 
-    const { error: dbError } = await supabaseClient.from('galeria_imagens').insert({
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user?.id) throw new Error('Sessão de usuário não encontrada. Faça login novamente.');
+
+    // 3) Metadados. O registro é explicitamente vinculado à campanha atual.
+    const payload = {
       url: imageUrl,
       categoria: pasta,
-      pasta: pasta,
-      nome: nome,
+      pasta,
+      nome,
       publico: publica,
       storage_path: storagePath,
-      criado_por: (await supabaseClient.auth.getUser()).data.user?.id || null,
-      campanha_id: obterCampanhaIdAtual(),
+      criado_por: user.id,
+      campanha_id: campanhaId,
       criado_em: new Date().toISOString()
-    });
-    if (dbError) throw dbError;
+    };
+
+    const { data: registro, error: dbError } = await supabaseClient
+      .from('galeria_imagens')
+      .insert(payload)
+      .select('id,url,categoria,pasta,nome,publico,storage_path,criado_em,criado_por,campanha_id')
+      .single();
+    if (dbError) throw new Error(`Banco: ${dbError.message}`);
+    if (!registro?.id) throw new Error('O banco não confirmou o registro da imagem.');
+
+    // 4) Atualiza imediatamente a tela e confirma que o registro está visível.
+    if (status) status.textContent = 'Atualizando biblioteca...';
+    await carregarGaleria(true);
+
+    const apareceu = dadosGaleriaAtual.some(img => img.id === registro.id);
+    if (!apareceu) {
+      throw new Error('A imagem foi salva, mas não apareceu na consulta da galeria. Verifique as políticas RLS da galeria no Supabase.');
+    }
 
     tocarSom('success');
-    mostrarPopup(publica ? '🌐 Imagem publicada para os jogadores.' : '🔒 Imagem salva na pasta oculta.');
+    mostrarPopup(publica ? '🌐 Imagem publicada e adicionada à galeria.' : '🔒 Imagem salva na pasta oculta e adicionada à galeria.');
     if (input) input.value = '';
     if (nomeInput) nomeInput.value = '';
-    await carregarGaleria(true);
   } catch (error) {
     console.error('Erro no upload da galeria:', error);
-    mostrarPopup('❌ Erro ao enviar imagem: ' + (error.message || 'erro desconhecido'));
+    // Se o arquivo chegou ao Storage mas os metadados falharam, remove o órfão.
+    if (arquivoEnviado) {
+      const { error: cleanupError } = await supabaseClient.storage.from(bucketGaleria).remove([storagePath]);
+      if (cleanupError) console.warn('Não foi possível limpar arquivo órfão da galeria:', cleanupError.message);
+    }
+    if (status) status.textContent = 'Erro ao salvar';
+    mostrarPopup('❌ Não foi possível adicionar a imagem: ' + (error.message || 'erro desconhecido'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.textoOriginal || '📤 Adicionar à Biblioteca'; }
+    if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+    if (status && !status.textContent?.startsWith('Erro')) {
+      status.textContent = `${dadosGaleriaAtual.length} recurso${dadosGaleriaAtual.length === 1 ? '' : 's'}`;
+    }
   }
 }
-
 async function prepararUrlsGaleria(imagens) {
   const lista = Array.isArray(imagens) ? imagens : [];
   return Promise.all(lista.map(async (img) => {
@@ -4199,6 +4317,7 @@ window.fazerCadastro = fazerCadastro;
 window.fazerLogout = fazerLogout;
 window.mudarAba = mudarAba;
 window.garantirSistemaNoctavell = garantirSistemaNoctavell;
+window.garantirSistemaOlimpia = garantirSistemaOlimpia;
 window.abrirAbaRolagensSegura = abrirAbaRolagensSegura;
 window.selecionarCampanha = selecionarCampanha;
 window.abrirNovaCampanha = abrirNovaCampanha;

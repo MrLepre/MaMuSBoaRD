@@ -1,0 +1,20 @@
+CRÔNICAS DE CAMELOT — GALERIA CORRIGIDA
+
+Esta versão corrige o fluxo:
+1. Upload físico para o Storage.
+2. Criação do registro em galeria_imagens com campanha_id.
+3. Confirmação do registro pelo banco.
+4. Recarregamento da galeria.
+5. Verificação de que a imagem realmente apareceu na consulta.
+6. Limpeza automática do arquivo se o banco falhar, evitando arquivos órfãos.
+
+IMPORTANTE:
+Execute no Supabase o arquivo:
+  sql-galeria-corrigir-exibicao.sql
+
+O SQL é incremental e não apaga imagens existentes.
+
+O bucket galeria é garantido como público para que imagens marcadas como
+públicas possam ser abertas pelos jogadores através de getPublicUrl.
+
+O bucket galeria-privada continua privado.
