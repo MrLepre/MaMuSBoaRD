@@ -1092,6 +1092,7 @@ async function fazerLogout() {
   campanhaAtual = null;
   sistemaAtual = null;
   atualizarVisibilidadeAcoesRapidas();
+  garantirAbasEconomiaJornaisVisiveis();
   campanhasDisponiveis = [];
   atualizarContextoCampanha();
   renderizarListaCampanhas();
@@ -1515,6 +1516,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   // Só agora que o sistema foi resolvido carregamos o estado tático da campanha.
   carregarEstadoWorldTrigger();
+  garantirAbasEconomiaJornaisVisiveis();
 
   salvarCampanhaLocalmente();
   atualizarContextoCampanha();
@@ -2184,17 +2186,43 @@ async function excluirJornal(id){if(!ehMestreGlobal||!confirm('Apagar esta notí
 function transmitirJornal(){if(canalMesa)canalMesa.send({type:'broadcast',event:'jornal_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),quando:Date.now()}});}
 function resetarDadosEconomiaJornalAoTrocarCampanha(){economiaCarregadaCampanha=null;jornaisCarregadosCampanha=null;economiaDados={mercados:[],itens:[],eventos:[]};jornaisDados=[];fecharEditorEconomia();fecharEditorJornal();}
 
-// Garante que as abas do mundo nunca sejam ocultadas por rotinas de autenticação/responsividade.
+// Economia e Jornais pertencem ao sistema Éter & Brasas e ao mundo da
+// campanha ativa. Eles NÃO são abas globais do VTT.
+function campanhaUsaEterBrasas() {
+  const cfg = sistemaAtual?.configuracao || {};
+  return !!campanhaAtual && (
+    cfg.tipo === 'eter_brasas' ||
+    /éter\s*&\s*brasas/i.test(sistemaAtual?.nome || '') ||
+    /eter\s*&\s*brasas/i.test(sistemaAtual?.nome || '')
+  );
+}
+
 function garantirAbasEconomiaJornaisVisiveis() {
+  const disponiveis = campanhaUsaEterBrasas();
   ['economia','jornais'].forEach(nome => {
     const btn = document.getElementById(`btn-aba-${nome}`);
-    if (btn) {
+    if (!btn) return;
+    if (disponiveis) {
       btn.style.setProperty('display', 'inline-flex', 'important');
       btn.style.setProperty('visibility', 'visible', 'important');
       btn.style.setProperty('opacity', '1', 'important');
       btn.style.setProperty('pointer-events', 'auto', 'important');
+      btn.removeAttribute('aria-hidden');
+    } else {
+      btn.style.setProperty('display', 'none', 'important');
+      btn.style.setProperty('visibility', 'hidden', 'important');
+      btn.style.setProperty('opacity', '0', 'important');
+      btn.style.setProperty('pointer-events', 'none', 'important');
+      btn.setAttribute('aria-hidden', 'true');
+      btn.classList.remove('ativo');
     }
   });
+
+  // Se o usuário estava em uma dessas abas e trocou para outra campanha/sistema,
+  // não deixamos a tela antiga continuar aberta.
+  if (!disponiveis && (abaAtual === 'economia' || abaAtual === 'jornais')) {
+    mudarAba('ficha');
+  }
 }
 
 // --- NAVEGAÇÃO DE ABAS ---
