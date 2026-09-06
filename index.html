@@ -92,14 +92,14 @@
       </div>
 
       <div id="painel-nova-campanha" class="card-secao card-nova-campanha" style="display:none;">
-        <h3>👑 Criar nova campanha</h3>
-        <p>Escolha um nome para a nova mesa. Ela será criada separada da campanha atual.</p>
+        <h3 id="titulo-form-campanha">👑 Criar nova campanha</h3>
+        <p id="texto-form-campanha">Escolha um nome para a nova mesa. Ela será criada separada da campanha atual.</p>
         <div class="form-nova-campanha">
           <input id="nova-campanha-nome" type="text" maxlength="80" placeholder="Ex.: A Queda de Avalon">
           <input id="nova-campanha-descricao" type="text" maxlength="180" placeholder="Descrição curta (opcional)">
           <label class="campo-formulario-campanha"><span>⚙️ Sistema RPG</span><select id="nova-campanha-sistema"><option value="">Carregando sistemas...</option></select></label>
-          <button onclick="criarNovaCampanha()" class="btn-ficha-principal">⚔️ Criar Campanha</button>
-          <button onclick="fecharNovaCampanha()" class="btn-secundario">Cancelar</button>
+          <button id="btn-salvar-campanha" type="button" onclick="criarNovaCampanha()" class="btn-ficha-principal">⚔️ Criar Campanha</button>
+          <button type="button" onclick="fecharNovaCampanha()" class="btn-secundario">Cancelar</button>
         </div>
       </div>
 

@@ -1568,32 +1568,94 @@ function renderizarListaCampanhas() {
         <p>${escaparHTML(campanha.descricao || 'Sem descrição.')}</p>
         <span class="card-campanha-meta">⚙️ ${escaparHTML(sistema)} · ${membroConhecido ? 'Você tem acesso' : 'Acesso mediante aprovação do Mestre'}</span></div>
       </div>
-      ${acao ? `<button type="button" class="btn-selecionar-campanha" onclick="${acao}('${campanha.id}')">${textoBotao}</button>` : `<button type="button" class="btn-selecionar-campanha" disabled>${textoBotao}</button>`}`;
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        ${acao ? `<button type="button" class="btn-selecionar-campanha" onclick="${acao}('${campanha.id}')">${textoBotao}</button>` : `<button type="button" class="btn-selecionar-campanha" disabled>${textoBotao}</button>`}
+        ${souMestre ? `<button type="button" class="btn-secundario" onclick="abrirEditarCampanha('${campanha.id}', event)">✏️ Editar</button>` : ''}
+      </div>`;
     lista.appendChild(card);
   });
 }
 
 async function abrirNovaCampanha() {
   if (!ehMestreGlobal) return;
+  await prepararFormularioCampanha(null);
   const painel = document.getElementById('painel-nova-campanha');
   if (painel) painel.style.display = 'block';
+  document.getElementById('nova-campanha-nome')?.focus();
+}
+
+async function prepararFormularioCampanha(campanha=null) {
+  const painel = document.getElementById('painel-nova-campanha');
+  const titulo = document.getElementById('titulo-form-campanha');
+  const texto = document.getElementById('texto-form-campanha');
+  const btn = document.getElementById('btn-salvar-campanha');
+  const nome = document.getElementById('nova-campanha-nome');
+  const descricao = document.getElementById('nova-campanha-descricao');
   const select = document.getElementById('nova-campanha-sistema');
+  if (painel) painel.style.display = 'block';
+  if (titulo) titulo.textContent = campanha ? '✏️ Editar campanha' : '👑 Criar nova campanha';
+  if (texto) texto.textContent = campanha ? 'Altere os dados da campanha. Os personagens, mapas, economia, jornais e demais recursos continuam vinculados à mesma campanha.' : 'Escolha um nome para a nova mesa. Ela será criada separada da campanha atual.';
+  if (btn) { btn.textContent = campanha ? '💾 Salvar alterações' : '⚔️ Criar Campanha'; btn.onclick = campanha ? () => salvarEdicaoCampanha(campanha.id) : criarNovaCampanha; }
+  if (nome) nome.value = campanha?.nome || '';
+  if (descricao) descricao.value = campanha?.descricao || '';
   if (select) {
     select.innerHTML = '<option value="">Carregando sistemas...</option>';
     const {data,error}=await supabaseClient.from('sistemas').select('id,nome,configuracao').order('nome',{ascending:true});
     if(error){ select.innerHTML='<option value="">Erro ao carregar sistemas</option>'; console.error(error); }
     else {
       select.innerHTML=(data||[]).map(s=>`<option value="${s.id}">${escaparHTML(s.nome)}${s.configuracao?.tipo==='legado'?' — legado':''}</option>`).join('');
-      const preferido=sistemaAtual?.id || (data||[]).find(s=>s.configuracao?.tipo==='legado')?.id || data?.[0]?.id;
+      const preferido=campanha?.sistema_id || sistemaAtual?.id || (data||[]).find(s=>s.configuracao?.tipo==='legado')?.id || data?.[0]?.id;
       if(preferido) select.value=preferido;
     }
   }
+}
+
+async function abrirEditarCampanha(campanhaId, evento) {
+  if (evento) { evento.preventDefault(); evento.stopPropagation(); }
+  if (!ehMestreGlobal) return;
+  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  if (!campanha) return mostrarPopup('❌ Campanha não encontrada.');
+  await prepararFormularioCampanha(campanha);
+  document.getElementById('painel-nova-campanha')?.scrollIntoView({behavior:'smooth', block:'nearest'});
   document.getElementById('nova-campanha-nome')?.focus();
+}
+
+async function salvarEdicaoCampanha(campanhaId) {
+  if (!supabaseClient || !ehMestreGlobal || !campanhaId) return;
+  const nome = document.getElementById('nova-campanha-nome')?.value.trim();
+  const descricao = document.getElementById('nova-campanha-descricao')?.value.trim() || '';
+  const sistemaId = document.getElementById('nova-campanha-sistema')?.value || null;
+  if (!nome) return mostrarPopup('❌ Informe o nome da campanha.');
+  if (!sistemaId) return mostrarPopup('❌ Selecione o sistema RPG da campanha.');
+  const { data, error } = await supabaseClient.from('campanhas')
+    .update({ nome, descricao, sistema_id: sistemaId, updated_at: new Date().toISOString() })
+    .eq('id', campanhaId)
+    .select('id,nome,descricao,sistema_id,mestre_id,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
+    .single();
+  if (error) return mostrarPopup('❌ Não foi possível salvar a campanha: ' + error.message);
+  const idx = campanhasDisponiveis.findIndex(c => c.id === campanhaId);
+  if (idx >= 0) campanhasDisponiveis[idx] = data;
+  if (campanhaAtual?.id === campanhaId) {
+    campanhaAtual = data;
+    sistemaAtual = data.sistemas || null;
+    atualizarContextoCampanha();
+    garantirAbasEconomiaJornaisVisiveis();
+    resetarDadosEconomiaJornalAoTrocarCampanha();
+  }
+  renderizarListaCampanhas();
+  fecharNovaCampanha();
+  mostrarPopup(`✅ Campanha "${nome}" atualizada.`);
 }
 
 function fecharNovaCampanha() {
   const painel = document.getElementById('painel-nova-campanha');
   if (painel) painel.style.display = 'none';
+  const titulo = document.getElementById('titulo-form-campanha');
+  const texto = document.getElementById('texto-form-campanha');
+  const btn = document.getElementById('btn-salvar-campanha');
+  if (titulo) titulo.textContent = '👑 Criar nova campanha';
+  if (texto) texto.textContent = 'Escolha um nome para a nova mesa. Ela será criada separada da campanha atual.';
+  if (btn) { btn.textContent = '⚔️ Criar Campanha'; btn.onclick = criarNovaCampanha; }
 }
 
 async function criarNovaCampanha() {
@@ -3754,6 +3816,8 @@ window.mudarAba = mudarAba;
 window.abrirAbaRolagensSegura = abrirAbaRolagensSegura;
 window.selecionarCampanha = selecionarCampanha;
 window.abrirNovaCampanha = abrirNovaCampanha;
+window.abrirEditarCampanha = abrirEditarCampanha;
+window.salvarEdicaoCampanha = salvarEdicaoCampanha;
 window.fecharNovaCampanha = fecharNovaCampanha;
 window.criarNovaCampanha = criarNovaCampanha;
 window.importarArquivoJSON = importarArquivoJSON;
