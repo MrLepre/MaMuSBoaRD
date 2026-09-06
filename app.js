@@ -861,7 +861,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const abaSalva = localStorage.getItem('cronicas_camelot_aba');
     if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria'].includes(abaSalva)) {
-      mudarAba(abaSalva);
+      mudarAba(abaSalva, abaSalva === 'rolagens' ? { __restauracaoAbaSalva: true } : undefined);
     }
   } catch (err) {}
 
@@ -994,7 +994,11 @@ document.addEventListener('keydown', (event) => {
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
   const abas = ['ficha', 'grupo', 'mapa', 'rolagens', 'galeria'];
   const index = Number(digit) - 1;
-  if (index >= 0 && index < abas.length) mudarAba(abas[index]);
+  if (index >= 0 && index < abas.length) {
+    const aba = abas[index];
+    if (aba === 'rolagens') abrirAbaRolagensSegura('atalho-teclado');
+    else mudarAba(aba);
+  }
 });
 
 window.addEventListener('message', async (event) => {
@@ -1170,11 +1174,19 @@ function focarElementoDepoisDoAba(id) {
   }, 80);
 }
 
+function abrirAbaRolagensSegura(origem = 'interno') {
+  // A aba de rolagens só pode ser aberta por uma ação explicitamente autorizada.
+  // Isso impede que um clique que escape de algum elemento/overlay seja interpretado
+  // como comando para abrir o salão de dados.
+  window.__cronicasPermitirAbaRolagens = { origem, ate: Date.now() + 1000 };
+  mudarAba('rolagens', { __navegacaoRolagensAutorizada: true, origem });
+}
+
 function acaoRapida(tipo) {
   fecharAcoesRapidas();
 
   if (tipo === 'rolagem') {
-    mudarAba('rolagens');
+    abrirAbaRolagensSegura('acoes-rapidas');
     focarElementoDepoisDoAba('expressao-dado');
     mostrarPopup('🎲 Salão de Rolagens aberto.');
     return;
@@ -1185,7 +1197,7 @@ function acaoRapida(tipo) {
     if (expressao === null) return;
     const input = document.getElementById('expressao-dado');
     if (!input) return mostrarPopup('❌ Campo de rolagem não encontrado.');
-    mudarAba('rolagens');
+    abrirAbaRolagensSegura('acao-ataque');
     input.value = expressao.trim();
     rolarExpressaoPersonalizada();
     return;
@@ -1997,6 +2009,24 @@ function criarTokenDoBestiario(idx){
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
   const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'grupo', 'mapa', 'rolagens', 'galeria'];
+
+  // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
+  // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
+  // pela Central de Ações Rápidas, pelo atalho de teclado ou pela restauração
+  // inicial da aba salva. Cliques/toques que escapem de overlays não podem
+  // transformar uma chamada indevida em navegação para os dados.
+  if (nomeAba === 'rolagens') {
+    const botaoNav = evento?.currentTarget?.closest?.('.abas-navegacao button');
+    const chamadaAutorizada = evento?.__navegacaoRolagensAutorizada === true;
+    const permissao = window.__cronicasPermitirAbaRolagens;
+    const permissaoValida = permissao && permissao.ate > Date.now();
+    const restauracaoInicial = evento?.__restauracaoAbaSalva === true;
+    if (!botaoNav && !chamadaAutorizada && !permissaoValida && !restauracaoInicial) {
+      console.warn('Abertura de Rolagens bloqueada: origem não autorizada.');
+      return;
+    }
+    window.__cronicasPermitirAbaRolagens = null;
+  }
   if (!abasValidas.includes(nomeAba)) return;
 
   const paineis = document.querySelectorAll('.painel');
@@ -3476,6 +3506,7 @@ window.fazerLogin = fazerLogin;
 window.fazerCadastro = fazerCadastro;
 window.fazerLogout = fazerLogout;
 window.mudarAba = mudarAba;
+window.abrirAbaRolagensSegura = abrirAbaRolagensSegura;
 window.selecionarCampanha = selecionarCampanha;
 window.abrirNovaCampanha = abrirNovaCampanha;
 window.fecharNovaCampanha = fecharNovaCampanha;
