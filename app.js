@@ -1269,6 +1269,32 @@ function acaoRapida(tipo) {
   }
 }
 
+// Barreira de interação da Central de Ações Rápidas.
+// O menu fechado não pode capturar cliques/toques mesmo que algum CSS futuro
+// coloque um descendente em pointer-events:auto. A barreira roda na captura,
+// antes dos handlers dos botões e dos listeners globais.
+document.addEventListener('pointerdown', (event) => {
+  const container = document.getElementById('acoes-rapidas');
+  if (!container || container.classList.contains('aberto')) return;
+  const menu = document.getElementById('menu-acoes-rapidas');
+  if (menu && menu.contains(event.target)) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+}, true);
+
+document.addEventListener('click', (event) => {
+  const container = document.getElementById('acoes-rapidas');
+  if (!container || container.classList.contains('aberto')) return;
+  const menu = document.getElementById('menu-acoes-rapidas');
+  if (menu && menu.contains(event.target)) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }
+}, true);
+
 document.addEventListener('pointerdown', (event) => {
   const container = document.getElementById('acoes-rapidas');
   if (container && container.classList.contains('aberto') && !container.contains(event.target)) {

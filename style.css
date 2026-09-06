@@ -726,7 +726,11 @@ body::before,
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  pointer-events: none;
+  /* Quando fechado, NENHUM descendente pode receber cliques/toques.
+     pointer-events:none no pai sozinho não basta porque filhos podem
+     sobrescrever a propriedade com pointer-events:auto. */
+  pointer-events: none !important;
+  visibility: hidden;
   opacity: 0;
   transform: translateY(12px) scale(.96);
   transform-origin: bottom right;
@@ -734,9 +738,22 @@ body::before,
 }
 
 .acoes-rapidas.aberto .menu-acoes-rapidas {
-  pointer-events: auto;
+  pointer-events: auto !important;
+  visibility: visible;
   opacity: 1;
   transform: none;
+}
+
+/* Estado fechado é também um estado de interação, não apenas visual. */
+.acoes-rapidas:not(.aberto) .acao-rapida {
+  pointer-events: none !important;
+  visibility: hidden !important;
+  user-select: none !important;
+}
+
+.acoes-rapidas.aberto .acao-rapida {
+  pointer-events: auto !important;
+  visibility: visible;
 }
 
 .acao-rapida {
