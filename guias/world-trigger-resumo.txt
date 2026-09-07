@@ -1,0 +1,19 @@
+WORLD TRIGGER — RADAR + LINHA DE VISÃO + GEOMETRIA TÁTICA
+
+Implementado:
+- Radar compartilhado por Squad.
+- Inimigos normais aparecem como sinais de radar, mas seus tokens só aparecem quando identificados por visão.
+- Bagworm remove o agente do radar; Scan pode localizá-lo.
+- Chameleon mantém a invisibilidade visual, mas continua detectável no radar.
+- Scan e Analysis com estados de informação.
+- Níveis: desconhecido, detectado, posição aproximada, visão exata e analisado.
+- FOV compartilhado pelo Squad.
+- Linha de visão por grade usando paredes.
+- Cobertura tática marcada no mapa.
+- Mestre pode editar paredes/coberturas diretamente nas células do mapa.
+- Geometria é transmitida em tempo real e persistida em mapas.dados_taticos.
+- Zoom, pan, lock, grid, tokens e movimentação existentes foram preservados.
+
+IMPORTANTE:
+Execute sql-world-trigger-visao-radar.sql no Supabase antes de depender da persistência da geometria tática entre recargas.
+Sem a coluna, a aplicação continua funcionando em tempo real/localmente, mas a geometria não será persistida no banco.

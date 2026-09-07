@@ -1614,6 +1614,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   carregarEstadoWorldTrigger();
   aplicarTemaMesa();
   garantirAbasEconomiaJornaisVisiveis();
+  garantirAbaGuiasVisivel();
 
   salvarCampanhaLocalmente();
   atualizarContextoCampanha();
@@ -2873,9 +2874,30 @@ async function abrirDetalhesSessao(sessaoId){
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
+// --- BIBLIOTECA DE GUIAS DO RPG ---
+const GUIAS_RPG = {
+  legado: [{titulo:'⚔️ Crônicas de Camelot — Guia do Sistema', arquivo:'guias/GUIA-CAMELOT.html', tipo:'html'}, {titulo:'📕 Manual original — Crônicas de Camelot', arquivo:'guias/cronicas-de-camelot-guia.pdf', tipo:'pdf'}],
+  elarion: [{titulo:'💎 Elarion — Sistema de Joias e Luvas', arquivo:'guias/GUIA-ELARION.html', tipo:'html'}],
+  world_trigger: [{titulo:'📖 Guia do Agente — RPG de Trion', arquivo:'guias/world-trigger-guia.pdf', tipo:'pdf'}, {titulo:'🧭 Visão / Radar / Camada Tática', arquivo:'guias/world-trigger-resumo.txt', tipo:'txt'}],
+  eter_brasas: [{titulo:'🔥 Guia Éter & Brasas', arquivo:'guias/eter-brasas-guia.pdf', tipo:'pdf'}, {titulo:'📜 Referência rápida — Éter & Brasas', arquivo:'guias/eter-brasas-resumo.txt', tipo:'txt'}],
+  noctavell: [{titulo:'🕯️ Manual de Noctavell', arquivo:'guias/noctavell-guia.pdf', tipo:'pdf'}, {titulo:'🕯️ Referência da Central do Véu', arquivo:'guias/noctavell-resumo.txt', tipo:'txt'}],
+  olimpia_pangeia: [{titulo:'🌌 Guia de Olímpia / Pangeia', arquivo:'guias/olimpia-pangeia-guia.html', tipo:'html'}, {titulo:'📜 Referência de regras — Olímpia / Pangeia', arquivo:'guias/olimpia-resumo.txt', tipo:'txt'}],
+  sobreviventes_fronteira: [{titulo:'🌀 Manual — Sobreviventes da Fronteira', arquivo:'guias/sobreviventes-da-fronteira-guia.pdf', tipo:'pdf'}, {titulo:'🧬 Referência rápida — Sobreviventes', arquivo:'guias/sobreviventes-resumo.txt', tipo:'txt'}],
+  noites_em_tokyo: [{titulo:'🌃 Manual — Noites em Tokyo', arquivo:'guias/noites-em-tokyo/index.html', tipo:'html'}]
+};
+function tipoSistemaParaGuias(){
+  const tipo=sistemaAtual?.configuracao?.tipo; if(tipo&&GUIAS_RPG[tipo])return tipo;
+  const nome=(sistemaAtual?.nome||'').toLowerCase();
+  if(/noites\s+em\s+tokyo/.test(nome))return'noites_em_tokyo'; if(/world\s*trigger|trion/.test(nome))return'world_trigger'; if(/éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome))return'eter_brasas'; if(/noctavell/.test(nome))return'noctavell'; if(/olímpia|olimpia|pangeia/.test(nome))return'olimpia_pangeia'; if(/sobreviventes\s+da\s+fronteira/.test(nome))return'sobreviventes_fronteira'; if(/elarion/.test(nome))return'elarion'; if(/camelot/.test(nome))return'legado'; return null;
+}
+function garantirAbaGuiasVisivel(){const btn=document.getElementById('btn-aba-guias');const ok=Boolean(campanhaAtual&&sistemaAtual&&tipoSistemaParaGuias());if(!btn)return;btn.style.setProperty('display',ok?'inline-flex':'none','important');btn.style.setProperty('visibility',ok?'visible':'hidden','important');btn.style.setProperty('opacity',ok?'1':'0','important');btn.style.setProperty('pointer-events',ok?'auto':'none','important');if(!ok)btn.classList.remove('ativo');if(!ok&&abaAtual==='guias')mudarAba('ficha');}
+function carregarGuiasRPG(){const lista=document.getElementById('guias-lista'),sub=document.getElementById('guias-subtitulo');if(!lista)return;const guias=GUIAS_RPG[tipoSistemaParaGuias()]||[];if(sub)sub.innerHTML=guias.length?`Materiais disponíveis para <strong>${escaparHTML(sistemaAtual?.nome||'Sistema RPG')}</strong>.`:'Nenhum guia cadastrado para este sistema.';lista.innerHTML=guias.length?guias.map((g,i)=>`<article class="guia-card"><div class="guia-card-icone">${g.tipo==='pdf'?'📕':g.tipo==='txt'?'📄':'📖'}</div><div class="guia-card-corpo"><h3>${escaparHTML(g.titulo)}</h3><p>${g.tipo==='pdf'?'Manual original em PDF':g.tipo==='txt'?'Material de referência rápido':'Guia integrado para leitura na mesa'}</p><button type="button" class="btn-acao" data-guia-index="${i}">Ler guia</button></div></article>`).join(''):'<div class="estado-galeria">Nenhum guia cadastrado para este sistema.</div>';lista.querySelectorAll('[data-guia-index]').forEach(b=>b.addEventListener('click',()=>abrirLeitorGuia(guias[Number(b.dataset.guiaIndex)])));}
+function abrirLeitorGuia(g){if(!g)return;const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),titulo=document.getElementById('guia-leitor-titulo'),link=document.getElementById('guia-abrir-original');if(!leitor||!frame)return;frame.src=g.arquivo;if(titulo)titulo.textContent=g.titulo;if(link)link.href=g.arquivo;leitor.style.display='block';const lista=document.getElementById('guias-lista');if(lista)lista.style.display='none';leitor.scrollIntoView({behavior:'smooth',block:'start'});}
+function fecharLeitorGuia(){const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),lista=document.getElementById('guias-lista');if(frame)frame.src='about:blank';if(leitor)leitor.style.display='none';if(lista)lista.style.display='grid';}
+
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'economia', 'jornais', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
+  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -2917,6 +2939,7 @@ function mudarAba(nomeAba, evento) {
   // Carregamento sob demanda: a mesa abre mais rápido e cada recurso é
   // consultado somente quando realmente é necessário.
   if (nomeAba === 'bestiario') { inicializarBestiarioElarion(); }
+  if (nomeAba === 'guias') { carregarGuiasRPG(); }
   if (nomeAba === 'economia') { carregarEconomiaAtual(); }
   if (nomeAba === 'jornais') { carregarJornaisAtual(); }
   if (nomeAba === 'noctavell') { carregarTrabalhosNoctavell(); }
@@ -4691,3 +4714,5 @@ window.renderizarBestiario = renderizarBestiario;
 window.abrirDetalheBestiario = abrirDetalheBestiario;
 window.fecharDetalheBestiario = fecharDetalheBestiario;
 window.criarTokenDoBestiario = criarTokenDoBestiario;
+
+window.carregarGuiasRPG=carregarGuiasRPG; window.abrirLeitorGuia=abrirLeitorGuia; window.fecharLeitorGuia=fecharLeitorGuia;

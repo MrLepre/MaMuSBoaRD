@@ -1,0 +1,3698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Noites em Tokyo — Manual do RPG</title>
+
+    <meta
+        name="description"
+        content="Manual oficial do sistema Noites em Tokyo."
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    <div class="background-noise"></div>
+    <div class="background-vignette"></div>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-top">
+
+            <div class="brand-mark">
+                NT
+            </div>
+
+            <div class="brand-text">
+                <strong>NOITES</strong>
+                <span>EM TOKYO</span>
+            </div>
+
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <nav class="navigation">
+
+            <span class="nav-label">SISTEMA</span>
+
+            <a href="#inicio" class="nav-link active">
+                <span class="nav-index">00</span>
+                <span>Introdução</span>
+            </a>
+
+            <a href="#sistema" class="nav-link">
+                <span class="nav-index">01</span>
+                <span>Sistema 2d10</span>
+            </a>
+
+            <a href="#atributos" class="nav-link">
+                <span class="nav-index">02</span>
+                <span>Atributos</span>
+            </a>
+
+            <a href="#criacao" class="nav-link">
+                <span class="nav-index">03</span>
+                <span>Criação de Personagem</span>
+            </a>
+
+            <a href="#testes" class="nav-link">
+                <span class="nav-index">04</span>
+                <span>Testes e Resolução</span>
+            </a>
+
+            <a href="#combate" class="nav-link">
+                <span class="nav-index">05</span>
+                <span>Combate</span>
+            </a>
+
+            <a href="#kagunes" class="nav-link">
+                <span class="nav-index">06</span>
+                <span>Kagunes</span>
+            </a>
+
+            <a href="#fome" class="nav-link">
+                <span class="nav-index">07</span>
+                <span>Fome</span>
+            </a>
+
+            <a href="#rc" class="nav-link">
+                <span class="nav-index">08</span>
+                <span>RC</span>
+            </a>
+
+            <a href="#kakuja" class="nav-link">
+                <span class="nav-index">09</span>
+                <span>Kakuja</span>
+            </a>
+
+            <span class="nav-label nav-label-space ccg-nav-label">
+                CCG
+            </span>
+
+            <a href="#investigadores" class="nav-link">
+                <span class="nav-index">10</span>
+                <span>Investigadores</span>
+            </a>
+
+            <a href="#classes" class="nav-link">
+                <span class="nav-index">11</span>
+                <span>Classes</span>
+            </a>
+
+            <a href="#quinques" class="nav-link">
+                <span class="nav-index">12</span>
+                <span>Quinques</span>
+            </a>
+
+            <a href="#aratas" class="nav-link ccg-link">
+                <span class="nav-index">13</span>
+                <span>Aratas</span>
+            </a>
+
+            <a href="#investigacao" class="nav-link ccg-link">
+                <span class="nav-index">14</span>
+                <span>Investigação</span>
+            </a>
+
+            <span class="nav-label nav-label-space">
+                MUNDO
+            </span>
+
+            <a href="#distritos" class="nav-link">
+                <span class="nav-index">15</span>
+                <span>Distritos</span>
+            </a>
+
+            <a href="#progressao" class="nav-link">
+                <span class="nav-index">16</span>
+                <span>Progressão</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-status">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    SISTEMA EM DESENVOLVIMENTO
+                </span>
+
+            </div>
+
+            <small>
+                Noites em Tokyo RPG
+            </small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTEÚDO
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =====================================================
+             HERO
+        ====================================================== -->
+
+        <section id="inicio" class="hero section">
+
+            <div class="hero-decoration">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="hero-content">
+
+                <span class="eyebrow">
+                    MANUAL DO SISTEMA
+                </span>
+
+                <h1>
+                    NOITES
+                    <span>EM TOKYO</span>
+                </h1>
+
+                <p class="hero-description">
+                    Entre na noite. Escolha seu lado.
+                    Sobreviva ao instinto.
+                </p>
+
+                <div class="hero-system">
+
+                    <span>2d10</span>
+                    <span>•</span>
+                    <span>GHOUL</span>
+                    <span>•</span>
+                    <span>CCG</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SISTEMA
+        ====================================================== -->
+
+        <section id="sistema" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">01</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        FUNDAMENTOS
+                    </span>
+
+                    <h2>O Sistema</h2>
+
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">
+                    NOITES EM TOKYO
+                </span>
+
+                <p>
+                    <strong>Noites em Tokyo</strong> é um RPG de horror,
+                    sobrevivência e conflito entre humanos e Ghouls.
+                </p>
+
+                <p>
+                    Os jogadores podem interpretar indivíduos tentando
+                    sobreviver nas ruas de Tokyo ou Ghouls lutando contra
+                    a própria natureza predatória.
+                </p>
+
+                <p>
+                    O sistema utiliza principalmente
+                    <strong>2d10 + modificador</strong> para resolver
+                    ações, confrontos e situações de risco.
+                </p>
+
+            </div>
+
+            <div class="feature-grid">
+
+                <article class="feature-card">
+
+                    <span class="feature-number">01</span>
+
+                    <div class="feature-icon">
+                        2D10
+                    </div>
+
+                    <h3>Resolução</h3>
+
+                    <p>
+                        Dois dados de dez faces determinam o resultado
+                        das ações.
+                    </p>
+
+                </article>
+
+                <article class="feature-card">
+
+                    <span class="feature-number">02</span>
+
+                    <div class="feature-icon">
+                        RC
+                    </div>
+
+                    <h3>Evolução</h3>
+
+                    <p>
+                        Células RC determinam o crescimento e o potencial
+                        dos Ghouls.
+                    </p>
+
+                </article>
+
+                <article class="feature-card">
+
+                    <span class="feature-number">03</span>
+
+                    <div class="feature-icon">
+                        餓
+                    </div>
+
+                    <h3>Fome</h3>
+
+                    <p>
+                        Quanto maior a fome, mais difícil se torna
+                        controlar o instinto.
+                    </p>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             ATRIBUTOS
+        ====================================================== -->
+
+        <section id="atributos" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">02</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        PERSONAGEM
+                    </span>
+
+                    <h2>Atributos</h2>
+
+                </div>
+
+            </div>
+
+            <div class="attribute-grid">
+
+                <article class="attribute-card">
+
+                    <div class="attribute-top">
+                        <span>FOR</span>
+                        <strong>Força</strong>
+                    </div>
+
+                    <p>
+                        Poder físico, golpes, agarrões e esforço corporal.
+                    </p>
+
+                </article>
+
+                <article class="attribute-card">
+
+                    <div class="attribute-top">
+                        <span>AGI</span>
+                        <strong>Agilidade</strong>
+                    </div>
+
+                    <p>
+                        Velocidade, reflexos, esquiva e precisão.
+                    </p>
+
+                </article>
+
+                <article class="attribute-card">
+
+                    <div class="attribute-top">
+                        <span>CON</span>
+                        <strong>Constituição</strong>
+                    </div>
+
+                    <p>
+                        Resistência física, vigor e capacidade de suportar dano.
+                    </p>
+
+                </article>
+
+                <article class="attribute-card">
+
+                    <div class="attribute-top">
+                        <span>INT</span>
+                        <strong>Inteligência</strong>
+                    </div>
+
+                    <p>
+                        Conhecimento, investigação, análise e raciocínio.
+                    </p>
+
+                </article>
+
+                <article class="attribute-card">
+
+                    <div class="attribute-top">
+                        <span>SAB</span>
+                        <strong>Sabedoria</strong>
+                    </div>
+
+                    <p>
+                        Percepção, instinto, leitura de situações e força mental.
+                    </p>
+
+                </article>
+
+                <article class="attribute-card">
+
+                    <div class="attribute-top">
+                        <span>CAR</span>
+                        <strong>Carisma</strong>
+                    </div>
+
+                    <p>
+                        Presença, influência, persuasão e interação social.
+                    </p>
+
+                </article>
+
+                <article class="attribute-card attribute-hunger">
+
+                    <div class="attribute-top">
+                        <span>FOM</span>
+                        <strong>Fome</strong>
+                    </div>
+
+                    <p>
+                        Representa o instinto predatório e a necessidade
+                        de consumir carne humana.
+                    </p>
+
+                    <span class="attribute-warning">
+                        ATRIBUTO ESPECIAL
+                    </span>
+
+                </article>
+
+            </div>
+
+
+            <div class="modifier-panel">
+
+                <div class="modifier-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            MODIFICADORES
+                        </span>
+
+                        <h3>
+                            Conversão de Atributos
+                        </h3>
+
+                    </div>
+
+                    <span class="modifier-caption">
+                        2d10 + MOD
+                    </span>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Valor</th>
+                                <th>0</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                                <th>5</th>
+                                <th>6</th>
+                                <th>7</th>
+                                <th>8</th>
+                                <th>9</th>
+                                <th>10</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+
+                                <td>Mod.</td>
+                                <td>-1</td>
+                                <td>+0</td>
+                                <td>+1</td>
+                                <td>+2</td>
+                                <td>+3</td>
+                                <td>+4</td>
+                                <td>+5</td>
+                                <td>+6</td>
+                                <td>+7</td>
+                                <td>+8</td>
+                                <td>+9</td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CRIAÇÃO DE PERSONAGEM — FASE 2
+        ====================================================== -->
+
+        <section id="criacao" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">03</span>
+
+                <div class="section-heading-content">
+                    <span class="eyebrow">FASE 2 · PERSONAGEM</span>
+                    <h2>Criação de Personagem</h2>
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">LEIA ANTES DE CRIAR</span>
+
+                <p>
+                    A criação de personagem em <strong>Noites em Tokyo</strong> é o processo
+                    de transformar um conceito em alguém capaz de existir dentro do mundo
+                    do RPG. Este capítulo explica a ordem das decisões e o significado
+                    de cada escolha.
+                </p>
+
+                <p>
+                    <strong>Este manual não é uma ficha digital.</strong> Nenhum valor é
+                    preenchido aqui e nenhuma rolagem é realizada nesta página. O jogador
+                    utiliza as regras apresentadas neste capítulo para montar sua ficha
+                    fora do guia, conforme as orientações do Mestre.
+                </p>
+
+            </div>
+
+            <div class="formula-panel compact">
+
+                <span class="formula-label">ORDEM DA CRIAÇÃO</span>
+
+                <div class="formula">
+                    CONCEITO <span>→</span> ORIGEM <span>→</span> ATRIBUTOS <span>→</span>
+                    ESPECIALIZAÇÃO <span>→</span> VALORES DERIVADOS <span>→</span> HISTÓRIA
+                </div>
+
+                <p>
+                    Siga essa sequência para entender o personagem antes de começar a jogar.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                01 · Conceito
+            </h3>
+
+            <div class="feature-grid">
+
+                <article class="feature-card">
+                    <span class="feature-number">01</span>
+                    <div class="feature-icon">IDENTIDADE</div>
+                    <h3>Quem é o personagem?</h3>
+                    <p>
+                        Defina nome, aparência, personalidade, passado, objetivos e os
+                        vínculos que tornam o personagem uma pessoa dentro da história.
+                    </p>
+                </article>
+
+                <article class="feature-card">
+                    <span class="feature-number">02</span>
+                    <div class="feature-icon">MOTIVAÇÃO</div>
+                    <h3>Por que ele luta?</h3>
+                    <p>
+                        Estabeleça aquilo que o personagem deseja, aquilo que teme e o
+                        que estaria disposto a fazer para sobreviver em Tokyo.
+                    </p>
+                </article>
+
+                <article class="feature-card">
+                    <span class="feature-number">03</span>
+                    <div class="feature-icon">CONCEITO</div>
+                    <h3>Qual é a sua função?</h3>
+                    <p>
+                        Pense no papel que ele pretende desempenhar na campanha: combatente,
+                        investigador, sobrevivente, predador, aliado ou outra função narrativa.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                02 · Origem e natureza
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">HUMANO</span>
+                    <h3>Sem Kagune</h3>
+                    <p>
+                        Humanos dependem de suas capacidades, treinamento, recursos e
+                        equipamentos para enfrentar os perigos de Tokyo. Quando atuam
+                        pela CCG, podem seguir as regras de Investigadores e Quinques.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">GHOUL</span>
+                    <h3>Predador</h3>
+                    <p>
+                        Ghouls possuem Kagune, utilizam RC como parte de sua evolução e
+                        precisam lidar com a Fome. Sua natureza altera profundamente a forma
+                        como sobrevivem e enfrentam o mundo.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">GHOUL DE UM OLHO</span>
+                    <h3>Condição rara</h3>
+                    <p>
+                        A condição de Ghoul de Um Olho é determinada pelas regras próprias
+                        apresentadas no capítulo correspondente. Ela representa uma origem
+                        excepcional e traz vantagens e riscos próprios.
+                    </p>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">GHOUL DE UM OLHO · REGRA</span>
+
+                <p>
+                    Para determinar se um Ghoul nasceu como <strong>Ghoul de Um Olho</strong>,
+                    utiliza-se 1d100. Um resultado de <strong>96 a 100</strong> indica a condição,
+                    correspondendo a uma chance de <strong>5%</strong>. Essa rolagem é feita pelo
+                    jogador durante a criação, com os dados da mesa — nunca pelo site.
+                </p>
+
+                <p>
+                    Um Ghoul de Um Olho recebe <strong>+2 em todos os atributos físicos</strong>,
+                    possui RC muito elevado, evolui mais rapidamente e chama mais atenção da CCG.
+                    Consulte o capítulo específico para as regras completas.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                03 · Atributos
+            </h3>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">OS SETE ATRIBUTOS</span>
+
+                <p>
+                    Os atributos representam as capacidades fundamentais do personagem.
+                    O sistema utiliza <strong>Força, Agilidade, Constituição, Inteligência,
+                    Sabedoria, Carisma e Fome</strong>. Cada valor possui um modificador que
+                    é utilizado nos testes de 2d10.
+                </p>
+
+                <p>
+                    A distribuição dos valores iniciais segue o método de criação definido
+                    para a campanha pelo Mestre. Depois de definidos, os atributos não devem
+                    ser alterados arbitrariamente: eles são a base dos valores derivados,
+                    testes e especializações do personagem.
+                </p>
+
+            </div>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">FÍSICOS</span>
+                    <h3>Força · Agilidade · Constituição</h3>
+                    <p>
+                        Representam capacidade corporal, velocidade, reflexos, resistência
+                        e capacidade de suportar esforço e ferimentos.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">MENTAIS</span>
+                    <h3>Inteligência · Sabedoria</h3>
+                    <p>
+                        Representam conhecimento, percepção, julgamento, experiência e
+                        capacidade de compreender situações complexas.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">SOCIAL / INSTINTO</span>
+                    <h3>Carisma · Fome</h3>
+                    <p>
+                        Carisma representa presença e interação social. Fome representa o
+                        instinto predatório e o impulso que acompanha a natureza Ghoul.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                04 · Especialização
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">GHOUL</span>
+                    <h3>Escolha da Kagune</h3>
+                    <p>
+                        Ghouls definem seu tipo de Kagune entre Ukaku, Koukaku, Rinkaku e
+                        Bikaku. Cada tipo possui características, vantagens e limitações próprias.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">CCG</span>
+                    <h3>Classe, Quinque e Arata</h3>
+                    <p>
+                        Investigadores seguem as regras da CCG para sua classe, treinamento
+                        e utilização de Quinques. Em casos excepcionais, um investigador
+                        selecionado por seus superiores também pode receber um Arata.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">HUMANO</span>
+                    <h3>Treinamento e recursos</h3>
+                    <p>
+                        Humanos podem construir sua identidade a partir de treinamento,
+                        conhecimentos, equipamentos e vínculos estabelecidos na campanha.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                05 · Valores derivados
+            </h3>
+
+            <div class="combat-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">CA</span>
+                    <div class="combat-value">10 + MOD. AGI</div>
+                    <p>
+                        A Classe de Armadura representa a dificuldade para atingir o personagem.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">VIDA</span>
+                    <div class="combat-value">20 + CON × 2</div>
+                    <p>
+                        Representa a quantidade de dano que o personagem suporta antes de ficar incapacitado.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">FADIGA</span>
+                    <div class="combat-value">5 + MOD. CON</div>
+                    <p>
+                        Representa o desgaste físico e a capacidade de continuar realizando esforços.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">INICIATIVA</span>
+                    <div class="combat-value">2d10 + MOD. AGI</div>
+                    <p>
+                        Determina a ordem em que os participantes agem quando um combate começa.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                06 · Fome, RC e Sanidade
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">FOME</span>
+                    <h3>O instinto predatório</h3>
+                    <p>
+                        Ghouls acumulam Fome quando passam missões sem se alimentar. A Fome
+                        interfere no autocontrole e pode levar ao Frenesi.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">RC</span>
+                    <h3>Potencial biológico</h3>
+                    <p>
+                        O nível de RC acompanha a evolução de um Ghoul e determina seu estágio
+                        de desenvolvimento até a possibilidade de alcançar uma Kakuja.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">SANIDADE</span>
+                    <h3>O preço psicológico</h3>
+                    <p>
+                        A Sanidade representa a estabilidade mental diante de horror, violência,
+                        canibalismo, Fome e manifestações de Kakuja.
+                    </p>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">06 · PRINCÍPIO IMPORTANTE</span>
+
+                <p>
+                    <strong>As escolhas mecânicas devem servir ao personagem, e não o contrário.</strong>
+                    Primeiro entenda quem ele é. Depois utilize as regras para representar esse
+                    conceito dentro do sistema. O Mestre pode ajudar a interpretar qualquer
+                    regra durante a criação.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             TESTES E RESOLUÇÃO — FASE 3
+        ====================================================== -->
+
+        <section id="testes" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">04</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">FASE 3 · RESOLUÇÃO</span>
+
+                    <h2>Testes e Resolução</h2>
+
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">COMO O SISTEMA RESOLVE SITUAÇÕES</span>
+
+                <p>
+                    Nem toda ação precisa de uma rolagem. Em <strong>Noites em Tokyo</strong>,
+                    os dados entram em cena quando existe uma possibilidade real de sucesso ou
+                    fracasso e o resultado pode alterar a situação da história. Se uma ação for
+                    simples, segura ou estiver claramente dentro das capacidades do personagem,
+                    o Mestre pode simplesmente determinar que ela acontece.
+                </p>
+
+                <p>
+                    Quando houver incerteza, o sistema utiliza uma única estrutura central:
+                    <strong>2d10 + modificador do atributo</strong>. O resultado é comparado com
+                    uma dificuldade definida pelo Mestre ou com o resultado de outro personagem.
+                </p>
+
+                <p>
+                    Esta é a base para perseguições, investigação, furtividade, resistência,
+                    interação social, controle do instinto e qualquer outra situação que não
+                    possua uma regra específica mais detalhada.
+                </p>
+
+            </div>
+
+            <div class="formula-panel">
+
+                <span class="formula-label">TESTE PADRÃO</span>
+
+                <div class="formula">
+                    2d10 <span>+</span> MODIFICADOR DO ATRIBUTO
+                </div>
+
+                <p>
+                    Compare o resultado com a dificuldade estabelecida pelo Mestre ou com o
+                    resultado do personagem que está se opondo à ação.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                01 · Quando realizar um teste
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">SEM ROLAGEM</span>
+                    <h3>Ação garantida</h3>
+                    <p>
+                        Se não existe risco relevante, oposição ou pressão, o Mestre pode
+                        simplesmente narrar o resultado. O sistema não exige dados para cada
+                        pequena ação realizada durante a sessão.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">COM ROLAGEM</span>
+                    <h3>Incerteza real</h3>
+                    <p>
+                        Quando o resultado é incerto e pode mudar o rumo da cena, o Mestre
+                        escolhe o atributo apropriado e estabelece a dificuldade ou oposição.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">REGRA DE OURO</span>
+                    <h3>Os dados servem à narrativa</h3>
+                    <p>
+                        Uma rolagem deve responder a uma pergunta importante. Evite pedir
+                        testes apenas porque uma regra existe. Se o resultado não importar,
+                        não há motivo para rolar.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                02 · Escolhendo o atributo
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">FORÇA</span>
+                    <h3>Potência física</h3>
+                    <p>
+                        Usada para levantar, quebrar, empurrar, agarrar e realizar ações que
+                        dependem principalmente de força bruta.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">AGILIDADE</span>
+                    <h3>Velocidade e reflexos</h3>
+                    <p>
+                        Usada para esquivas, equilíbrio, movimentos rápidos, ações precisas,
+                        furtividade física e iniciativa.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">CONSTITUIÇÃO</span>
+                    <h3>Resistência corporal</h3>
+                    <p>
+                        Usada para suportar esforço, ferimentos, exaustão e situações em que
+                        o corpo precisa continuar funcionando sob pressão.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">INTELIGÊNCIA</span>
+                    <h3>Raciocínio e conhecimento</h3>
+                    <p>
+                        Usada para analisar informações, investigar, deduzir, lembrar conhecimentos
+                        e compreender situações complexas.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">SABEDORIA</span>
+                    <h3>Percepção e julgamento</h3>
+                    <p>
+                        Usada para perceber detalhes, interpretar situações, seguir a intuição
+                        e manter o julgamento diante de circunstâncias extremas.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">CARISMA</span>
+                    <h3>Presença e influência</h3>
+                    <p>
+                        Usada para convencer, negociar, intimidar, liderar, mentir ou influenciar
+                        outras pessoas.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">FOME</span>
+                    <h3>Instinto predatório</h3>
+                    <p>
+                        É o atributo ligado à natureza Ghoul. Representa o impulso predatório e
+                        pode ser utilizado em situações relacionadas à Fome, ao instinto e ao
+                        domínio dessa natureza.
+                    </p>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">A ABORDAGEM DEFINE O ATRIBUTO</span>
+
+                <p>
+                    A mesma tarefa pode utilizar atributos diferentes dependendo de como o
+                    personagem tenta realizá-la. Um personagem que deseja obter uma informação
+                    pode usar <strong>Carisma</strong> para convencer alguém, <strong>Inteligência</strong>
+                    para deduzir a resposta ou <strong>Sabedoria</strong> para perceber uma mentira.
+                </p>
+
+                <p>
+                    O Mestre deve considerar a abordagem apresentada pelo jogador, e não apenas
+                    o nome da ação. Isso permite que personagens diferentes resolvam o mesmo
+                    problema de maneiras distintas.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                03 · Dificuldade
+            </h3>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">ESCALA DE DIFICULDADE</span>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>NÍVEL</th>
+                                <th>DT</th>
+                                <th>REFERÊNCIA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Trivial</td>
+                                <td>6</td>
+                                <td>Ação extremamente simples ou quase garantida.</td>
+                            </tr>
+                            <tr>
+                                <td>Fácil</td>
+                                <td>9</td>
+                                <td>Exige alguma atenção, mas está dentro das capacidades comuns.</td>
+                            </tr>
+                            <tr>
+                                <td>Moderada</td>
+                                <td>12</td>
+                                <td>Desafio normal para um personagem competente.</td>
+                            </tr>
+                            <tr>
+                                <td>Difícil</td>
+                                <td>15</td>
+                                <td>Exige treinamento, bons atributos ou uma boa abordagem.</td>
+                            </tr>
+                            <tr>
+                                <td>Muito difícil</td>
+                                <td>18</td>
+                                <td>Desafio severo, em que uma falha é bastante provável.</td>
+                            </tr>
+                            <tr>
+                                <td>Extrema</td>
+                                <td>21</td>
+                                <td>Feito para personagens altamente capazes.</td>
+                            </tr>
+                            <tr>
+                                <td>Quase impossível</td>
+                                <td>24+</td>
+                                <td>Algo além do alcance normal da maioria dos personagens.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>
+                    A dificuldade não precisa ser escolhida mecanicamente em toda situação. O Mestre
+                    pode ajustá-la de acordo com condições, tempo disponível, equipamento, pressão,
+                    ambiente e outras circunstâncias relevantes.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                04 · Testes opostos
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">CONFRONTO</span>
+                    <h3>Resultado contra resultado</h3>
+                    <p>
+                        Quando dois personagens disputam diretamente uma situação, ambos realizam
+                        um teste apropriado. O maior resultado vence o confronto.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">ABORDAGEM</span>
+                    <h3>Cada lado usa seu atributo</h3>
+                    <p>
+                        O atributo depende da forma como cada participante age. Uma perseguição, por
+                        exemplo, pode colocar Agilidade contra Agilidade; um agarrão pode colocar Força
+                        contra Força ou Agilidade, conforme a situação.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">EMPATE</span>
+                    <h3>A situação permanece</h3>
+                    <p>
+                        Em caso de empate, nenhum dos lados obtém vantagem decisiva. O Mestre mantém
+                        a situação como está ou introduz uma nova circunstância que altere o confronto.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                05 · Vantagem e desvantagem
+            </h3>
+
+            <div class="combat-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">VANTAGEM</span>
+                    <div class="combat-value">+2</div>
+                    <p>
+                        Uma circunstância claramente favorável concede +2 ao resultado final do teste.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">NORMAL</span>
+                    <div class="combat-value">+0</div>
+                    <p>
+                        Quando não existe uma condição especial alterando a situação, o teste é realizado normalmente.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">DESVANTAGEM</span>
+                    <div class="combat-value">−2</div>
+                    <p>
+                        Uma circunstância claramente desfavorável aplica −2 ao resultado final do teste.
+                    </p>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">LIMITES</span>
+
+                <p>
+                    Vantagens e desvantagens não devem se acumular indefinidamente. Quando uma situação
+                    já possui uma condição claramente favorável ou desfavorável, trate-a como vantagem
+                    ou desvantagem em vez de somar diversos modificadores iguais.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                06 · Sucesso, falha e resultados extremos
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">SUCESSO</span>
+                    <h3>Resultado ≥ dificuldade</h3>
+                    <p>
+                        Se o resultado final alcançar ou superar a dificuldade, a ação é bem-sucedida.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">FALHA</span>
+                    <h3>Resultado &lt; dificuldade</h3>
+                    <p>
+                        Se o resultado final ficar abaixo da dificuldade, a ação falha. A consequência
+                        depende da situação e não precisa significar que nada aconteceu.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">CRÍTICO</span>
+                    <h3>10 + 10</h3>
+                    <p>
+                        Dois resultados 10 formam um crítico: a ação é realizada de maneira excepcional.
+                        Em combate, os efeitos específicos do crítico são definidos no capítulo de Combate.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">FALHA CRÍTICA</span>
+                    <h3>1 + 1</h3>
+                    <p>
+                        Dois resultados 1 formam uma falha crítica. Além da falha normal, o Mestre pode
+                        aplicar uma consequência adicional coerente com a cena.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                07 · Testes de resistência
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">CONSTITUIÇÃO</span>
+                    <h3>Resistência física</h3>
+                    <p>
+                        Utilizada quando o personagem precisa suportar esforço, ferimentos, exaustão
+                        ou uma ameaça que afeta diretamente o corpo.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">SABEDORIA</span>
+                    <h3>Resistência mental</h3>
+                    <p>
+                        Utilizada para manter o julgamento e perceber situações que podem abalar a
+                        estabilidade do personagem.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">FOME</span>
+                    <h3>Resistência ao instinto</h3>
+                    <p>
+                        Pode ser utilizada por Ghouls quando a situação envolve diretamente o impulso
+                        predatório, o cheiro de sangue ou a necessidade de controlar a própria natureza.
+                    </p>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">VONTADE NÃO É UM OITAVO ATRIBUTO</span>
+
+                <p>
+                    O termo <strong>Vontade</strong> pode aparecer na narrativa e em regras específicas
+                    para representar resistência e controle, mas não é um atributo adicional. Quando uma
+                    regra pedir um teste de Vontade, o Mestre deve utilizar o atributo indicado pela situação,
+                    normalmente <strong>Sabedoria</strong> para controle mental ou <strong>Fome</strong> quando
+                    o conflito for diretamente contra o instinto Ghoul.
+                </p>
+
+            </div>
+
+            <h3 class="subheading">
+                08 · Sanidade
+            </h3>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">ESTABILIDADE MENTAL</span>
+
+                <p>
+                    Sanidade representa a capacidade de um personagem continuar racional diante de horror,
+                    violência extrema e experiências que ultrapassam aquilo que ele consegue processar. Ela
+                    não é um oitavo atributo e não substitui Sabedoria ou Fome. É uma consequência narrativa
+                    e mecânica das experiências vividas durante a campanha.
+                </p>
+
+                <p>
+                    O Mestre pode considerar um teste de Sanidade quando o personagem presencia um horror
+                    significativo, passa por uma experiência traumática, presencia uma manifestação extrema
+                    de Kakuja ou enfrenta situações capazes de quebrar sua estabilidade. O teste utiliza
+                    <strong>2d10 + modificador de Sabedoria</strong>, salvo quando uma regra específica indicar
+                    outra abordagem.
+                </p>
+
+                <p>
+                    Uma falha não precisa significar perda imediata de controle. O Mestre pode representar
+                    o impacto através de medo, hesitação, perturbação, dificuldade de agir, lembranças
+                    traumáticas ou outras consequências coerentes com a personalidade do personagem.
+                </p>
+
+            </div>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">FOME EXTREMA</span>
+                    <h3>O instinto se aproxima</h3>
+                    <p>
+                        A Fome pode tornar o controle mais difícil. Situações em que um Ghoul está próximo
+                        do Frenesi devem priorizar testes relacionados ao instinto e ao autocontrole.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">CANIBALISMO</span>
+                    <h3>O preço psicológico</h3>
+                    <p>
+                        O consumo de outro Ghoul pode representar um peso psicológico permanente. As
+                        consequências de Sanidade são determinadas conforme a gravidade do ato e o contexto
+                        da campanha.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">KAKUJA</span>
+                    <h3>Controle e monstruosidade</h3>
+                    <p>
+                        Manifestações de Kakuja podem colocar a estabilidade do personagem em risco. Consulte
+                        o capítulo de Kakuja para as regras específicas de transformação e controle.
+                    </p>
+                </article>
+
+            </div>
+
+            <h3 class="subheading">
+                09 · Exemplos de jogo
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+                    <span class="panel-label">GHOUL</span>
+                    <h3>Escapar de uma patrulha</h3>
+                    <p>
+                        Um Ghoul precisa atravessar um beco enquanto investigadores patrulham a região.
+                        O Mestre considera a situação difícil e solicita um teste de Agilidade. O resultado
+                        é comparado à dificuldade determinada pela cena.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">CCG</span>
+                    <h3>Analisar uma cena</h3>
+                    <p>
+                        Um investigador procura sinais deixados por um Ghoul. Dependendo da abordagem,
+                        o Mestre pode solicitar Inteligência para analisar evidências ou Sabedoria para
+                        perceber detalhes que passariam despercebidos.
+                    </p>
+                </article>
+
+                <article class="small-panel">
+                    <span class="panel-label">INSTINTO</span>
+                    <h3>Resistir ao cheiro de sangue</h3>
+                    <p>
+                        Um Ghoul sente o cheiro de sangue humano durante uma missão. Se o Mestre considerar
+                        que a Fome representa um risco real, pode solicitar um teste relacionado ao instinto
+                        para determinar se o personagem mantém o controle.
+                    </p>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">REGRA DE OURO DO MESTRE</span>
+
+                <p>
+                    <strong>As regras existem para resolver situações, não para impedir a narrativa.</strong>
+                    Quando uma regra não contemplar perfeitamente uma situação, escolha a interpretação
+                    que melhor preserve a lógica do mundo, a diversão da mesa e a coerência de
+                    <strong>Noites em Tokyo</strong>.
+                </p>
+
+                <p>
+                    O objetivo do teste é responder a uma pergunta: <strong>o personagem conseguiu fazer
+                    aquilo que tentou?</strong> Depois da resposta, a história continua.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             COMBATE — FASE 1
+        ====================================================== -->
+
+        <section id="combate" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">05</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        FASE 1 · CONFRONTO
+                    </span>
+
+                    <h2>Combate</h2>
+
+                </div>
+
+            </div>
+
+
+            <!-- VALORES DERIVADOS -->
+
+            <div class="combat-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        CLASSE DE ARMADURA
+                    </span>
+
+                    <div class="combat-value">
+                        10 + MOD. AGI
+                    </div>
+
+                    <p>
+                        Representa a dificuldade necessária para atingir
+                        o personagem com um ataque.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        VIDA
+                    </span>
+
+                    <div class="combat-value">
+                        20 + CON × 2
+                    </div>
+
+                    <p>
+                        Pontos de Vida representam a capacidade de suportar
+                        ferimentos antes de ficar incapacitado.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        FADIGA
+                    </span>
+
+                    <div class="combat-value">
+                        5 + MOD. CON
+                    </div>
+
+                    <p>
+                        Representa o desgaste físico causado por esforço
+                        e situações extremas.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <div class="combat-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        INICIATIVA
+                    </span>
+
+                    <div class="combat-value">
+                        2d10 + MOD. AGI
+                    </div>
+
+                    <p>
+                        Define a ordem dos participantes no início
+                        de um confronto.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        MOVIMENTO
+                    </span>
+
+                    <div class="combat-value">
+                        6 METROS
+                    </div>
+
+                    <p>
+                        Todo personagem possui 6 metros de movimento
+                        por rodada como valor-base.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        ESTRUTURA DO TURNO
+                    </span>
+
+                    <div class="combat-value">
+                        AÇÃO + MOV. + REAÇÃO
+                    </div>
+
+                    <p>
+                        Cada personagem possui uma ação, movimento
+                        e reação por rodada.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <!-- RODADA -->
+
+            <div class="formula-panel compact">
+
+                <span class="formula-label">
+                    ESTRUTURA DE UMA RODADA
+                </span>
+
+                <div class="formula">
+                    AÇÃO <span>+</span> MOVIMENTO <span>+</span> REAÇÃO
+                </div>
+
+                <p>
+                    O jogador pode distribuir essas opções conforme
+                    as regras da situação e das habilidades do personagem.
+                </p>
+
+            </div>
+
+
+            <!-- AÇÕES -->
+
+            <h3 class="subheading">
+                Ações de combate
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        ATAQUE
+                    </span>
+
+                    <h3>
+                        Atacar
+                    </h3>
+
+                    <p>
+                        Realize uma rolagem de ataque contra a CA do alvo.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        TÁTICA
+                    </span>
+
+                    <h3>
+                        Defender
+                    </h3>
+
+                    <p>
+                        Receba <strong>+2 CA</strong> até o início
+                        do seu próximo turno.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        MOVIMENTO
+                    </span>
+
+                    <h3>
+                        Correr
+                    </h3>
+
+                    <p>
+                        Dobre seu movimento naquele turno.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        CONTROLE
+                    </span>
+
+                    <h3>
+                        Agarrar
+                    </h3>
+
+                    <p>
+                        Tente restringir fisicamente um alvo
+                        através de um teste apropriado.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        MOVIMENTO
+                    </span>
+
+                    <h3>
+                        Levantar
+                    </h3>
+
+                    <p>
+                        Levante-se após estar caído.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        INTERAÇÃO
+                    </span>
+
+                    <h3>
+                        Interagir
+                    </h3>
+
+                    <p>
+                        Manipule objetos, portas, equipamentos ou
+                        elementos relevantes do cenário.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <!-- ATAQUES -->
+
+            <h3 class="subheading">
+                Ataques e dano
+            </h3>
+
+            <div class="content-panel">
+
+                <div class="panel-decoration"></div>
+
+                <span class="panel-label">
+                    REGRA DE ATAQUE
+                </span>
+
+                <p>
+                    Um ataque utiliza:
+                    <strong>2d10 + modificador do atributo apropriado.</strong>
+                </p>
+
+                <p>
+                    Se o resultado for igual ou superior à
+                    <strong>Classe de Armadura (CA)</strong> do alvo,
+                    o ataque acerta.
+                </p>
+
+                <p>
+                    O dano desarmado básico é:
+                    <strong>1d6 + modificador de Força.</strong>
+                </p>
+
+            </div>
+
+
+            <div class="combat-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        ATAQUE FÍSICO
+                    </span>
+
+                    <div class="combat-value">
+                        2d10 + MOD
+                    </div>
+
+                    <p>
+                        Utilize o atributo adequado à natureza do ataque.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        DANO DESARMADO
+                    </span>
+
+                    <div class="combat-value">
+                        1d6 + MOD FOR
+                    </div>
+
+                    <p>
+                        Dano básico de ataques corporais sem arma ou Kagune.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        ACERTO
+                    </span>
+
+                    <div class="combat-value">
+                        ATAQUE ≥ CA
+                    </div>
+
+                    <p>
+                        Igualar a CA já é suficiente para atingir o alvo.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <!-- CRÍTICOS -->
+
+            <h3 class="subheading">
+                Acertos e falhas críticas
+            </h3>
+
+            <div class="test-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        CRÍTICO
+                    </span>
+
+                    <h3>
+                        10 + 10
+                    </h3>
+
+                    <p>
+                        Dois resultados 10 no 2d10 produzem um
+                        acerto crítico automático.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        DANO CRÍTICO
+                    </span>
+
+                    <h3>
+                        Dado maximizado
+                    </h3>
+
+                    <p>
+                        No acerto crítico, o dado de dano é considerado
+                        em seu valor máximo.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        FALHA CRÍTICA
+                    </span>
+
+                    <h3>
+                        1 + 1
+                    </h3>
+
+                    <p>
+                        Dois resultados 1 representam uma falha crítica.
+                        O Mestre determina a consequência.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <!-- REAÇÕES -->
+
+            <h3 class="subheading">
+                Reações
+            </h3>
+
+            <div class="combat-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        ESQUIVA
+                    </span>
+
+                    <div class="combat-value">
+                        +2 CA
+                    </div>
+
+                    <p>
+                        Quando um ataque é realizado contra você,
+                        gaste sua reação para receber +2 CA contra
+                        aquele ataque.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        DEFESA EMERGENCIAL
+                    </span>
+
+                    <div class="combat-value">
+                        −1d6 DANO
+                    </div>
+
+                    <p>
+                        Após sofrer dano, gaste sua reação para reduzir
+                        o dano sofrido em 1d6.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        LIMITE
+                    </span>
+
+                    <div class="combat-value">
+                        1 REAÇÃO
+                    </div>
+
+                    <p>
+                        Cada personagem possui uma reação por rodada,
+                        recuperada no início do seu próximo turno.
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <!-- INCAPACITADO -->
+
+            <h3 class="subheading">
+                0 PV — Incapacitado
+            </h3>
+
+            <div class="combat-warning">
+
+                <div class="warning-symbol">
+                    0
+                </div>
+
+                <div>
+
+                    <span class="panel-label">
+                        ESTADO CRÍTICO
+                    </span>
+
+                    <h3>
+                        O personagem chegou a 0 PV.
+                    </h3>
+
+                    <p>
+                        Ao chegar a <strong>0 Pontos de Vida</strong>,
+                        o personagem fica incapacitado.
+                    </p>
+
+                    <p>
+                        Enquanto estiver incapacitado, ele não pode
+                        agir normalmente e precisa realizar testes
+                        de sobrevivência.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- SOBREVIVÊNCIA -->
+
+            <div class="formula-panel compact">
+
+                <span class="formula-label">
+                    TESTE DE SOBREVIVÊNCIA
+                </span>
+
+                <div class="formula">
+                    2d10 <span>+</span> CONSTITUIÇÃO
+                </div>
+
+                <p>
+                    Três sucessos estabilizam o personagem.
+                    Três falhas resultam em morte.
+                    Sofrer dano enquanto incapacitado adiciona
+                    automaticamente uma falha.
+                </p>
+
+            </div>
+
+
+            <!-- REGENERAÇÃO -->
+
+            <h3 class="subheading">
+                Regeneração Ghoul
+            </h3>
+
+            <div class="content-panel">
+
+                <span class="panel-label">
+                    REGENERAÇÃO NATURAL
+                </span>
+
+                <p>
+                    Fora de combate, um Ghoul pode recuperar:
+                    <strong>1d6 + modificador de Fome</strong> em
+                    Pontos de Vida, conforme as condições da cena.
+                </p>
+
+                <p>
+                    Formas avançadas de regeneração serão definidas
+                    posteriormente através do sistema de RC, Kagune
+                    e evolução.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             KAGUNES
+        ====================================================== -->
+
+        <section id="kagunes" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">06</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        BIOLOGIA GHOUL
+                    </span>
+
+                    <h2>Kagunes</h2>
+
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <p>
+                    O Kagune é o órgão predatório utilizado pelos Ghouls
+                    para combate. Sua manifestação determina características
+                    físicas, estilo de luta e limitações.
+                </p>
+
+                <p>
+                    Existem quatro tipos principais:
+                    <strong>Ukaku, Koukaku, Rinkaku e Bikaku.</strong>
+                </p>
+
+            </div>
+
+
+            <!-- UKAKU -->
+
+            <article class="kagune-entry">
+
+                <div class="kagune-entry-header">
+
+                    <span class="kagune-number">
+                        01
+                    </span>
+
+                    <div>
+
+                        <span class="eyebrow">
+                            TIPO I
+                        </span>
+
+                        <h3>
+                            Ukaku
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="kagune-layout">
+
+                    <div class="kagune-art">
+
+                        <img
+                            src="imagens/kagunes/ukaku.jpeg"
+                            alt="Kagune Ukaku"
+                        >
+
+                    </div>
+
+                    <div class="kagune-info">
+
+                        <p>
+                            Manifestado geralmente na região superior
+                            das costas. É leve, veloz e especializado
+                            em ataques à distância.
+                        </p>
+
+                        <div class="info-box">
+
+                            <span>BÔNUS</span>
+
+                            <strong>
+                                +2 Agilidade
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <span>ESPECIALIZAÇÃO</span>
+
+                            <strong>
+                                Ataques à distância
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box danger">
+
+                            <span>LIMITAÇÃO</span>
+
+                            <strong>
+                                Baixa resistência
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- KOUKAKU -->
+
+            <article class="kagune-entry">
+
+                <div class="kagune-entry-header">
+
+                    <span class="kagune-number">
+                        02
+                    </span>
+
+                    <div>
+
+                        <span class="eyebrow">
+                            TIPO II
+                        </span>
+
+                        <h3>
+                            Koukaku
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="kagune-layout">
+
+                    <div class="kagune-art">
+
+                        <img
+                            src="imagens/kagunes/koukaku.jpeg"
+                            alt="Kagune Koukaku"
+                        >
+
+                    </div>
+
+                    <div class="kagune-info">
+
+                        <p>
+                            Extremamente resistente e pesado.
+                            Pode assumir formas semelhantes a escudos,
+                            lâminas ou grandes estruturas defensivas.
+                        </p>
+
+                        <div class="info-box">
+
+                            <span>BÔNUS</span>
+
+                            <strong>
+                                +2 Resistência
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <span>ESPECIALIZAÇÃO</span>
+
+                            <strong>
+                                Grande defesa
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box danger">
+
+                            <span>LIMITAÇÃO</span>
+
+                            <strong>
+                                Movimentos lentos
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- RINKAKU -->
+
+            <article class="kagune-entry">
+
+                <div class="kagune-entry-header">
+
+                    <span class="kagune-number">
+                        03
+                    </span>
+
+                    <div>
+
+                        <span class="eyebrow">
+                            TIPO III
+                        </span>
+
+                        <h3>
+                            Rinkaku
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="kagune-layout">
+
+                    <div class="kagune-art">
+
+                        <img
+                            src="imagens/kagunes/rinkaku.jpeg"
+                            alt="Kagune Rinkaku"
+                        >
+
+                    </div>
+
+                    <div class="kagune-info">
+
+                        <p>
+                            Possui enorme capacidade regenerativa e pode
+                            formar diversos tentáculos ou estruturas
+                            simultaneamente.
+                        </p>
+
+                        <div class="info-box">
+
+                            <span>BÔNUS</span>
+
+                            <strong>
+                                +2 Regeneração
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <span>ESPECIALIZAÇÃO</span>
+
+                            <strong>
+                                Alto dano
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box danger">
+
+                            <span>LIMITAÇÃO</span>
+
+                            <strong>
+                                Instável emocionalmente
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- BIKAKU -->
+
+            <article class="kagune-entry">
+
+                <div class="kagune-entry-header">
+
+                    <span class="kagune-number">
+                        04
+                    </span>
+
+                    <div>
+
+                        <span class="eyebrow">
+                            TIPO IV
+                        </span>
+
+                        <h3>
+                            Bikaku
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="kagune-layout">
+
+                    <div class="kagune-art">
+
+                        <img
+                            src="imagens/kagunes/bikaku.jpeg"
+                            alt="Kagune Bikaku"
+                        >
+
+                    </div>
+
+                    <div class="kagune-info">
+
+                        <p>
+                            Geralmente surge na região inferior das costas
+                            e possui formato semelhante a uma cauda.
+                            É considerado o tipo mais equilibrado.
+                        </p>
+
+                        <div class="info-box">
+
+                            <span>BÔNUS</span>
+
+                            <strong>
+                                +1 nos atributos físicos
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <span>ESPECIALIZAÇÃO</span>
+
+                            <strong>
+                                Equilibrado
+                            </strong>
+
+                        </div>
+
+                        <div class="info-box">
+
+                            <span>CARACTERÍSTICA</span>
+
+                            <strong>
+                                Boa força e alcance
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <div class="cycle-panel">
+
+                <span class="eyebrow">
+                    CICLO NATURAL
+                </span>
+
+                <h3>
+                    Vantagens entre Kagunes
+                </h3>
+
+                <div class="cycle">
+
+                    <div>UKAKU</div>
+                    <span>›</span>
+
+                    <div>BIKAKU</div>
+                    <span>›</span>
+
+                    <div>RINKAKU</div>
+                    <span>›</span>
+
+                    <div>KOUKAKU</div>
+                    <span>›</span>
+
+                    <div>UKAKU</div>
+
+                </div>
+
+                <p>
+                    A vantagem natural representa uma superioridade
+                    situacional, não uma vitória automática.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             UM OLHO
+        ====================================================== -->
+
+        <section id="olho-unico" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">07</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        VARIAÇÃO RARA
+                    </span>
+
+                    <h2>
+                        Ghoul de Um Olho
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <p>
+                    Alguns indivíduos nascem como Ghouls de Um Olho,
+                    uma condição extremamente rara.
+                </p>
+
+                <div class="formula-panel compact">
+
+                    <span class="formula-label">
+                        ROLAGEM
+                    </span>
+
+                    <div class="formula">
+                        1d100
+                    </div>
+
+                    <p>
+                        01–95: Ghoul comum<br>
+                        96–100: Ghoul de Um Olho
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="feature-grid">
+
+                <article class="feature-card">
+
+                    <span class="feature-number">
+                        +2
+                    </span>
+
+                    <h3>
+                        Atributos físicos
+                    </h3>
+
+                    <p>
+                        Recebe +2 em todos os atributos físicos.
+                    </p>
+
+                </article>
+
+                <article class="feature-card">
+
+                    <span class="feature-number">
+                        RC
+                    </span>
+
+                    <h3>
+                        RC elevado
+                    </h3>
+
+                    <p>
+                        Possui uma concentração de células RC superior.
+                    </p>
+
+                </article>
+
+                <article class="feature-card">
+
+                    <span class="feature-number">
+                        ↑
+                    </span>
+
+                    <h3>
+                        Evolução
+                    </h3>
+
+                    <p>
+                        Desenvolve seu potencial mais rapidamente.
+                    </p>
+
+                </article>
+
+            </div>
+
+            <div class="warning-panel">
+
+                <span>⚠</span>
+
+                <div>
+
+                    <strong>
+                        ATENÇÃO
+                    </strong>
+
+                    <p>
+                        Ghouls de Um Olho possuem maior probabilidade
+                        de chamar a atenção da CCG.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             FOME
+        ====================================================== -->
+
+        <section id="fome" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">08</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        INSTINTO
+                    </span>
+
+                    <h2>
+                        Fome
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="fome-panel">
+
+                <div class="fome-symbol">
+                    餓
+                </div>
+
+                <div class="fome-content">
+
+                    <span class="eyebrow">
+                        A FOME NUNCA DESAPARECE
+                    </span>
+
+                    <h3>
+                        Todo Ghoul precisa se alimentar.
+                    </h3>
+
+                    <p>
+                        Cada missão realizada sem alimentação aumenta
+                        a Fome do personagem em <strong>+1</strong>.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="fome-grid">
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        CONTROLE
+                    </span>
+
+                    <p>
+                        Testes sociais podem sofrer penalidades quando
+                        a Fome está elevada.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        INSTINTO
+                    </span>
+
+                    <p>
+                        O Mestre pode exigir testes para evitar atacar
+                        humanos próximos.
+                    </p>
+
+                </article>
+
+                <article class="small-panel">
+
+                    <span class="panel-label">
+                        RECUPERAÇÃO
+                    </span>
+
+                    <p>
+                        Fome elevada reduz a recuperação de RC.
+                    </p>
+
+                </article>
+
+                <article class="small-panel danger-panel">
+
+                    <span class="panel-label">
+                        MÁXIMO
+                    </span>
+
+                    <p>
+                        Em níveis extremos, um teste de Vontade pode
+                        ser exigido para evitar o Frenesi.
+                    </p>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RC
+        ====================================================== -->
+
+        <section id="rc" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">09</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        CÉLULAS RC
+                    </span>
+
+                    <h2>
+                        RC
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <p>
+                    As células RC representam a capacidade biológica
+                    de um Ghoul. Elas influenciam sua força, evolução
+                    e capacidade de desenvolver uma Kakuja.
+                </p>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>RC</th>
+                            <th>Classificação</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>0–999</td>
+                            <td>Ghoul Iniciante</td>
+                        </tr>
+
+                        <tr>
+                            <td>1.000–2.999</td>
+                            <td>Ghoul Experiente</td>
+                        </tr>
+
+                        <tr>
+                            <td>3.000–5.999</td>
+                            <td>Ghoul Forte</td>
+                        </tr>
+
+                        <tr>
+                            <td>6.000–9.999</td>
+                            <td>Elite</td>
+                        </tr>
+
+                        <tr>
+                            <td>10.000–14.999</td>
+                            <td>Semi-Kakuja</td>
+                        </tr>
+
+                        <tr>
+                            <td>15.000+</td>
+                            <td>Kakuja Completa</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <h3 class="subheading">
+                RC obtido através de humanos
+            </h3>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Alvo</th>
+                            <th>RC</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Cadáver em estado ruim</td>
+                            <td>20</td>
+                        </tr>
+
+                        <tr>
+                            <td>Humano desnutrido</td>
+                            <td>30</td>
+                        </tr>
+
+                        <tr>
+                            <td>Humano comum</td>
+                            <td>50</td>
+                        </tr>
+
+                        <tr>
+                            <td>Humano saudável</td>
+                            <td>60</td>
+                        </tr>
+
+                        <tr>
+                            <td>Atleta / Militar</td>
+                            <td>75</td>
+                        </tr>
+
+                        <tr>
+                            <td>Investigador CCG</td>
+                            <td>100</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <h3 class="subheading">
+                RC obtido através de Ghouls
+            </h3>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Ghoul consumido</th>
+                            <th>RC</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Ghoul Fraco</td>
+                            <td>150</td>
+                        </tr>
+
+                        <tr>
+                            <td>Rank C</td>
+                            <td>200</td>
+                        </tr>
+
+                        <tr>
+                            <td>Rank B</td>
+                            <td>300</td>
+                        </tr>
+
+                        <tr>
+                            <td>Rank A</td>
+                            <td>450</td>
+                        </tr>
+
+                        <tr>
+                            <td>Rank SS</td>
+                            <td>700</td>
+                        </tr>
+
+                        <tr>
+                            <td>Rank SSS</td>
+                            <td>1.000</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="warning-panel">
+
+                <span>☠</span>
+
+                <div>
+
+                    <strong>
+                        CANNIBALISMO
+                    </strong>
+
+                    <p>
+                        Consumir outros Ghouls oferece muito mais RC,
+                        porém pode causar danos permanentes à Sanidade
+                        e prejudicar a reputação do personagem entre
+                        outros Ghouls.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             KAKUJA
+        ====================================================== -->
+
+        <section id="kakuja" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">10</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        EVOLUÇÃO DO KAGUNE
+                    </span>
+
+                    <h2>
+                        Kakuja
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="content-panel">
+
+                <p>
+                    A <strong>Kakuja</strong> é uma evolução anormal
+                    do Kagune causada pelo acúmulo e mutação de células RC.
+                </p>
+
+                <p>
+                    O processo geralmente está relacionado ao consumo
+                    repetido de outros Ghouls.
+                </p>
+
+                <p>
+                    Quanto maior o acúmulo de RC, maior o potencial
+                    da transformação — mas também maior pode ser
+                    o conflito entre consciência e instinto.
+                </p>
+
+            </div>
+
+
+            <!-- PARCIAL -->
+
+            <article class="kakuja-card">
+
+                <div class="kakuja-art">
+
+                    <img
+                        src="imagens/kakuja/kakuja-parcial.jpeg"
+                        alt="Kakuja Parcial"
+                    >
+
+                </div>
+
+                <div class="kakuja-text">
+
+                    <span class="kakuja-stage">
+                        ESTÁGIO I
+                    </span>
+
+                    <h3>
+                        Kakuja Parcial
+                    </h3>
+
+                    <p>
+                        A primeira manifestação da transformação.
+                        O Kagune começa a se espalhar pelo corpo,
+                        formando placas, lâminas, membros adicionais
+                        ou outras estruturas orgânicas.
+                    </p>
+
+                    <p>
+                        A transformação ainda é instável e pode ser
+                        difícil de controlar.
+                    </p>
+
+                    <ul>
+
+                        <li>
+                            Cobertura parcial do corpo.
+                        </li>
+
+                        <li>
+                            Aumento do poder ofensivo.
+                        </li>
+
+                        <li>
+                            Maior resistência física.
+                        </li>
+
+                        <li>
+                            Manifestação irregular do Kagune.
+                        </li>
+
+                        <li>
+                            Alto risco de perda de controle.
+                        </li>
+
+                    </ul>
+
+                    <div class="kakuja-rule">
+
+                        <strong>
+                            10.000–14.999 RC
+                        </strong>
+
+                        <span>
+                            Pode ativar Semi-Kakuja.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- ARMADURA -->
+
+            <article class="kakuja-card reverse">
+
+                <div class="kakuja-art">
+
+                    <img
+                        src="imagens/kakuja/kakuja-completa-armadura.jpeg"
+                        alt="Kakuja Completa Armadura"
+                    >
+
+                </div>
+
+                <div class="kakuja-text">
+
+                    <span class="kakuja-stage">
+                        ESTÁGIO II
+                    </span>
+
+                    <h3>
+                        Kakuja Completa — Armadura
+                    </h3>
+
+                    <p>
+                        Neste estágio, o Kagune deixa de ser apenas
+                        uma extensão do corpo e passa a formar uma
+                        estrutura de combate integrada.
+                    </p>
+
+                    <p>
+                        A manifestação pode cobrir grande parte do
+                        corpo, criando uma verdadeira armadura viva.
+                    </p>
+
+                    <ul>
+
+                        <li>
+                            Grande aumento de resistência.
+                        </li>
+
+                        <li>
+                            Aumento expressivo do dano.
+                        </li>
+
+                        <li>
+                            Regeneração acelerada.
+                        </li>
+
+                        <li>
+                            Proteção de regiões vitais.
+                        </li>
+
+                        <li>
+                            Novas possibilidades de ataque.
+                        </li>
+
+                    </ul>
+
+                    <div class="kakuja-rule">
+
+                        <strong>
+                            15.000+ RC
+                        </strong>
+
+                        <span>
+                            Kakuja Completa.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- MONSTRUOSA -->
+
+            <article class="kakuja-card">
+
+                <div class="kakuja-art">
+
+                    <img
+                        src="imagens/kakuja/kakuja-completa-monstruosa.jpeg"
+                        alt="Kakuja Completa Monstruosa"
+                    >
+
+                </div>
+
+                <div class="kakuja-text">
+
+                    <span class="kakuja-stage">
+                        ESTÁGIO III
+                    </span>
+
+                    <h3>
+                        Kakuja Completa — Monstruosa
+                    </h3>
+
+                    <p>
+                        O estágio máximo da evolução.
+                        O Kagune pode assumir uma forma gigantesca,
+                        monstruosa e altamente especializada.
+                    </p>
+
+                    <p>
+                        A anatomia humana pode ser parcialmente
+                        abandonada em favor de estruturas criadas
+                        exclusivamente para caça e combate.
+                    </p>
+
+                    <ul>
+
+                        <li>
+                            Múltiplos membros.
+                        </li>
+
+                        <li>
+                            Mandíbulas e bocas adicionais.
+                        </li>
+
+                        <li>
+                            Lâminas e espinhos.
+                        </li>
+
+                        <li>
+                            Carapaças e placas orgânicas.
+                        </li>
+
+                        <li>
+                            Estruturas gigantescas.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </article>
+
+
+            <div class="combat-warning">
+
+                <div class="warning-symbol">
+                    !
+                </div>
+
+                <div>
+
+                    <span class="panel-label">
+                        PERDA DE CONTROLE
+                    </span>
+
+                    <h3>
+                        A Kakuja não é apenas poder.
+                    </h3>
+
+                    <p>
+                        Ao ativar a Semi-Kakuja, o personagem deve
+                        realizar um <strong>teste de Vontade</strong>.
+                    </p>
+
+                    <p>
+                        Em caso de sucesso, mantém o controle.
+                        Em caso de falha, entra em <strong>Frenesi</strong>.
+                    </p>
+
+                    <p>
+                        Durante o Frenesi, o personagem não consegue
+                        distinguir aliados de inimigos e ataca qualquer
+                        criatura próxima. O Mestre controla suas ações
+                        até o fim da transformação.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PROGRESSÃO
+        ====================================================== -->
+
+        <section id="progressao" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">15</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        RANKING
+                    </span>
+
+                    <h2>
+                        Progressão
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="rank-grid">
+
+                <article class="rank-card">
+                    <span>C</span>
+                    <strong>Ghoul Inicial</strong>
+                </article>
+
+                <article class="rank-card">
+                    <span>B</span>
+                    <strong>Ghoul Desenvolvido</strong>
+                </article>
+
+                <article class="rank-card">
+                    <span>A</span>
+                    <strong>Ghoul Perigoso</strong>
+                </article>
+
+                <article class="rank-card">
+                    <span>SS</span>
+                    <strong>Ghoul Excepcional</strong>
+                </article>
+
+                <article class="rank-card">
+                    <span>SSS</span>
+                    <strong>Ameaça Extrema</strong>
+                </article>
+
+            </div>
+
+            <div class="content-panel">
+
+                <p>
+                    Ghouls iniciam sua trajetória no
+                    <strong>Rank C</strong> e podem evoluir conforme
+                    sobrevivem, acumulam experiência e aumentam
+                    seu potencial.
+                </p>
+
+                <div class="rank-line">
+                    C <span>→</span>
+                    B <span>→</span>
+                    A <span>→</span>
+                    SS <span>→</span>
+                    SSS
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DISTRITOS
+        ====================================================== -->
+
+        <section id="distritos" class="section">
+
+            <div class="section-heading">
+
+                <span class="section-number">14</span>
+
+                <div class="section-heading-content">
+
+                    <span class="eyebrow">
+                        TOKYO
+                    </span>
+
+                    <h2>
+                        Distritos
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="district-grid">
+
+                <article><strong>01</strong><span>Grande presença da CCG</span></article>
+                <article><strong>02</strong><span>Comércio e alta vigilância</span></article>
+                <article><strong>03</strong><span>Conflitos ocasionais</span></article>
+                <article><strong>04</strong><span>Território neutro</span></article>
+                <article><strong>05</strong><span>Área residencial</span></article>
+                <article><strong>06</strong><span>Forte presença Ghoul</span></article>
+                <article><strong>07</strong><span>Distrito da Anteiku</span></article>
+                <article><strong>08</strong><span>Influência da Aogiri em certos períodos</span></article>
+                <article><strong>09</strong><span>Território disputado</span></article>
+                <article><strong>10</strong><span>Pouca atividade</span></article>
+                <article><strong>11</strong><span>Base importante da Aogiri</span></article>
+                <article><strong>12</strong><span>Domínio da CCG</span></article>
+                <article><strong>13</strong><span>Área industrial</span></article>
+                <article><strong>14</strong><span>Território neutro</span></article>
+                <article><strong>15</strong><span>Pouca população</span></article>
+                <article><strong>16</strong><span>Investigação intensa</span></article>
+                <article><strong>17</strong><span>Pequenas organizações</span></article>
+                <article><strong>18</strong><span>Alta criminalidade</span></article>
+                <article><strong>19</strong><span>Zona residencial</span></article>
+                <article><strong>20</strong><span>Anteiku — principal cenário</span></article>
+                <article><strong>21</strong><span>Poucos Ghouls</span></article>
+                <article><strong>22</strong><span>Área portuária</span></article>
+                <article><strong>23</strong><span>Laboratórios e operações da CCG</span></article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CCG
+        ====================================================== -->
+
+        <div class="ccg-zone">
+
+            <section id="ccg" class="section ccg-section">
+
+                <div class="ccg-banner" id="investigadores">
+
+                    <span class="ccg-symbol">
+                        CCG
+                    </span>
+
+                    <div>
+
+                        <span class="eyebrow">
+                            COMISSÃO DE CONTRAMEDIDAS
+                        </span>
+
+                        <h2>
+                            A Caçada Começa.
+                        </h2>
+
+                        <p>
+                            Para a CCG, todo Ghoul é uma ameaça que
+                            precisa ser identificada, classificada
+                            e eliminada.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="section-heading">
+
+                    <span class="section-number">13</span>
+
+                    <div class="section-heading-content">
+
+                        <span class="eyebrow">
+                            ESTRUTURA
+                        </span>
+
+                        <h2 id="classes">
+                            Classes da CCG
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="ccg-ranks">
+
+                    <article>
+                        <span>03ª</span>
+                        <strong>Classe</strong>
+                    </article>
+
+                    <article>
+                        <span>02ª</span>
+                        <strong>Classe</strong>
+                    </article>
+
+                    <article>
+                        <span>01ª</span>
+                        <strong>Classe</strong>
+                    </article>
+
+                    <article>
+                        <span>ESPECIAL</span>
+                        <strong>Classe Especial</strong>
+                    </article>
+
+                    <article>
+                        <span>ASSOCIADO</span>
+                        <strong>Especial Associado</strong>
+                    </article>
+
+                </div>
+
+
+                <div id="quinques" class="content-panel ccg-panel">
+
+                    <span class="panel-label">
+                        SISTEMA DE INVESTIGAÇÃO
+                    </span>
+
+                    <h3>
+                        Quanto mais a CCG descobre,
+                        mais perigoso fica ser um Ghoul.
+                    </h3>
+
+                    <p>
+                        Investigadores podem reunir informações,
+                        testemunhos, registros e evidências sobre
+                        atividades suspeitas.
+                    </p>
+
+                    <p>
+                        Conforme a quantidade de evidências aumenta,
+                        a CCG pode determinar características do alvo.
+                    </p>
+
+                </div>
+
+
+
+                <div class="content-panel">
+                    <span class="panel-label">QUINQUES</span>
+                    <h3>Armas produzidas pela CCG</h3>
+                    <p>Quinques são armas desenvolvidas a partir de material biológico de Ghouls e utilizadas por Investigadores para enfrentar Kagunes.</p>
+                    <p>Os detalhes de categorias, propriedades, criação e progressão das Quinques permanecem separados do núcleo 2d10 para serem definidos na seção própria do sistema.</p>
+                </div>
+
+                <!-- =====================================================
+                     ARATAS
+                ====================================================== -->
+
+                <div id="aratas" class="ccg-arata-intro content-panel">
+
+                    <span class="panel-label">
+                        ARATAS · ARMADURAS BIOLÓGICAS
+                    </span>
+
+                    <h3>
+                        O poder de um Ghoul transformado em armadura.
+                    </h3>
+
+                    <p>
+                        Aratas são armaduras biológicas desenvolvidas a partir de Ghouls.
+                        A tecnologia permite ampliar as capacidades físicas de um investigador,
+                        oferecendo uma vantagem brutal contra inimigos que normalmente
+                        estariam além das capacidades humanas.
+                    </p>
+
+                    <p>
+                        Um Arata não é um equipamento comum. Seu uso depende da seleção pelos
+                        superiores da CCG e do histórico do investigador. Apenas demonstrar
+                        força não significa receber um: a organização precisa considerar o
+                        investigador capaz de suportar o risco da armadura.
+                    </p>
+
+                    <div class="warning-panel">
+                        <span class="panel-label">RISCO DE SOBRECARGA</span>
+                        <p>
+                            O mesmo poder que fortalece o investigador pode destruí-lo.
+                            Aratas exigem resistência física suficiente para suportar sua
+                            atividade biológica. Um usuário inadequado pode sofrer uma
+                            sobrecarga severa, fazendo a armadura consumir seu próprio corpo.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="arata-grid">
+
+                    <article class="arata-card">
+                        <div class="arata-art">
+                            <img src="imagens/aratas/arata-proto.jpeg" alt="Arata Proto">
+                        </div>
+                        <div class="arata-info">
+                            <span class="panel-label">MODELO</span>
+                            <h3>Arata Proto</h3>
+                            <p>
+                                Modelo experimental de Arata, criado para ampliar drasticamente
+                                as capacidades físicas do investigador. Sua estrutura demonstra
+                                a natureza agressiva da tecnologia e o risco de sobrecarga.
+                            </p>
+                            <div class="arata-tags">
+                                <span>FORÇA</span><span>VELOCIDADE</span><span>EXPERIMENTAL</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="arata-card">
+                        <div class="arata-art">
+                            <img src="imagens/aratas/arata-ii.jpeg" alt="Arata II">
+                        </div>
+                        <div class="arata-info">
+                            <span class="panel-label">MODELO</span>
+                            <h3>Arata II</h3>
+                            <p>
+                                Uma evolução voltada para alta defesa. A blindagem biológica
+                                reforçada aumenta a capacidade de suportar confrontos diretos,
+                                mas continua exigindo um usuário fisicamente resistente.
+                            </p>
+                            <div class="arata-tags">
+                                <span>DEFESA</span><span>RESISTÊNCIA</span><span>BLINDAGEM</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="arata-card">
+                        <div class="arata-art">
+                            <img src="imagens/aratas/arata-joker.jpeg" alt="Arata Joker">
+                        </div>
+                        <div class="arata-info">
+                            <span class="panel-label">MODELO</span>
+                            <h3>Arata Joker</h3>
+                            <p>
+                                Um modelo de alta agilidade, projetado para acompanhar
+                                investigadores que dependem de mobilidade e ataques rápidos.
+                                Sua configuração incorpora lâminas orgânicas integradas.
+                            </p>
+                            <div class="arata-tags">
+                                <span>AGILIDADE</span><span>VELOCIDADE</span><span>LÂMINAS</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="arata-card">
+                        <div class="arata-art">
+                            <img src="imagens/aratas/arata-proto-ii.jpeg" alt="Arata Proto II">
+                        </div>
+                        <div class="arata-info">
+                            <span class="panel-label">REFERÊNCIA</span>
+                            <h3>Arata Proto II</h3>
+                            <p>
+                                Modelo intermediário da linha Proto, com maior integração entre a
+                                estrutura biológica e o corpo do investigador. Sua configuração
+                                amplia o potencial físico da armadura sem abandonar o caráter experimental.
+                            </p>
+                            <div class="arata-tags">
+                                <span>PROTO II</span><span>BIOARMADURA</span><span>EXPERIMENTAL</span>
+                            </div>
+                        </div>
+                    </article>
+
+                </div>
+
+                <div class="content-panel ccg-panel">
+                    <span class="panel-label">COMO FUNCIONA NO RPG</span>
+                    <p>
+                        O guia apresenta os Aratas como parte do equipamento avançado da CCG.
+                        O jogador não escolhe um Arata livremente durante a criação: a obtenção
+                        depende da narrativa, da autorização dos superiores e da capacidade
+                        do investigador de suportar a armadura.
+                    </p>
+                    <p>
+                        Os bônus específicos de cada modelo devem ser definidos pela campanha
+                        e pelo Mestre. Quando forem utilizados, o risco de sobrecarga deve
+                        acompanhar a resistência do usuário, mantendo o Arata como uma vantagem
+                        poderosa, mas perigosa.
+                    </p>
+                </div>
+
+
+                <div id="investigacao" class="investigation-grid">
+
+                    <article>
+
+                        <span>01</span>
+
+                        <h3>
+                            Identificação
+                        </h3>
+
+                        <p>
+                            A CCG começa reunindo informações
+                            sobre atividades suspeitas.
+                        </p>
+
+                    </article>
+
+                    <article>
+
+                        <span>02</span>
+
+                        <h3>
+                            Kagune
+                        </h3>
+
+                        <p>
+                            Evidências suficientes podem revelar
+                            o tipo de Kagune utilizado.
+                        </p>
+
+                    </article>
+
+                    <article>
+
+                        <span>03</span>
+
+                        <h3>
+                            RC
+                        </h3>
+
+                        <p>
+                            Exames podem estimar a concentração
+                            de células RC.
+                        </p>
+
+                    </article>
+
+                    <article>
+
+                        <span>04</span>
+
+                        <h3>
+                            Codinome
+                        </h3>
+
+                        <p>
+                            Um Ghoul conhecido pode receber um
+                            codinome oficial.
+                        </p>
+
+                    </article>
+
+                    <article>
+
+                        <span>05</span>
+
+                        <h3>
+                            Ameaça
+                        </h3>
+
+                        <p>
+                            A quantidade de informações permite
+                            estimar o nível de perigo.
+                        </p>
+
+                    </article>
+
+                    <article>
+
+                        <span>06</span>
+
+                        <h3>
+                            Caçada
+                        </h3>
+
+                        <p>
+                            Quando o alvo é confirmado, uma operação
+                            pode ser iniciada.
+                        </p>
+
+                    </article>
+
+                </div>
+
+
+                <div class="ccg-investigation-panel">
+
+                    <span class="eyebrow">
+                        DOSSIÊ DE INVESTIGAÇÃO
+                    </span>
+
+                    <div class="dossier">
+
+                        <div>
+                            <span>ALVO</span>
+                            <strong>GHOUL DESCONHECIDO</strong>
+                        </div>
+
+                        <div>
+                            <span>KAGUNE</span>
+                            <strong>DESCONHECIDO</strong>
+                        </div>
+
+                        <div>
+                            <span>RC</span>
+                            <strong>ESTIMATIVA PENDENTE</strong>
+                        </div>
+
+                        <div>
+                            <span>CODINOME</span>
+                            <strong>SEM REGISTRO</strong>
+                        </div>
+
+                        <div>
+                            <span>AMEAÇA</span>
+                            <strong>EM AVALIAÇÃO</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =====================================================
+             FOOTER
+        ====================================================== -->
+
+        <footer class="footer">
+
+            <div class="footer-symbol">
+                NT
+            </div>
+
+            <div>
+
+                <strong>
+                    NOITES EM TOKYO
+                </strong>
+
+                <p>
+                    Manual do Sistema RPG
+                </p>
+
+            </div>
+
+            <span class="footer-copy">
+
+                © <span id="current-year"></span>
+
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>

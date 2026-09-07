@@ -37,6 +37,7 @@
       <button onclick="mudarAba('campanhas', event)">Campanhas</button>
       <button id="btn-aba-sistemas" onclick="mudarAba('sistemas', event)" style="display:none;">Sistemas RPG</button>
       <button id="btn-aba-bestiario" onclick="mudarAba('bestiario', event)" style="display:none;">📖 Bestiário</button>
+      <button id="btn-aba-guias" class="aba-mundo" onclick="mudarAba('guias', event)" style="display:none;">📚 Guias do RPG</button>
       <button id="btn-aba-noctavell" class="aba-mundo" onclick="mudarAba('noctavell', event)" style="display:none;">🕯️ Véu</button>
       <button id="btn-aba-economia" class="aba-mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo">💰 Economia</button>
       <button id="btn-aba-jornais" class="aba-mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo">📰 Jornais</button>
@@ -84,6 +85,25 @@
   </div>
 
   <main>
+    <section id="aba-guias" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">📚 Biblioteca da Mesa</span>
+          <h2 style="margin:4px 0 0;">Guias do RPG</h2>
+          <p id="guias-subtitulo" class="texto-vazio">Entre em uma campanha para carregar os materiais do sistema.</p>
+        </div>
+      </div>
+      <div id="guias-lista" class="guias-lista"><div class="estado-galeria">Nenhum guia carregado.</div></div>
+      <div id="guia-leitor" class="guia-leitor" style="display:none;">
+        <div class="guia-leitor-barra">
+          <button type="button" class="btn-secundario" onclick="fecharLeitorGuia()">← Voltar aos guias</button>
+          <strong id="guia-leitor-titulo">Guia</strong>
+          <a id="guia-abrir-original" class="btn-secundario guia-link-original" href="#" target="_blank" rel="noopener">Abrir</a>
+        </div>
+        <iframe id="guia-iframe" title="Leitor de guia do RPG" loading="lazy"></iframe>
+      </div>
+    </section>
+
     <section id="aba-campanhas" class="painel">
       <div class="cabecalho-campanhas">
         <div>

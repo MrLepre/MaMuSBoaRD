@@ -1,0 +1,14 @@
+ÉTER & BRASAS — PRIMEIRA INTEGRAÇÃO
+
+Adicionado como sistema selecionável na Mesa.
+
+Incluído nesta etapa:
+- configuração própria no banco: tipo eter_brasas
+- ficha via ficha-generica.html com 6 atributos, recursos e campos do sistema
+- 2d10, Impulso/Pressão, CDs, combate, PV e sobrevivência documentados na configuração
+- catálogo de perícias e armas do Guia
+- bestiário importado da planilha BESTIÁRIO — ÉTER & BRASAS
+- moedas importadas da planilha valores moedas.xlsx
+- bestiário Mestre com criação de token no mapa
+
+Observação: o Guia contém trechos com versões diferentes de algumas regras. Esta primeira integração usa a versão mais específica do capítulo de criação/regras básicas encontrada no Guia (atributos iniciam em 0, 10 pontos, 5 perícias treinadas, CDs 10/14/18/22). As versões alternativas permanecem para decisão posterior, sem serem apagadas.

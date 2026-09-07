@@ -1,0 +1,18 @@
+BIBLIOTECA DE GUIAS — MaMuSBoaRD
+
+A aba "📚 Guias do RPG" aparece quando uma campanha ativa possui um sistema reconhecido.
+Ela carrega somente os materiais vinculados ao sistema da campanha.
+
+Sistemas contemplados:
+- Crônicas de Camelot
+- Elarion
+- World Trigger / RPG de Trion
+- Éter & Brasas
+- Noctavell
+- Olímpia / Pangeia
+- Sobreviventes da Fronteira
+- Noites em Tokyo
+
+Os manuais locais são lidos dentro da própria mesa por iframe. PDFs usam o leitor nativo do navegador; guias HTML abrem no mesmo painel; referências TXT permanecem disponíveis para consulta.
+
+Não foi alterada a mecânica do mapa, tokens, zoom, pan, grade, persistência, rolagens, campanhas ou demais recursos existentes.

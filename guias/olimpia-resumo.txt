@@ -1,0 +1,73 @@
+OLÍMPIA — PANGEIA | IMPLEMENTAÇÃO V1
+
+Implementado no VTT sem remover os sistemas anteriores.
+
+1. SISTEMA
+- Sistema selecionável: "Olímpia — Pangeia".
+- Tipo interno: olimpia_pangeia.
+- Criação automática do sistema pelo Mestre na aba Sistemas.
+- Ficha dedicada: ficha-olimpia.html.
+
+2. FICHA
+- Nome, Nível, XP, Raça, Reino, Classe, Estilo de Combate, Classe Secundária e Montaria/Familiar.
+- Atributos: FOR, DES, INT, SAB, CAR, CON.
+- Perícias da ficha física original: Acrobatics, Animal Handling, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight of Hand, Stealth e Survival.
+- Vida, Mana e XP editáveis.
+- Jóias, Magias, Equipamentos e Itens.
+
+3. KIT DE HABILIDADES
+A estrutura solicitada para o sistema foi implementada como:
+- Passiva
+- Habilidade 1
+- Habilidade 2
+- Habilidade 3
+- Ultimate
+
+Não foram usados Q/W/E/R.
+
+O Guia fornece a regra de 3 habilidades iniciais e uma habilidade associada ao estilo de combate, mas não fornece os textos completos das três habilidades iniciais/Ultimate para todas as classes. Por isso esses campos permanecem editáveis e não foram inventados.
+
+4. ESTILOS
+Foram cadastrados os estilos e habilidades de estilo explicitamente presentes no Guia, incluindo Guerreiro, Cavaleiro, Atirador, Ninja, Alquimista, Templário/Paladino, Druida, Xamã, Lutador, Dançarino e Bárbaro/Berserker.
+
+5. RAÇAS
+- Humano
+- Elfo
+- Orc
+
+6. REINOS
+- Olímpia
+- Lumier
+- Cluvant
+- Bel
+- Fenrir
+- Long Bunker
+- Cassiantopia
+- Magistar
+- Deviation
+
+As classes exclusivas dos reinos são restringidas na ficha conforme o Guia.
+
+7. ATRIBUTOS / MULTIPLICADOR
+A cada 3 pontos de atributo, o personagem ganha 1 de multiplicador. A ficha mostra esse multiplicador como floor(atributo/3), seguindo o exemplo do Guia de atributo 6 = multiplicador 2.
+
+8. XP
+Foi aplicada a regra definida pelo usuário: o próximo nível é sempre o dobro do XP do anterior.
+Nível 1 = 100 XP.
+Fórmula: XP do nível N = 100 × 2^(N−1).
+
+9. PROGRESSÃO
+- Habilidade de classe em níveis 5, 10 e 15.
+- Classe secundária no nível 20.
+
+10. COOLDOWN
+Regra do Guia registrada na ficha/configuração:
+- Habilidades iniciais: 5 turnos.
+- A cada nível, reduz 1 turno.
+- Mínimo de 2 turnos e 3 de Mana.
+
+11. JÓIAS
+Implementada a estrutura de cadastro e as regras registradas no Guia: almas de dragões, vínculo com itens, fortalecimento por quantidade do mesmo elemento, possibilidade de buffar habilidades marciais/de classe/magias, cooldown compartilhado e ausência de custo de Mana para habilidades vindas de Jóias.
+
+12. PRESERVAÇÃO
+Este pacote parte da versão mais recente da Mesa antes da inclusão de Olímpia/Pangeia. As funcionalidades existentes de mapas, tokens, rolagens, campanhas, sessões, diários, galeria, Elarion, Éter & Brasas, Noctavell e World Trigger foram mantidas.
