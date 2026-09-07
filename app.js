@@ -2876,14 +2876,31 @@ async function abrirDetalhesSessao(sessaoId){
 
 // --- BIBLIOTECA DE GUIAS DO RPG ---
 const GUIAS_RPG = {
-  legado: [{titulo:'⚔️ Crônicas de Camelot — Guia do Sistema', arquivo:'guias/GUIA-CAMELOT.html', tipo:'html'}, {titulo:'📕 Manual original — Crônicas de Camelot', arquivo:'guias/cronicas-de-camelot-guia.pdf', tipo:'pdf'}],
-  elarion: [{titulo:'💎 Elarion — Sistema de Joias e Luvas', arquivo:'guias/GUIA-ELARION.html', tipo:'html'}],
-  world_trigger: [{titulo:'📖 Guia do Agente — RPG de Trion', arquivo:'guias/world-trigger-guia.pdf', tipo:'pdf'}, {titulo:'🧭 Visão / Radar / Camada Tática', arquivo:'guias/world-trigger-resumo.txt', tipo:'txt'}],
-  eter_brasas: [{titulo:'🔥 Guia Éter & Brasas', arquivo:'guias/eter-brasas-guia.pdf', tipo:'pdf'}, {titulo:'📜 Referência rápida — Éter & Brasas', arquivo:'guias/eter-brasas-resumo.txt', tipo:'txt'}],
-  noctavell: [{titulo:'🕯️ Manual de Noctavell', arquivo:'guias/noctavell-guia.pdf', tipo:'pdf'}, {titulo:'🕯️ Referência da Central do Véu', arquivo:'guias/noctavell-resumo.txt', tipo:'txt'}],
-  olimpia_pangeia: [{titulo:'🌌 Guia de Olímpia / Pangeia', arquivo:'guias/olimpia-pangeia-guia.html', tipo:'html'}, {titulo:'📜 Referência de regras — Olímpia / Pangeia', arquivo:'guias/olimpia-resumo.txt', tipo:'txt'}],
-  sobreviventes_fronteira: [{titulo:'🌀 Manual — Sobreviventes da Fronteira', arquivo:'guias/sobreviventes-da-fronteira-guia.pdf', tipo:'pdf'}, {titulo:'🧬 Referência rápida — Sobreviventes', arquivo:'guias/sobreviventes-resumo.txt', tipo:'txt'}],
-  noites_em_tokyo: [{titulo:'🌃 Manual — Noites em Tokyo', arquivo:'guias/noites-em-tokyo/index.html', tipo:'html'}]
+  legado: [
+    {titulo:'⚔️ Crônicas de Camelot — Manual completo', arquivo:'guias/oficiais/cronicas-de-camelot-manual-completo.pdf', tipo:'pdf'}
+  ],
+  elarion: [
+    {titulo:'💎 Elarion — Sistema de Joias e Luvas — Guia completo', arquivo:'guias/GUIA-ELARION.html', tipo:'html'}
+  ],
+  world_trigger: [
+    {titulo:'📖 Guia do Agente — RPG de Trion — Manual completo', arquivo:'guias/oficiais/world-trigger-guia-do-agente-completo.pdf', tipo:'pdf'}
+  ],
+  eter_brasas: [
+    {titulo:'🔥 Éter & Brasas — Guia completo', arquivo:'guias/oficiais/eter-brasas-manual-completo.pdf', tipo:'pdf'}
+  ],
+  noctavell: [
+    {titulo:'🕯️ Noctavell — Manual completo', arquivo:'guias/oficiais/noctavell-manual-completo.pdf', tipo:'pdf'}
+  ],
+  olimpia_pangeia: [
+    {titulo:'🌌 Olímpia / Pangeia — Guia completo', arquivo:'guias/oficiais/olimpia-pangeia-guia-completo.pdf', tipo:'pdf'},
+    {titulo:'📄 Olímpia / Pangeia — Documento original', arquivo:'guias/oficiais/olimpia-pangeia-guia-completo.docx', tipo:'doc'}
+  ],
+  sobreviventes_fronteira: [
+    {titulo:'🌀 Sobreviventes da Fronteira — Manual completo', arquivo:'guias/oficiais/sobreviventes-da-fronteira-manual-completo.pdf', tipo:'pdf'}
+  ],
+  noites_em_tokyo: [
+    {titulo:'🌃 Noites em Tokyo — Guia completo', arquivo:'https://mrlepre.github.io/Noites-em-Tokyo/', tipo:'html', externo:true}
+  ]
 };
 function tipoSistemaParaGuias(){
   const tipo=sistemaAtual?.configuracao?.tipo; if(tipo&&GUIAS_RPG[tipo])return tipo;
