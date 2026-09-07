@@ -1358,6 +1358,7 @@ function obterTemaSistemaParaMesa() {
     noctavell: { corPrimaria:'#9b5de5', corSecundaria:'#d9d9e6', corFundo:'#0d0912', corPainel:'#1a1222', corPainel2:'#100c16' },
     olimpia_pangeia: { corPrimaria:'#c9a85b', corSecundaria:'#6da8d8', corFundo:'#0b0d14', corPainel:'#151923', corPainel2:'#0d111a' },
     sobreviventes_fronteira: { corPrimaria:'#c6a15b', corSecundaria:'#a94d42', corFundo:'#0a0d0b', corPainel:'#131814', corPainel2:'#0d120f' },
+    noites_em_tokyo: { corPrimaria:'#8b1e3f', corSecundaria:'#c9cbd4', corFundo:'#080a10', corPainel:'#111522', corPainel2:'#171c2b' },
     world_trigger: { corPrimaria:'#39b8ff', corSecundaria:'#7fd7ff', corFundo:'#071018', corPainel:'#0d1822', corPainel2:'#09131b' },
     legado: { corPrimaria:'#3f8cff', corSecundaria:'#d4af37', corFundo:'#070b14', corPainel:'#101725', corPainel2:'#0b101b' }
   };
@@ -2177,6 +2178,20 @@ function criarConfiguracaoWorldTrigger(){
   };
 }
 
+function criarConfiguracaoNoitesEmTokyo(){
+  const attrs=[['FOR','Força'],['AGI','Agilidade'],['CON','Constituição'],['INT','Inteligência'],['SAB','Sabedoria'],['CAR','Carisma'],['FOME','Fome']];
+  return {versao:1,tipo:'noites_em_tokyo',dados:['d6','d10','d100'],descricao:'RPG urbano de Ghouls, CCG, Kagunes, Quinques, Aratas e sobrevivência em Tokyo.',modulos:{atributos:true,origens:true,kagunes:true,fome:true,rc:true,kakuja:true,ccg:true,quinques:true,aratas:true,sanidade:true,combate:true},regras:{atributos:{lista:attrs.map(x=>({sigla:x[0],nome:x[1]})),distribuicao:'Definida pelo Mestre'},derivados:{ca:'10 + MOD. AGI',vida:'20 + CON × 2',fadiga:'5 + MOD. CON',iniciativa:'2d10 + MOD. AGI'},testes:'2d10 + modificador do atributo',combate:{movimento:'6 metros',turno:'1 Ação + 1 Movimento + 1 Reação',ataque:'2d10 + modificador contra CA',desarmado:'1d6 + MOD. FOR',critico:'10+10',falha_critica:'1+1',incapacitado:'0 PV; testes de sobrevivência; 3 sucessos estabilizam, 3 falhas resultam em morte'},kagunes:{tipos:[{nome:'Ukaku',bonus:'+2 Agilidade',especializacao:'Ataques à distância',limitacao:'Baixa resistência'},{nome:'Koukaku',bonus:'+2 Resistência',especializacao:'Grande defesa',limitacao:'Movimentos lentos'},{nome:'Rinkaku',bonus:'+2 Regeneração',especializacao:'Alto dano',limitacao:'Instável emocionalmente'},{nome:'Bikaku',bonus:'+1 nos atributos físicos',especializacao:'Equilibrado',limitacao:'Nenhuma extrema'}],ciclo:'Ukaku > Bikaku > Rinkaku > Koukaku > Ukaku'},one_eye:'1d100; 96–100; +2 atributos físicos',fome:'Cada missão sem alimentação +1; pode causar Frenesi',rc:{faixas:[['0–999','Ghoul Iniciante'],['1.000–2.999','Ghoul Experiente'],['3.000–5.999','Ghoul Forte'],['6.000–9.999','Elite'],['10.000–14.999','Semi-Kakuja'],['15.000+','Kakuja Completa']]},kakuja:{estagios:['Kakuja Parcial','Kakuja Completa — Armadura','Kakuja Completa — Monstruosa'],controle:'Ao ativar Semi-Kakuja, teste de Vontade; falha causa Frenesi'},ccg:{arquetipos:['Investigador de Campo','Analista','Rastreador','Executor','Especialista Quinque','Comandante'],quinques:['Kurotsuki','Shirabe','Kitsune','Guren','Kagami','Tensei'],arata:['Arata Proto','Arata II','Arata Joker','Arata Proto II']},quinque_progressao:['Familiaridade','Proficiência','Especialização','Maestria','Sincronia']},tema:{corPrimaria:'#8b1e3f',corSecundaria:'#c9cbd4',corFundo:'#080a10',corPainel:'#111522',corPainel2:'#171c2b'},ficha:'ficha-noites-em-tokyo.html'};
+}
+async function garantirSistemaNoitesEmTokyo(){
+  if(!ehMestreGlobal||!supabaseClient)return;
+  const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Noites em Tokyo').limit(1);
+  if(error||data?.length)return;
+  const session=(await supabaseClient.auth.getSession()).data.session;if(!session)return;
+  const cfg=criarConfiguracaoNoitesEmTokyo();
+  const r=await supabaseClient.from('sistemas').insert({nome:'Noites em Tokyo',descricao:'Ghouls, CCG, Kagunes, Quinques, Aratas, Fome, RC e Kakuja.',configuracao:cfg,criado_por:session.user.id});
+  if(r.error)console.warn('Noites em Tokyo não pôde ser criado automaticamente:',r.error.message);
+}
+
 function criarConfiguracaoElarion(){
   const attrs=[['FOR','Força'],['CON','Constituição'],['AGI','Agilidade'],['VON','Vontade'],['INT','Inteligência'],['CAR','Carisma'],['PER','Percepção'],['FÉ','Fé']];
   return {versao:1,tipo:'elarion',dados:['d10','d12'],modulos:{joias:{ativo:true,quantidade_limite:false},luvas:{ativo:true},classes:{ativo:true},racas:{ativo:true},coracao:{dados:3},inspiracao:{max:3},testes:{dados:'2d10'},fadiga:{pf_minimo:5}},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:1,max_inicial:5})),progressao_xp:[0,100,300,600,1000,1500,2100,2800,3600,4500,5500,6600,7800,9100,10500,12000,13600,15300,17100,19000],classes:['Espadachim Rúnico','Guardião Prismático','Arqueiro Elemental','Teurgo Cristalino','Sombra Lapidada','Berserker do Núcleo','Bardo da Inspiração','Místico Mentalista'],portadores_puros:['Punho Elemental','Condutor do Núcleo','Avatar do Vazio','Mestre da Luz Interior','Punho da Ruína','Tecedor Temporal'],racas:['Humano','Elfo','Orc','Khajiit','Lizardmen','Anões','Povo-Fera'],tf:'CON + VON + Nível',pf_minimo:5,teste:'2d10 + modificador vs CD',coracao:'3 dados; 1d12 para feitos impossíveis',inspiracao:'0–3'},tema:{corPrimaria:'#c89b3c',corFundo:'#09080b',corPainel:'#17121b'},ficha:'ficha-elarion.html'};
@@ -2359,7 +2374,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const modulosNT=cfg.tipo==='noites_em_tokyo'?['🩸 Ghouls','🧬 Kagunes','🔬 RC / Kakuja','⚔️ CCG / Quinques','🌙 Fome / Sanidade']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):modulosNT.length?modulosNT.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -2397,7 +2412,7 @@ async function abrirFichaDoSistema(id){
   const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
   sistemaAtual=data;
   const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
-  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
+  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noites_em_tokyo') abrirFichaGenericaNoIframe(iframe, 'ficha-noites-em-tokyo.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
   const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
   modal.style.display='flex';
 }
@@ -2920,7 +2935,7 @@ function mudarAba(nomeAba, evento) {
       if (ehMestreGlobal) {
         await garantirSistemaElarion();
         await garantirSistemaEterBrasas();
-        await garantirSistemaNoctavell();
+        await garantirSistemaNoctavell(); garantirSistemaNoitesEmTokyo();
         await garantirSistemaOlimpia();
       await garantirSistemaSobreviventes();
       }
@@ -2958,57 +2973,33 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
   const ehEdicaoMestre = Boolean(ehMestreGlobal && userIdDestino && userIdDestino !== session.user.id);
   const idDestino = userIdDestino || session.user.id;
 
-  const campanhaId = obterCampanhaIdAtual();
-  const dadosSalvar = {
-    nome_personagem: nomeChar,
-    dados_ficha: dadosFichaAtual,
-    updated_at: new Date().toISOString(),
-    campanha_id: campanhaId
-  };
-
-  // Não usamos upsert aqui. Algumas instalações antigas do banco ainda possuem
-  // uma chave única legada (por exemplo, user_id sozinho), e o PostgREST pode
-  // então retornar "duplicate key" mesmo com onConflict em (user_id,campanha_id).
-  // Primeiro localizamos a ficha da campanha e atualizamos; só inserimos quando
-  // ela realmente não existe. Isso também é mais previsível em celulares.
-  const { data: fichaExistente, error: buscaError } = await supabaseClient
-    .from('fichas')
-    .select('id')
-    .eq('user_id', idDestino)
-    .eq('campanha_id', campanhaId)
-    .limit(1)
-    .maybeSingle();
-
-  if (buscaError) {
-    mostrarPopup('❌ Erro ao localizar a ficha: ' + buscaError.message);
-    return;
-  }
-
   let resultado;
-  if (fichaExistente?.id) {
+
+  if (ehEdicaoMestre) {
     resultado = await supabaseClient
       .from('fichas')
-      .update(dadosSalvar)
-      .eq('id', fichaExistente.id);
-  } else if (ehEdicaoMestre || idDestino === session.user.id) {
-    resultado = await supabaseClient
-      .from('fichas')
-      .insert({
-        user_id: idDestino,
-        ...dadosSalvar
-      });
+      .update({
+        nome_personagem: nomeChar,
+        dados_ficha: dadosFichaAtual,
+        updated_at: new Date(),
+        campanha_id: obterCampanhaIdAtual()
+      })
+      .eq('user_id', idDestino)
+      .eq('campanha_id', obterCampanhaIdAtual());
   } else {
-    mostrarPopup('❌ O Mestre só pode editar uma ficha existente nesta campanha.');
-    return;
+    resultado = await supabaseClient
+      .from('fichas')
+      .upsert({
+        user_id: session.user.id,
+        nome_personagem: nomeChar,
+        dados_ficha: dadosFichaAtual,
+        updated_at: new Date(),
+        campanha_id: obterCampanhaIdAtual()
+      }, { onConflict: 'user_id,campanha_id' });
   }
 
   if (resultado.error) {
-    const msg = resultado.error.message || 'Erro desconhecido';
-    if (/duplicate key|unique constraint|already exists/i.test(msg)) {
-      mostrarPopup('❌ Já existe uma ficha para este jogador nesta campanha. Recarregue a página e tente salvar novamente.');
-    } else {
-      mostrarPopup('❌ Erro ao salvar: ' + msg);
-    }
+    mostrarPopup('❌ Erro ao salvar: ' + resultado.error.message);
   } else {
     mostrarPopup(ehEdicaoMestre ? '👑 Ficha do jogador atualizada pelo Mestre!' : '💾 Ficha salva na nuvem com sucesso!');
   }
@@ -3077,7 +3068,7 @@ function abrirCriadorFicha() {
   if (ehFichaLegadaAtual()) {
     iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html'))));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html')))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, null, 'criacao');
   }
   const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
@@ -3096,7 +3087,7 @@ function abrirEditorFichaAtual() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html')));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dadosFichaAtual, 'edicao');
   }
   modal.style.display = 'flex';
@@ -3115,7 +3106,7 @@ function abrirEditorFicha(dados, userId = null) {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html')));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dados, 'edicao');
   }
   modal.style.display = 'flex';
@@ -3132,7 +3123,7 @@ function abrirFichaCompletaNoIframe(dados) {
   const conteudoModal = document.getElementById('modal-conteudo-ficha');
   if (!conteudoModal) return;
   const tipo = sistemaAtual?.configuracao?.tipo;
-  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-editor.html'))));
+  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-editor.html')))));
   const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(sistemaAtual?.id||'')}&t=${Date.now()}`;
   conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="${src}"></iframe>`;
   const iframe = document.getElementById('iframe-ficha-visualizacao');
