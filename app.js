@@ -33,6 +33,9 @@ let sessaoAtual = null;
 let diarioAtual = null;
 let diarioImagens = [];
 let sessoesCampanha = [];
+let tokensCarregadosCampanhaId = null;
+let carregandoTokensCampanhaId = null;
+const timersPersistenciaTokens = new Map();
 
 // --- WORLD TRIGGER: estado tático local (Squad / Radar / Stealth) ---
 let wtRecalculoVisibilidadeAgendado = false;
@@ -630,6 +633,7 @@ function atualizarTokenNPCWorldTrigger(indice){
   registrarTokenNoRadarWT(id,n.nome,parseFloat(token.style.left)||0,parseFloat(token.style.top)||0,worldTriggerEstado.meuSquad,!!n.bagwormAtivo,!!n.chameleonAtivo,n.trion||null,n.triggers_ativos||[]);
   aplicarVisibilidadeTokenWT(token);
   transmitirMovimentoToken(token,parseFloat(token.style.left)||0,parseFloat(token.style.top)||0);
+  agendarPersistenciaToken(token, true);
 }
 function alternarBagwormNPCWorldTrigger(indice){
   const n=obterSquadNPCsWorldTrigger()[indice]; if(!n)return;
@@ -661,8 +665,9 @@ function sincronizarTokensSquadWorldTrigger(baseX=10,baseY=10,tamanho=45){
   npcs.forEach((n,i)=>{
     const pos=obterPosicaoFormacaoNPCWT(i,baseX,baseY);
     const id=`token_${base}_npc_${i+1}`;
-    criarElementoToken(id,n.nome,pos.x,pos.y,tamanho,n.imagem||'',Number(n.hpMax)||50,Number(n.hpMax)||50,true,{ownerNick:nick,squad:worldTriggerEstado.meuSquad,bagworm:!!n.bagwormAtivo,chameleon:!!n.chameleonAtivo,trion:n.trion||null,triggers:n.triggers_ativos||[],tipo:'npc_squad',npcIndex:i});
-    if(canalMesa) canalMesa.send({type:'broadcast',event:'vtt_mover_token',payload:{id,nome:n.nome,x:pos.x,y:pos.y,tamanho,imagem:n.imagem||'',hpAtual:Number(n.hpMax)||50,hpMax:Number(n.hpMax)||50,campanha_id:obterCampanhaIdAtual(),squad:worldTriggerEstado.meuSquad||'',bagworm:!!n.bagwormAtivo,chameleon:!!n.chameleonAtivo,trion:n.trion||null,triggers:n.triggers_ativos||[],ownerNick:nick,tipo:'npc_squad',npcIndex:i}});
+    criarElementoToken(id,n.nome,pos.x,pos.y,tamanho,n.imagem||'',Number(n.hpMax)||50,Number(n.hpMax)||50,true,{ownerNick:nick,squad:worldTriggerEstado.meuSquad,bagworm:!!n.bagwormAtivo,chameleon:!!n.chameleonAtivo,trion:n.trion||null,triggers:n.triggers_ativos||[],tipo:'npc_squad',npcIndex:i,ownerUserId:window.usuarioAtualId||''});
+    const npcToken = document.getElementById(id); if(npcToken) agendarPersistenciaToken(npcToken, true);
+    if(canalMesa) canalMesa.send({type:'broadcast',event:'vtt_mover_token',payload:{id,nome:n.nome,x:pos.x,y:pos.y,tamanho,imagem:n.imagem||'',hpAtual:Number(n.hpMax)||50,hpMax:Number(n.hpMax)||50,campanha_id:obterCampanhaIdAtual(),squad:worldTriggerEstado.meuSquad||'',bagworm:!!n.bagwormAtivo,chameleon:!!n.chameleonAtivo,trion:n.trion||null,triggers:n.triggers_ativos||[],ownerNick:nick,ownerUserId:window.usuarioAtualId||'',tipo:'npc_squad',npcIndex:i}});
   });
 }
 function renderizarPainelWorldTrigger() {
@@ -903,6 +908,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         .on('broadcast', { event: 'novo_mapa' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
           exibirMapaNaTela(payload.payload.url);
+          setTimeout(() => carregarTokensCampanha(true), 120);
           mostrarPopup('🗺️ O Mestre atualizou o Mapa de Batalha!');
         })
         .on('broadcast', { event: 'wt_mapa_tatico' }, (payload) => {
@@ -958,12 +964,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             payload.payload.x, 
             payload.payload.y, 
             payload.payload.tamanho || 45, 
-            payload.payload.imagem || '', 
+            payload.payload.imagemStoragePath ? '' : (payload.payload.imagem || ''), 
             payload.payload.hpAtual ?? 50, 
             payload.payload.hpMax ?? 50, 
             (String(payload.payload.ownerNick || payload.payload.nome || '').trim().toLowerCase() === obterMeuNickWT().trim().toLowerCase()) || ehMestreGlobal,
-            { ownerNick: payload.payload.ownerNick || '', tipo: payload.payload.tipo || '', npcIndex: payload.payload.npcIndex, squad: payload.payload.squad || '', bagworm: !!payload.payload.bagworm, chameleon: !!payload.payload.chameleon, trion: payload.payload.trion ?? null, triggers: Array.isArray(payload.payload.triggers) ? payload.payload.triggers : [] }
+            { ownerNick: payload.payload.ownerNick || '', ownerUserId: payload.payload.ownerUserId || '', tipo: payload.payload.tipo || '', npcIndex: payload.payload.npcIndex, squad: payload.payload.squad || '', bagworm: !!payload.payload.bagworm, chameleon: !!payload.payload.chameleon, trion: payload.payload.trion ?? null, triggers: Array.isArray(payload.payload.triggers) ? payload.payload.triggers : [], imagemStoragePath: payload.payload.imagemStoragePath || '', imagemBucket: payload.payload.imagemBucket || '', imagemPublico: payload.payload.imagemPublico !== false }
           );
+          const tokenRecebido = document.getElementById(payload.payload.id);
+          if (tokenRecebido && payload.payload.imagemStoragePath) aplicarImagemStorageAoToken(tokenRecebido, payload.payload.imagemStoragePath, payload.payload.imagemBucket || '', payload.payload.imagemPublico !== false, payload.payload.imagem || '');
         })
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') atualizarStatusConexao('online', 'Távola sincronizada');
@@ -1099,6 +1107,8 @@ async function fazerLogout() {
   await supabaseClient.auth.signOut();
   atualizarInterfaceAuth(null);
   dadosFichaAtual = null;
+  limparEstadoPersistenciaTokens();
+  document.getElementById('vtt-tokens-camada')?.replaceChildren();
   campanhaAtual = null;
   sistemaAtual = null;
   aplicarTemaMesa();
@@ -1348,6 +1358,7 @@ function obterTemaSistemaParaMesa() {
     noctavell: { corPrimaria:'#9b5de5', corSecundaria:'#d9d9e6', corFundo:'#0d0912', corPainel:'#1a1222', corPainel2:'#100c16' },
     olimpia_pangeia: { corPrimaria:'#c9a85b', corSecundaria:'#6da8d8', corFundo:'#0b0d14', corPainel:'#151923', corPainel2:'#0d111a' },
     sobreviventes_fronteira: { corPrimaria:'#c6a15b', corSecundaria:'#a94d42', corFundo:'#0a0d0b', corPainel:'#131814', corPainel2:'#0d120f' },
+    noites_em_tokyo: { corPrimaria:'#8b1e3f', corSecundaria:'#c9cbd4', corFundo:'#080a10', corPainel:'#111522', corPainel2:'#171c2b' },
     world_trigger: { corPrimaria:'#39b8ff', corSecundaria:'#7fd7ff', corFundo:'#071018', corPainel:'#0d1822', corPainel2:'#09131b' },
     legado: { corPrimaria:'#3f8cff', corSecundaria:'#d4af37', corFundo:'#070b14', corPainel:'#101725', corPainel2:'#0b101b' }
   };
@@ -1610,6 +1621,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   // Limpa estados carregados de recursos da campanha anterior.
   dadosFichaAtual = null;
+  limparEstadoPersistenciaTokens();
   abasCarregadas = { mapa: false, galeria: false };
   dadosGaleriaAtual = [];
   pastaGaleriaAtual = 'Todas';
@@ -2166,6 +2178,20 @@ function criarConfiguracaoWorldTrigger(){
   };
 }
 
+function criarConfiguracaoNoitesEmTokyo(){
+  const attrs=[['FOR','Força'],['AGI','Agilidade'],['CON','Constituição'],['INT','Inteligência'],['SAB','Sabedoria'],['CAR','Carisma'],['FOME','Fome']];
+  return {versao:1,tipo:'noites_em_tokyo',dados:['d6','d10','d100'],descricao:'RPG urbano de Ghouls, CCG, Kagunes, Quinques, Aratas e sobrevivência em Tokyo.',modulos:{atributos:true,origens:true,kagunes:true,fome:true,rc:true,kakuja:true,ccg:true,quinques:true,aratas:true,sanidade:true,combate:true},regras:{atributos:{lista:attrs.map(x=>({sigla:x[0],nome:x[1]})),distribuicao:'Definida pelo Mestre'},derivados:{ca:'10 + MOD. AGI',vida:'20 + CON × 2',fadiga:'5 + MOD. CON',iniciativa:'2d10 + MOD. AGI'},testes:'2d10 + modificador do atributo',combate:{movimento:'6 metros',turno:'1 Ação + 1 Movimento + 1 Reação',ataque:'2d10 + modificador contra CA',desarmado:'1d6 + MOD. FOR',critico:'10+10',falha_critica:'1+1',incapacitado:'0 PV; testes de sobrevivência; 3 sucessos estabilizam, 3 falhas resultam em morte'},kagunes:{tipos:[{nome:'Ukaku',bonus:'+2 Agilidade',especializacao:'Ataques à distância',limitacao:'Baixa resistência'},{nome:'Koukaku',bonus:'+2 Resistência',especializacao:'Grande defesa',limitacao:'Movimentos lentos'},{nome:'Rinkaku',bonus:'+2 Regeneração',especializacao:'Alto dano',limitacao:'Instável emocionalmente'},{nome:'Bikaku',bonus:'+1 nos atributos físicos',especializacao:'Equilibrado',limitacao:'Nenhuma extrema'}],ciclo:'Ukaku > Bikaku > Rinkaku > Koukaku > Ukaku'},one_eye:'1d100; 96–100; +2 atributos físicos',fome:'Cada missão sem alimentação +1; pode causar Frenesi',rc:{faixas:[['0–999','Ghoul Iniciante'],['1.000–2.999','Ghoul Experiente'],['3.000–5.999','Ghoul Forte'],['6.000–9.999','Elite'],['10.000–14.999','Semi-Kakuja'],['15.000+','Kakuja Completa']]},kakuja:{estagios:['Kakuja Parcial','Kakuja Completa — Armadura','Kakuja Completa — Monstruosa'],controle:'Ao ativar Semi-Kakuja, teste de Vontade; falha causa Frenesi'},ccg:{arquetipos:['Investigador de Campo','Analista','Rastreador','Executor','Especialista Quinque','Comandante'],quinques:['Kurotsuki','Shirabe','Kitsune','Guren','Kagami','Tensei'],arata:['Arata Proto','Arata II','Arata Joker','Arata Proto II']},quinque_progressao:['Familiaridade','Proficiência','Especialização','Maestria','Sincronia']},tema:{corPrimaria:'#8b1e3f',corSecundaria:'#c9cbd4',corFundo:'#080a10',corPainel:'#111522',corPainel2:'#171c2b'},ficha:'ficha-noites-em-tokyo.html'};
+}
+async function garantirSistemaNoitesEmTokyo(){
+  if(!ehMestreGlobal||!supabaseClient)return;
+  const {data,error}=await supabaseClient.from('sistemas').select('id').eq('nome','Noites em Tokyo').limit(1);
+  if(error||data?.length)return;
+  const session=(await supabaseClient.auth.getSession()).data.session;if(!session)return;
+  const cfg=criarConfiguracaoNoitesEmTokyo();
+  const r=await supabaseClient.from('sistemas').insert({nome:'Noites em Tokyo',descricao:'Ghouls, CCG, Kagunes, Quinques, Aratas, Fome, RC e Kakuja.',configuracao:cfg,criado_por:session.user.id});
+  if(r.error)console.warn('Noites em Tokyo não pôde ser criado automaticamente:',r.error.message);
+}
+
 function criarConfiguracaoElarion(){
   const attrs=[['FOR','Força'],['CON','Constituição'],['AGI','Agilidade'],['VON','Vontade'],['INT','Inteligência'],['CAR','Carisma'],['PER','Percepção'],['FÉ','Fé']];
   return {versao:1,tipo:'elarion',dados:['d10','d12'],modulos:{joias:{ativo:true,quantidade_limite:false},luvas:{ativo:true},classes:{ativo:true},racas:{ativo:true},coracao:{dados:3},inspiracao:{max:3},testes:{dados:'2d10'},fadiga:{pf_minimo:5}},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:1,max_inicial:5})),progressao_xp:[0,100,300,600,1000,1500,2100,2800,3600,4500,5500,6600,7800,9100,10500,12000,13600,15300,17100,19000],classes:['Espadachim Rúnico','Guardião Prismático','Arqueiro Elemental','Teurgo Cristalino','Sombra Lapidada','Berserker do Núcleo','Bardo da Inspiração','Místico Mentalista'],portadores_puros:['Punho Elemental','Condutor do Núcleo','Avatar do Vazio','Mestre da Luz Interior','Punho da Ruína','Tecedor Temporal'],racas:['Humano','Elfo','Orc','Khajiit','Lizardmen','Anões','Povo-Fera'],tf:'CON + VON + Nível',pf_minimo:5,teste:'2d10 + modificador vs CD',coracao:'3 dados; 1d12 para feitos impossíveis',inspiracao:'0–3'},tema:{corPrimaria:'#c89b3c',corFundo:'#09080b',corPainel:'#17121b'},ficha:'ficha-elarion.html'};
@@ -2348,7 +2374,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const modulosNT=cfg.tipo==='noites_em_tokyo'?['🩸 Ghouls','🧬 Kagunes','🔬 RC / Kakuja','⚔️ CCG / Quinques','🌙 Fome / Sanidade']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):modulosNT.length?modulosNT.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -2386,7 +2412,7 @@ async function abrirFichaDoSistema(id){
   const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
   sistemaAtual=data;
   const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
-  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
+  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noites_em_tokyo') abrirFichaGenericaNoIframe(iframe, 'ficha-noites-em-tokyo.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
   const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
   modal.style.display='flex';
 }
@@ -2457,8 +2483,9 @@ function criarTokenDoBestiario(idx){
   if(!ehMestreGlobal)return mostrarPopup('❌ Apenas o Mestre pode criar criaturas no mapa.');
   const m=bestiarioElarion[idx]; if(!m)return;
   const base='monstro_'+normalizarIdTokenWT(m.nome)+'_'+Date.now();
-  criarElementoToken(base,m.nome,10,10,55,'',Number(m.pv)||1,Number(m.pv)||1,true,{tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[],ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre'});
-  if(canalMesa) canalMesa.send({type:'broadcast',event:'vtt_mover_token',payload:{id:base,nome:m.nome,x:10,y:10,tamanho:55,imagem:'',hpAtual:Number(m.pv)||1,hpMax:Number(m.pv)||1,campanha_id:obterCampanhaIdAtual(),ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[]}});
+  criarElementoToken(base,m.nome,10,10,55,'',Number(m.pv)||1,Number(m.pv)||1,true,{tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[],ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',ownerUserId:window.usuarioAtualId||''});
+  const tokenMonstro=document.getElementById(base); if(tokenMonstro) salvarTokenNoSupabase(tokenMonstro);
+  if(canalMesa) canalMesa.send({type:'broadcast',event:'vtt_mover_token',payload:{id:base,nome:m.nome,x:10,y:10,tamanho:55,imagem:'',hpAtual:Number(m.pv)||1,hpMax:Number(m.pv)||1,campanha_id:obterCampanhaIdAtual(),ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',ownerUserId:window.usuarioAtualId||'',tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[]}});
   mostrarPopup(`🐾 ${m.nome} foi colocado no mapa!`);
 }
 
@@ -2908,7 +2935,7 @@ function mudarAba(nomeAba, evento) {
       if (ehMestreGlobal) {
         await garantirSistemaElarion();
         await garantirSistemaEterBrasas();
-        await garantirSistemaNoctavell();
+        await garantirSistemaNoctavell(); garantirSistemaNoitesEmTokyo();
         await garantirSistemaOlimpia();
       await garantirSistemaSobreviventes();
       }
@@ -3041,7 +3068,7 @@ function abrirCriadorFicha() {
   if (ehFichaLegadaAtual()) {
     iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html'))));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html')))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, null, 'criacao');
   }
   const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
@@ -3060,7 +3087,7 @@ function abrirEditorFichaAtual() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html')));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dadosFichaAtual, 'edicao');
   }
   modal.style.display = 'flex';
@@ -3079,7 +3106,7 @@ function abrirEditorFicha(dados, userId = null) {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-generica.html')));
+    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
     abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dados, 'edicao');
   }
   modal.style.display = 'flex';
@@ -3096,7 +3123,7 @@ function abrirFichaCompletaNoIframe(dados) {
   const conteudoModal = document.getElementById('modal-conteudo-ficha');
   if (!conteudoModal) return;
   const tipo = sistemaAtual?.configuracao?.tipo;
-  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : 'ficha-editor.html'))));
+  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-editor.html')))));
   const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(sistemaAtual?.id||'')}&t=${Date.now()}`;
   conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="${src}"></iframe>`;
   const iframe = document.getElementById('iframe-ficha-visualizacao');
@@ -3272,6 +3299,7 @@ async function carregarMapaAtual() {
   const { data } = await supabaseClient.from('mapas').select('url_mapa').eq('campanha_id', campanhaId).limit(1).maybeSingle();
   if (data && data.url_mapa) {
     exibirMapaNaTela(data.url_mapa);
+    setTimeout(() => carregarTokensCampanha(true), 80);
   }
 }
 
@@ -3338,6 +3366,7 @@ function exibirMapaNaTela(url) {
     renderizarFovWorldTrigger();
     setTimeout(atualizarVisibilidadeTodosTokensWT, 0);
   }
+  setTimeout(() => carregarTokensCampanha(), 40);
 }
 
 // Configura o arrasto (Pan) do mapa para o Mestre quando destravado
@@ -3518,7 +3547,7 @@ async function abrirModalConfigToken() {
       imagensHtml = `
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 120px; overflow-y: auto; background: #0b0d12; padding: 6px; border-radius: 4px; border: 1px solid #29292e;">
           ${data.map(img => `
-            <div class="opcao-img-token" onclick="selecionarImgToken('${img.url}', this)" style="cursor: pointer; border: 2px solid transparent; border-radius: 4px; overflow: hidden; height: 45px;">
+            <div class="opcao-img-token" data-storage-path="${escaparAtributoHTML(img.storage_path || '')}" data-publico="${img.publico ? 'true' : 'false'}" onclick="selecionarImgToken('${img.url}', this)" style="cursor: pointer; border: 2px solid transparent; border-radius: 4px; overflow: hidden; height: 45px;">
               <img src="${img.url}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
           `).join('')}
@@ -3560,13 +3589,16 @@ async function abrirModalConfigToken() {
 
       <div style="margin-bottom: 8px;">
         <label style="display: block; font-size: 0.8rem; color: #e6ca88; margin-bottom: 2px;">Escolher Imagem:</label>
-        <input type="hidden" id="token-url-escolhida" value="">
+        <input type="hidden" id="token-url-escolhida" value=">
+        <input type="hidden" id="token-imagem-storage-path" value=">
+        <input type="hidden" id="token-imagem-bucket" value=">
+        <input type="hidden" id="token-imagem-publico" value="true">
         ${imagensHtml}
       </div>
 
       <div style="margin-bottom: 12px;">
         <label style="display: block; font-size: 0.8rem; color: #e6ca88; margin-bottom: 2px;">Ou Link Direto:</label>
-        <input type="text" id="token-url-input" placeholder="https://..." oninput="document.getElementById('token-url-escolhida').value=this.value" style="width: 100%; padding: 6px; background: #0b0d12; color: #fff; border: 1px solid #4a3d24; border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;">
+        <input type="text" id="token-url-input" placeholder="https://..." oninput="document.getElementById('token-url-escolhida').value=this.value; document.getElementById('token-imagem-storage-path').value=''; document.getElementById('token-imagem-bucket').value=''; document.getElementById('token-imagem-publico').value='true'" style="width: 100%; padding: 6px; background: #0b0d12; color: #fff; border: 1px solid #4a3d24; border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;">
       </div>
 
       <div style="display: flex; gap: 8px; justify-content: flex-end;">
@@ -3582,6 +3614,14 @@ function selecionarImgToken(url, elem) {
   document.querySelectorAll('.opcao-img-token').forEach(el => el.style.border = '2px solid transparent');
   elem.style.border = '2px solid #04d361';
   document.getElementById('token-url-escolhida').value = url;
+  const storagePath = elem.dataset.storagePath || '';
+  const bucket = elem.dataset.publico === 'false' ? 'galeria-privada' : 'galeria';
+  const pathInput = document.getElementById('token-imagem-storage-path');
+  const bucketInput = document.getElementById('token-imagem-bucket');
+  const publicoInput = document.getElementById('token-imagem-publico');
+  if (pathInput) pathInput.value = storagePath;
+  if (bucketInput) bucketInput.value = bucket;
+  if (publicoInput) publicoInput.value = elem.dataset.publico === 'false' ? 'false' : 'true';
   document.getElementById('token-url-input').value = url;
 }
 
@@ -3589,6 +3629,9 @@ function confirmarCriacaoToken() {
   const tamanho = parseInt(document.getElementById('token-tamanho-select').value) || 45;
   const hpMax = parseInt(document.getElementById('token-hp-input').value) || 50;
   const imagem = document.getElementById('token-url-escolhida').value.trim();
+  const imagemStoragePath = document.getElementById('token-imagem-storage-path')?.value || '';
+  const imagemBucket = document.getElementById('token-imagem-bucket')?.value || '';
+  const imagemPublico = document.getElementById('token-imagem-publico')?.value !== 'false';
   if (worldTriggerAtivo()) {
     worldTriggerEstado.meuSquad = String(document.getElementById('wt-token-squad-input')?.value || '').trim();
     worldTriggerEstado.bagworm = !!document.getElementById('wt-token-bagworm')?.checked && worldTriggerEstado.triggersAtivos.some(x=>String(x).toLowerCase()==='bagworm');
@@ -3597,10 +3640,10 @@ function confirmarCriacaoToken() {
   }
   document.getElementById('modal-config-token').style.display = 'none';
   
-  executarAdicionarTokenMesa(tamanho, imagem, hpMax, hpMax);
+  executarAdicionarTokenMesa(tamanho, imagem, hpMax, hpMax, { storagePath: imagemStoragePath, bucket: imagemBucket, publico: imagemPublico });
 }
 
-async function executarAdicionarTokenMesa(tamanho = 45, imagem = '', hpMax = 50, hpAtual = 50) {
+async function executarAdicionarTokenMesa(tamanho = 45, imagem = '', hpMax = 50, hpAtual = 50, imagemMeta = {}) {
   const userNick = document.getElementById('user-nick-display')?.innerText || document.getElementById('auth-nick')?.value || 'Cavaleiro';
   const tokenID = 'token_' + (userNick.toLowerCase().replace(/[^a-z0-9]/g, '_'));
 
@@ -3609,18 +3652,173 @@ async function executarAdicionarTokenMesa(tamanho = 45, imagem = '', hpMax = 50,
     squad: worldTriggerEstado.meuSquad,
     bagworm: worldTriggerEstado.bagworm,
     chameleon: worldTriggerEstado.chameleon,
-    triggers: [...worldTriggerEstado.triggersAtivos], ownerNick: userNick, tipo:'player'
+    triggers: [...worldTriggerEstado.triggersAtivos], ownerNick: userNick, ownerUserId: window.usuarioAtualId || '', tipo:'player', imagemStoragePath: imagemMeta.storagePath || '', imagemBucket: imagemMeta.bucket || '', imagemPublico: imagemMeta.publico !== false
   });
+  const tokenCriado = document.getElementById(tokenID);
+  if (tokenCriado) await salvarTokenNoSupabase(tokenCriado);
   if (worldTriggerAtivo()) sincronizarTokensSquadWorldTrigger(10,10,tamanho);
   
   if (canalMesa) {
     canalMesa.send({
       type: 'broadcast',
       event: 'vtt_mover_token',
-      payload: { id: tokenID, nome: userNick, x: 10, y: 10, tamanho, imagem, hpAtual, hpMax, campanha_id: obterCampanhaIdAtual(), squad: worldTriggerEstado.meuSquad || '', bagworm: !!worldTriggerEstado.bagworm, chameleon: !!worldTriggerEstado.chameleon, triggers: [...worldTriggerEstado.triggersAtivos], ownerNick: userNick, tipo:'player' }
+      payload: { id: tokenID, nome: userNick, x: 10, y: 10, tamanho, imagem: imagemMeta.storagePath ? '' : imagem, imagemStoragePath: imagemMeta.storagePath || '', imagemBucket: imagemMeta.bucket || '', imagemPublico: imagemMeta.publico !== false, hpAtual, hpMax, campanha_id: obterCampanhaIdAtual(), squad: worldTriggerEstado.meuSquad || '', bagworm: !!worldTriggerEstado.bagworm, chameleon: !!worldTriggerEstado.chameleon, triggers: [...worldTriggerEstado.triggersAtivos], ownerNick: userNick, ownerUserId: window.usuarioAtualId || '', tipo:'player' }
     });
   }
   mostrarPopup('🛡️ Token posicionado na Távola!');
+}
+
+
+function tokenImagemMetaDoElemento(token) {
+  if (!token) return { storagePath: '', bucket: '', publico: true };
+  return {
+    storagePath: token.dataset.tokenImagemStoragePath || '',
+    bucket: token.dataset.tokenImagemBucket || '',
+    publico: token.dataset.tokenImagemPublico !== 'false'
+  };
+}
+
+async function resolverImagemTokenURL(storagePath, bucket, publico = true, fallbackUrl = '') {
+  if (!storagePath) return fallbackUrl || '';
+  try {
+    const nomeBucket = bucket || (publico ? 'galeria' : 'galeria-privada');
+    if (nomeBucket === 'galeria' || publico) {
+      const { data } = supabaseClient.storage.from(nomeBucket).getPublicUrl(storagePath);
+      return data?.publicUrl || fallbackUrl || '';
+    }
+    const { data, error } = await supabaseClient.storage.from(nomeBucket).createSignedUrl(storagePath, 3600);
+    if (!error && data?.signedUrl) return data.signedUrl;
+  } catch (err) {
+    console.warn('Não foi possível resolver imagem do token:', err);
+  }
+  return fallbackUrl || '';
+}
+
+async function aplicarImagemStorageAoToken(token, storagePath, bucket, publico = true, fallbackUrl = '') {
+  if (!token || !storagePath || !supabaseClient) return;
+  const url = await resolverImagemTokenURL(storagePath, bucket, publico, fallbackUrl);
+  if (!url || !document.body.contains(token)) return;
+  token.dataset.tokenImagemStoragePath = storagePath;
+  token.dataset.tokenImagemBucket = bucket || (publico ? 'galeria' : 'galeria-privada');
+  token.dataset.tokenImagemPublico = String(publico);
+  token.dataset.tokenImagem = url;
+  token.style.backgroundImage = `url(${url})`;
+  token.style.backgroundSize = 'cover';
+  token.style.backgroundPosition = 'center';
+  token.innerText = '';
+}
+
+function tokenParaPersistencia(token) {
+  if (!token) return null;
+  const campanhaId = obterCampanhaIdAtual();
+  if (!campanhaId) return null;
+  const imagemMeta = tokenImagemMetaDoElemento(token);
+  return {
+    campanha_id: campanhaId,
+    id: token.dataset.tokenId,
+    nome: token.dataset.tokenNome || 'Personagem',
+    owner_user_id: token.dataset.tokenOwnerUserId || window.usuarioAtualId || null,
+    x: Number(token.dataset.tokenX ?? parseFloat(token.style.left) ?? 10),
+    y: Number(token.dataset.tokenY ?? parseFloat(token.style.top) ?? 10),
+    tamanho: Number(token.dataset.tokenTamanho) || 45,
+    imagem_url: imagemMeta.storagePath ? null : (token.dataset.tokenImagem || null),
+    imagem_storage_path: imagemMeta.storagePath || null,
+    imagem_bucket: imagemMeta.storagePath ? (imagemMeta.bucket || (imagemMeta.publico ? 'galeria' : 'galeria-privada')) : null,
+    imagem_publico: imagemMeta.publico,
+    hp_atual: Number(token.dataset.tokenHpAtual) || 0,
+    hp_max: Number(token.dataset.tokenHpMax) || 50,
+    squad: token.dataset.tokenSquad || '',
+    bagworm: token.dataset.tokenBagworm === 'true',
+    chameleon: token.dataset.tokenChameleon === 'true',
+    trion: token.dataset.tokenTrion || null,
+    triggers: (() => { try { return JSON.parse(token.dataset.tokenTriggers || '[]'); } catch (err) { return []; } })(),
+    owner_nick: token.dataset.tokenOwnerNick || '',
+    tipo: token.dataset.tokenTipo || '',
+    npc_index: token.dataset.tokenNpcIndex !== '' ? Number(token.dataset.tokenNpcIndex) : null,
+    atualizado_em: new Date().toISOString()
+  };
+}
+
+async function salvarTokenNoSupabase(token) {
+  if (!supabaseClient || !token || !obterCampanhaIdAtual()) return;
+  const registro = tokenParaPersistencia(token);
+  if (!registro) return;
+  const { error } = await supabaseClient.from('vtt_tokens').upsert(registro, { onConflict: 'campanha_id,id' });
+  if (error) console.error('Erro ao persistir token:', error);
+}
+
+function agendarPersistenciaToken(token, imediato = false) {
+  if (!token || !supabaseClient || !obterCampanhaIdAtual()) return;
+  const id = `${obterCampanhaIdAtual()}:${token.dataset.tokenId}`;
+  if (imediato) {
+    const timer = timersPersistenciaTokens.get(id);
+    if (timer) clearTimeout(timer);
+    timersPersistenciaTokens.delete(id);
+    salvarTokenNoSupabase(token);
+    return;
+  }
+  const anterior = timersPersistenciaTokens.get(id);
+  if (anterior) clearTimeout(anterior);
+  const timer = setTimeout(() => {
+    timersPersistenciaTokens.delete(id);
+    salvarTokenNoSupabase(token);
+  }, 250);
+  timersPersistenciaTokens.set(id, timer);
+}
+
+async function carregarTokensCampanha(forcar = false) {
+  if (!supabaseClient) return;
+  const campanhaId = obterCampanhaIdAtual();
+  const camada = document.getElementById('vtt-tokens-camada');
+  if (!campanhaId || !camada) return;
+  if (!forcar && tokensCarregadosCampanhaId === campanhaId) return;
+  if (carregandoTokensCampanhaId === campanhaId) return;
+  carregandoTokensCampanhaId = campanhaId;
+  try {
+    const { data, error } = await supabaseClient
+      .from('vtt_tokens')
+      .select('*')
+      .eq('campanha_id', campanhaId)
+      .order('atualizado_em', { ascending: true });
+    if (error) throw error;
+
+    const idsDoBanco = new Set((data || []).map(t => String(t.id)));
+    Array.from(camada.querySelectorAll('.vtt-token')).forEach(el => {
+      if (!idsDoBanco.has(String(el.dataset.tokenId || ''))) el.remove();
+    });
+
+    for (const t of (data || [])) {
+      const souDono = String(t.owner_nick || '').trim().toLowerCase() === obterMeuNickWT().trim().toLowerCase();
+      const podeMover = souDono || ehMestreGlobal;
+      const imagemInicial = t.imagem_storage_path ? '' : (t.imagem_url || '');
+      const token = criarElementoToken(
+        t.id, t.nome, Number(t.x), Number(t.y), Number(t.tamanho) || 45,
+        imagemInicial, Number(t.hp_atual) || 0, Number(t.hp_max) || 50, podeMover,
+        {
+          ownerNick: t.owner_nick || '', tipo: t.tipo || '', npcIndex: t.npc_index,
+          squad: t.squad || '', bagworm: !!t.bagworm, chameleon: !!t.chameleon,
+          trion: t.trion ?? null, triggers: Array.isArray(t.triggers) ? t.triggers : [],
+          imagemStoragePath: t.imagem_storage_path || '', imagemBucket: t.imagem_bucket || '', imagemPublico: t.imagem_publico !== false
+        }
+      );
+      if (token && t.imagem_storage_path) {
+        aplicarImagemStorageAoToken(token, t.imagem_storage_path, t.imagem_bucket || '', t.imagem_publico !== false, t.imagem_url || '');
+      }
+    }
+    tokensCarregadosCampanhaId = campanhaId;
+  } catch (error) {
+    console.error('Erro ao carregar tokens da campanha:', error);
+    mostrarPopup('❌ Não foi possível carregar os tokens desta campanha.');
+  } finally {
+    carregandoTokensCampanhaId = null;
+  }
+}
+
+function limparEstadoPersistenciaTokens() {
+  tokensCarregadosCampanhaId = null;
+  carregandoTokensCampanhaId = null;
+  timersPersistenciaTokens.forEach(timer => clearTimeout(timer));
+  timersPersistenciaTokens.clear();
 }
 
 function criarElementoToken(id, nome, x, y, tamanho = 45, imagem = '', hpAtual = 50, hpMax = 50, ehMeu = false, metadados = {}) {
@@ -3639,6 +3837,9 @@ function criarElementoToken(id, nome, x, y, tamanho = 45, imagem = '', hpAtual =
   token.dataset.tokenNome = nome;
   token.dataset.tokenTamanho = tamanho;
   token.dataset.tokenImagem = imagem;
+  token.dataset.tokenImagemStoragePath = metadados.imagemStoragePath ?? token.dataset.tokenImagemStoragePath ?? '';
+  token.dataset.tokenImagemBucket = metadados.imagemBucket ?? token.dataset.tokenImagemBucket ?? '';
+  token.dataset.tokenImagemPublico = String(metadados.imagemPublico !== undefined ? !!metadados.imagemPublico : token.dataset.tokenImagemPublico !== 'false');
   token.dataset.tokenHpAtual = hpAtual;
   token.dataset.tokenHpMax = hpMax;
   token.dataset.tokenX = x;
@@ -3649,6 +3850,7 @@ function criarElementoToken(id, nome, x, y, tamanho = 45, imagem = '', hpAtual =
   token.dataset.tokenTriggers = JSON.stringify(Array.isArray(metadados.triggers) ? metadados.triggers : (token.dataset.tokenTriggers ? JSON.parse(token.dataset.tokenTriggers) : []));
   token.dataset.tokenTrion = metadados.trion ?? token.dataset.tokenTrion ?? '';
   token.dataset.tokenOwnerNick = metadados.ownerNick ?? token.dataset.tokenOwnerNick ?? '';
+  token.dataset.tokenOwnerUserId = metadados.ownerUserId ?? token.dataset.tokenOwnerUserId ?? window.usuarioAtualId ?? '';
   token.dataset.tokenTipo = metadados.tipo ?? token.dataset.tokenTipo ?? '';
   token.dataset.tokenNpcIndex = metadados.npcIndex != null ? String(metadados.npcIndex) : (token.dataset.tokenNpcIndex || '');
 
@@ -3705,6 +3907,7 @@ function criarElementoToken(id, nome, x, y, tamanho = 45, imagem = '', hpAtual =
     token.dataset.arrastoConfigurado = 'true';
     ativarArrastoToken(token);
   }
+  return token;
 }
 
 function obterCoordenadasTokenPeloCursor(clientX, clientY) {
@@ -3734,6 +3937,7 @@ function atualizarPosicaoTokenLocal(token, x, y) {
   if (worldTriggerAtivo()) {
     registrarTokenNoRadarWT(token.dataset.tokenId, token.dataset.tokenNome, x, y, token.dataset.tokenSquad, token.dataset.tokenBagworm === 'true', token.dataset.tokenChameleon === 'true', token.dataset.tokenTrion || null, (() => { try { return JSON.parse(token.dataset.tokenTriggers || '[]'); } catch (err) { return []; } })());
   }
+  agendarPersistenciaToken(token, false);
 }
 
 function transmitirMovimentoToken(token, x, y) {
@@ -3769,7 +3973,10 @@ function transmitirMovimentoToken(token, x, y) {
       x,
       y,
       tamanho: Number(token.dataset.tokenTamanho) || 45,
-      imagem: token.dataset.tokenImagem || '',
+      imagem: token.dataset.tokenImagemStoragePath ? '' : (token.dataset.tokenImagem || ''),
+      imagemStoragePath: token.dataset.tokenImagemStoragePath || '',
+      imagemBucket: token.dataset.tokenImagemBucket || '',
+      imagemPublico: token.dataset.tokenImagemPublico !== 'false',
       hpAtual: Number(token.dataset.tokenHpAtual) || 0,
       hpMax: Number(token.dataset.tokenHpMax) || 50,
       campanha_id: obterCampanhaIdAtual(),
@@ -3779,6 +3986,7 @@ function transmitirMovimentoToken(token, x, y) {
       trion: token.dataset.tokenTrion || null,
       triggers: (() => { try { return JSON.parse(token.dataset.tokenTriggers || '[]'); } catch (err) { return []; } })(),
       ownerNick: token.dataset.tokenOwnerNick || '',
+      ownerUserId: token.dataset.tokenOwnerUserId || '',
       tipo: token.dataset.tokenTipo || '',
       npcIndex: token.dataset.tokenNpcIndex !== '' ? Number(token.dataset.tokenNpcIndex) : null
     }
@@ -3870,10 +4078,12 @@ function ativarArrastoToken(token) {
         const x = parseFloat(token.style.left) || 0;
         const y = parseFloat(token.style.top) || 0;
         transmitirMovimentoToken(token, x, y);
+        agendarPersistenciaToken(token, true);
         mostrarPopup(`❤️ HP de ${nome} atualizado: ${hpAtual}/${hpMax}`);
       }
     }
 
+    agendarPersistenciaToken(token, true);
     e.stopPropagation();
     e.preventDefault();
   };
