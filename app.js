@@ -2880,7 +2880,7 @@ const GUIAS_RPG = {
     {titulo:'⚔️ Crônicas de Camelot — Manual completo', arquivo:'guias/oficiais/cronicas-de-camelot-manual-completo.pdf', tipo:'pdf'}
   ],
   elarion: [
-    {titulo:'💎 Elarion — Sistema de Joias e Luvas — Guia completo', arquivo:'guias/GUIA-ELARION.html', tipo:'html'}
+    {titulo:'💎 Elarion — PREMISSA — Sistema de Joias e Luvas — Manual completo', arquivo:'guias/oficiais/PREMISSA.pdf', tipo:'pdf'}
   ],
   world_trigger: [
     {titulo:'📖 Guia do Agente — RPG de Trion — Manual completo', arquivo:'guias/oficiais/world-trigger-guia-do-agente-completo.pdf', tipo:'pdf'}

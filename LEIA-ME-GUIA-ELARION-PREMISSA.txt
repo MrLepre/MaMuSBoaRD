@@ -1,0 +1,8 @@
+GUIA OFICIAL — ELARION
+
+O guia oficial de Elarion na Mesa é o arquivo:
+  guias/oficiais/PREMISSA.pdf
+
+O nome original do arquivo é PREMISSA. Ele é exibido na aba 📚 Guias do RPG quando a campanha ativa utiliza o sistema Elarion.
+
+O guia é aberto dentro do leitor da mesa como PDF, preservando o conteúdo original do manual.
