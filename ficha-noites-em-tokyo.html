@@ -10,13 +10,283 @@
 <section id="fome" class="panel"><div class="grid"><div class="field"><label>Fome</label><input id="fome" type="number" min="0" max="5" value="0"></div><div class="field"><label>Sanidade</label><input id="sanidade" type="number" min="0" value="0"></div><div class="field"><label>Fome de Caça (CCG)</label><input id="fome_caca" type="number" min="0" max="5" value="0"></div><div class="field"><label>Condições / consequências</label><textarea id="condicoes"></textarea></div></div><div class="note">A Fome nunca desaparece para Ghouls: cada missão realizada sem alimentação aumenta +1. Em Fome extrema, o Mestre pode exigir teste de Vontade para evitar Frenesi. Para CCG, Fome representa obsessão pelo alvo.</div></section>
 <section id="historia" class="panel"><div class="grid"><div class="field"><label>Passado</label><textarea id="passado"></textarea></div><div class="field"><label>Personalidade</label><textarea id="personalidade"></textarea></div><div class="field"><label>Relações / Facções</label><textarea id="relacoes"></textarea></div><div class="field"><label>Notas da campanha</label><textarea id="notas"></textarea></div></div></section>
 <div class="actions"><button class="btn primary" id="enviar">⚔️ Enviar para a Mesa</button><button class="btn" id="salvar">💾 Salvar rascunho</button><button class="btn" id="carregar">↩️ Recuperar rascunho</button></div></main><script>
-const modo=new URLSearchParams(location.search).get('modo')||'criacao';const sistema={id:new URLSearchParams(location.search).get('sistema')||null,nome:'Noites em Tokyo'};const ATTR=[['FOR','Força'],['AGI','Agilidade'],['CON','Constituição'],['INT','Inteligência'],['SAB','Sabedoria'],['CAR','Carisma'],['FOME','Fome']];
-const $=id=>document.getElementById(id), val=id=>$(id)?.value??'', num=id=>Number(val(id))||0;function mod(v){return Math.floor((v-10)/2)}
-function renderAttrs(){const box=$('attrs');box.innerHTML='';ATTR.forEach(([sig,nome])=>{const d=document.createElement('div');d.className='card';d.innerHTML=`<div class="muted">${nome} · ${sig}</div><input id="attr_${sig}" type="number" value="0"><div class="muted">Modificador: <strong id="mod_${sig}">+0</strong></div>`;box.appendChild(d);});ATTR.forEach(([sig])=>{const el=$('attr_'+sig);el.addEventListener('input',calcular)});calcular()}
-function calcular(){ATTR.forEach(([sig])=>{const m=mod(num('attr_'+sig));$('mod_'+sig).textContent=(m>=0?'+':'')+m});$('ca').textContent=10+mod(num('attr_AGI'));$('vida_calc').textContent=20+num('attr_CON')*2;$('fadiga_calc').textContent=5+mod(num('attr_CON'))}
-function collect(){const o={_sistema_id:sistema.id,_sistema_nome:sistema.nome,_modo:modo,tipo:'noites_em_tokyo',nome:val('nome'),origem:val('origem'),nivel:num('nivel'),conceito:val('conceito'),motivacao:val('motivacao'),objetivos:val('objetivos'),kagune:val('kagune'),um_olho:val('um_olho'),vida:num('vida'),fadiga:num('fadiga'),iniciativa:num('iniciativa'),arquetipo:val('arquetipo'),quinque:val('quinque'),arata:val('arata'),quinque_rank:val('quinque_rank'),rc:num('rc'),rank:val('rank'),kakuja:val('kakuja'),kakuja_nivel:val('kakuja_nivel'),fome:num('fome'),sanidade:num('sanidade'),fome_caca:num('fome_caca'),condicoes:val('condicoes'),passado:val('passado'),personalidade:val('personalidade'),relacoes:val('relacoes'),notas:val('notas'),atributos:Object.fromEntries(ATTR.map(([s])=>[s,num('attr_'+s)])),regras:{teste:'2d10 + modificador do atributo',ca:'10 + MOD. AGI',vida:'20 + CON × 2',fadiga:'5 + MOD. CON',iniciativa:'2d10 + MOD. AGI',turno:'1 Ação + 1 Movimento + 1 Reação',critico:'10+10',falha_critica:'1+1',movimento:'6 metros',one_eye:'1d100; 96–100 indica Ghoul de Um Olho',rc:'0–999 iniciante; 1000–2999 experiente; 3000–5999 forte; 6000–9999 elite; 10000–14999 semi-kakuja; 15000+ kakuja completa'}};return o}
-function fill(o){if(!o)return;['nome','origem','nivel','conceito','motivacao','objetivos','kagune','um_olho','vida','fadiga','iniciativa','arquetipo','quinque','arata','quinque_rank','rc','rank','kakuja','kakuja_nivel','fome','sanidade','fome_caca','condicoes','passado','personalidade','relacoes','notas'].forEach(k=>{if($(k)&&o[k]!==undefined)$(k).value=o[k]});if(o.atributos)ATTR.forEach(([s])=>{if($('attr_'+s))$('attr_'+s).value=o.atributos[s]??0});calcular()}
-function enviar(){window.parent.postMessage({type:'cronicas-camelot-ficha-pronta',dados:collect(),modo,sistema_id:sistema.id},location.origin)}
-$('salvar').onclick=()=>{localStorage.setItem('ficha_noites_em_tokyo_'+(sistema.id||'generico'),JSON.stringify(collect()));alert('💾 Rascunho salvo neste dispositivo.')};$('carregar').onclick=()=>{const r=localStorage.getItem('ficha_noites_em_tokyo_'+(sistema.id||'generico'));if(r)fill(JSON.parse(r));else alert('Nenhum rascunho encontrado.')};$('enviar').onclick=enviar;
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')});window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='cronicas-camelot-carregar-ficha')fill(e.data.dados||{})});renderAttrs();
+const params = new URLSearchParams(location.search);
+const modo = params.get('modo') || 'criacao';
+const sistema = {
+  id: params.get('sistema') || null,
+  nome: 'Noites em Tokyo',
+  tipo: 'noites_em_tokyo'
+};
+
+const ATTR = [
+  ['FOR','Força'], ['AGI','Agilidade'], ['CON','Constituição'],
+  ['INT','Inteligência'], ['SAB','Sabedoria'], ['CAR','Carisma'],
+  ['FOME','Fome']
+];
+
+const $ = id => document.getElementById(id);
+const val = id => $(id)?.value ?? '';
+const num = id => {
+  const n = Number(val(id));
+  return Number.isFinite(n) ? n : 0;
+};
+const setVal = (id, value) => {
+  const el = $(id);
+  if (!el || value === undefined || value === null) return;
+  if (el.type === 'checkbox') el.checked = Boolean(value);
+  else el.value = value;
+};
+const firstDefined = (...values) => values.find(v => v !== undefined && v !== null && v !== '');
+const mod = v => Math.floor((Number(v) - 10) / 2);
+
+function renderAttrs() {
+  const box = $('attrs');
+  if (!box) return;
+  box.innerHTML = '';
+  ATTR.forEach(([sig, nome]) => {
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.innerHTML = `
+      <div class="muted">${nome} · ${sig}</div>
+      <input id="attr_${sig}" type="number" value="0">
+      <div class="muted">Modificador: <strong id="mod_${sig}">+0</strong></div>
+    `;
+    box.appendChild(d);
+  });
+  ATTR.forEach(([sig]) => $('attr_' + sig)?.addEventListener('input', calcular));
+  calcular();
+}
+
+function calcular() {
+  ATTR.forEach(([sig]) => {
+    const m = mod(num('attr_' + sig));
+    const out = $('mod_' + sig);
+    if (out) out.textContent = (m >= 0 ? '+' : '') + m;
+  });
+  const ca = $('ca');
+  const vida = $('vida_calc');
+  const fadiga = $('fadiga_calc');
+  if (ca) ca.textContent = 10 + mod(num('attr_AGI'));
+  if (vida) vida.textContent = 20 + num('attr_CON') * 2;
+  if (fadiga) fadiga.textContent = 5 + mod(num('attr_CON'));
+}
+
+/*
+ * Compatibilidade:
+ * A ficha pode receber dados:
+ * 1) no formato novo e plano desta ficha;
+ * 2) no formato das fichas anteriores do MaMuSBoaRD;
+ * 3) parcialmente aninhados (identidade, atributos, biologia, combate,
+ *    ccg, quinques, aratas, rc, fome, historia).
+ */
+function normalizarDadosEntrada(raw) {
+  const o = raw || {};
+  const identidade = o.identidade || {};
+  const atributos = o.atributos || o.attributes || {};
+  const biologia = o.biologia || {};
+  const combate = o.combate || {};
+  const ccg = o.ccg || {};
+  const quinques = o.quinques || {};
+  const aratas = o.aratas || {};
+  const rc = o.rc_kakuja || o.rc || {};
+  const fome = o.fome_sanidade || o.fome || {};
+  const historia = o.historia || o.history || {};
+  const especializacao = o.especializacao || o.treinamento || {};
+
+  const get = (flat, ...nested) =>
+    firstDefined(o[flat], ...nested.map(path => path.reduce((a,k) => a?.[k], o)));
+
+  const out = {
+    nome: get('nome', ['personagem_nome'], ['identidade','nome']),
+    origem: get('origem', ['identidade','origem']),
+    nivel: get('nivel', ['identidade','nivel']),
+    conceito: get('conceito', ['identidade','conceito']),
+    motivacao: get('motivacao', ['identidade','motivacao'], ['identidade','motivação']),
+    objetivos: get('objetivos', ['identidade','objetivos']),
+    kagune: get('kagune', ['biologia','kagune'], ['kagunes','tipo']),
+    um_olho: get('um_olho', ['biologia','um_olho'], ['biologia','umOlho']),
+    vida: get('vida', ['combate','vida'], ['combate','pv_atual'], ['recursos','vida']),
+    fadiga: get('fadiga', ['combate','fadiga'], ['recursos','fadiga']),
+    iniciativa: get('iniciativa', ['combate','iniciativa']),
+    arquetipo: get('arquetipo', ['ccg','arquetipo']),
+    quinque: get('quinque', ['quinques','nome'], ['ccg','quinque']),
+    arata: get('arata', ['aratas','nome'], ['ccg','arata']),
+    quinque_rank: get('quinque_rank', ['quinques','rank'], ['quinques','progressao'], ['ccg','quinque_rank']),
+    rc: get('rc', ['rc','valor'], ['rc_kakuja','rc']),
+    rank: get('rank', ['rc','rank'], ['rc_kakuja','rank']),
+    kakuja: get('kakuja', ['rc','kakuja'], ['rc_kakuja','kakuja']),
+    kakuja_nivel: get('kakuja_nivel', ['rc','kakuja_nivel'], ['rc_kakuja','nivel']),
+    fome: get('fome', ['fome','valor'], ['fome_sanidade','fome']),
+    sanidade: get('sanidade', ['fome','sanidade'], ['fome_sanidade','sanidade']),
+    fome_caca: get('fome_caca', ['fome','fome_caca'], ['ccg','fome_caca']),
+    condicoes: get('condicoes', ['combate','condicoes'], ['fome','condicoes']),
+    passado: get('passado', ['historia','passado']),
+    personalidade: get('personalidade', ['historia','personalidade']),
+    relacoes: get('relacoes', ['historia','relacoes'], ['historia','relações']),
+    notas: get('notas', ['historia','notas'], ['notas_campanha']),
+    especializacao: get('especializacao', ['especializacao','nome'], ['treinamento','especializacao']),
+    treinamento: get('treinamento', ['especializacao','treinamento']),
+    recursos: get('recursos', ['especializacao','recursos'])
+  };
+
+  out.atributos = {};
+  ATTR.forEach(([sig]) => {
+    out.atributos[sig] = firstDefined(
+      atributos[sig],
+      atributos[sig.toLowerCase()],
+      o['attr_' + sig],
+      o[sig],
+      0
+    );
+  });
+
+  return out;
+}
+
+function collect() {
+  return {
+    _sistema_id: sistema.id,
+    _sistema_nome: sistema.nome,
+    _modo: modo,
+    tipo: 'noites_em_tokyo',
+
+    nome: val('nome'),
+    origem: val('origem'),
+    nivel: num('nivel'),
+    conceito: val('conceito'),
+    motivacao: val('motivacao'),
+    objetivos: val('objetivos'),
+
+    especializacao: val('especializacao'),
+    treinamento: val('treinamento'),
+    recursos: val('recursos'),
+
+    kagune: val('kagune'),
+    um_olho: val('um_olho'),
+
+    vida: num('vida'),
+    fadiga: num('fadiga'),
+    iniciativa: num('iniciativa'),
+
+    arquetipo: val('arquetipo'),
+    quinque: val('quinque'),
+    quinque_rank: val('quinque_rank'),
+    arata: val('arata'),
+
+    rc: num('rc'),
+    rank: val('rank'),
+    kakuja: val('kakuja'),
+    kakuja_nivel: val('kakuja_nivel'),
+
+    fome: num('fome'),
+    sanidade: num('sanidade'),
+    fome_caca: num('fome_caca'),
+    condicoes: val('condicoes'),
+
+    passado: val('passado'),
+    personalidade: val('personalidade'),
+    relacoes: val('relacoes'),
+    notas: val('notas'),
+
+    atributos: Object.fromEntries(ATTR.map(([s]) => [s, num('attr_' + s)])),
+
+    regras: {
+      sistema: 'Noites em Tokyo',
+      teste: '2d10 + modificador do atributo',
+      ca: '10 + MOD. AGI',
+      vida: '20 + CON × 2',
+      fadiga: '5 + MOD. CON',
+      iniciativa: '2d10 + MOD. AGI',
+      turno: '1 Ação + 1 Movimento + 1 Reação',
+      movimento: '6 metros',
+      ataque: '2d10 + modificador contra CA',
+      desarmado: '1d6 + MOD. FOR',
+      critico: '10+10',
+      falha_critica: '1+1',
+      one_eye: '1d100; 96–100',
+      rc: 'Faixas do manual de Noites em Tokyo',
+      fome: 'Missões sem alimentação aumentam a Fome e podem causar Frenesi'
+    }
+  };
+}
+
+function fill(raw) {
+  if (!raw) return;
+  const o = normalizarDadosEntrada(raw);
+
+  [
+    'nome','origem','nivel','conceito','motivacao','objetivos',
+    'especializacao','treinamento','recursos',
+    'kagune','um_olho','vida','fadiga','iniciativa',
+    'arquetipo','quinque','quinque_rank','arata',
+    'rc','rank','kakuja','kakuja_nivel',
+    'fome','sanidade','fome_caca','condicoes',
+    'passado','personalidade','relacoes','notas'
+  ].forEach(k => setVal(k, o[k]));
+
+  ATTR.forEach(([sig]) => setVal('attr_' + sig, o.atributos[sig]));
+  calcular();
+}
+
+function enviar() {
+  const dados = collect();
+  window.parent.postMessage({
+    type: 'cronicas-camelot-ficha-pronta',
+    dados,
+    modo,
+    sistema_id: sistema.id,
+    userId: null
+  }, window.location.origin);
+}
+
+function salvarRascunho() {
+  localStorage.setItem(
+    'ficha_noites_em_tokyo_' + (sistema.id || 'generico'),
+    JSON.stringify(collect())
+  );
+  const msg = document.querySelector('.status-ficha');
+  if (msg) msg.textContent = '💾 Rascunho salvo neste dispositivo.';
+  else alert('💾 Rascunho salvo neste dispositivo.');
+}
+
+function carregarRascunho() {
+  const r = localStorage.getItem(
+    'ficha_noites_em_tokyo_' + (sistema.id || 'generico')
+  );
+  if (r) fill(JSON.parse(r));
+  else alert('Nenhum rascunho encontrado.');
+}
+
+// Recebe dados do MaMuSBoaRD depois que o iframe terminou de carregar.
+window.addEventListener('message', event => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data;
+  if (!data) return;
+
+  if (data.type === 'cronicas-camelot-carregar-sistema' && data.sistema) {
+    if (data.sistema.id) sistema.id = data.sistema.id;
+  }
+
+  if (data.type === 'cronicas-camelot-carregar-ficha') {
+    fill(data.dados || {});
+  }
+});
+
+$('salvar')?.addEventListener('click', salvarRascunho);
+$('carregar')?.addEventListener('click', carregarRascunho);
+$('enviar')?.addEventListener('click', enviar);
+
+document.querySelectorAll('.tabs button').forEach(button => {
+  button.type = 'button';
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    button.classList.add('active');
+    const target = $(button.dataset.tab);
+    if (target) target.classList.add('active');
+  });
+});
+
+renderAttrs();
+
 </script></body></html>
