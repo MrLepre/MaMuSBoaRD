@@ -860,6 +860,7 @@ try {
 
 document.addEventListener('DOMContentLoaded', async () => {
   restaurarEstadoSidebar();
+  inicializarInteracoesMobile();
   document.getElementById('diario-arquivos')?.addEventListener('change', adicionarImagensDiario);
   let timerAutoSaveDiario=null;
   ['diario-titulo','diario-conteudo'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{ if(!sessaoEhEditavel()) return; clearTimeout(timerAutoSaveDiario); timerAutoSaveDiario=setTimeout(()=>salvarDiarioAtual(false),1800); }));
@@ -3709,6 +3710,7 @@ function mudarAba(nomeAba, evento) {
 
   if (window.innerWidth <= 900) fecharMenuNavegacao();
   abaAtual = nomeAba;
+  atualizarNavegacaoMobile();
   try { localStorage.setItem('cronicas_camelot_aba', nomeAba); } catch (err) {}
 
   if (nomeAba === 'inicio') { renderizarCentralCampanha(); carregarResumoCentralCampanha(); }
@@ -5525,6 +5527,126 @@ function mostrarPopup(texto) {
   }, 3500);
 }
 
+
+// ==========================================================
+// FASE 1.5 — EXPERIÊNCIA MOBILE / TABLET
+// ==========================================================
+const MOBILE_NAV_ITEMS = [
+  { aba:'grupo', icone:'👥', nome:'Grupo' },
+  { aba:'sessoes', icone:'🎬', nome:'Sessões' },
+  { aba:'bestiario', icone:'📖', nome:'Bestiário' },
+  { aba:'guias', icone:'📚', nome:'Guias' },
+  { aba:'economia', icone:'💰', nome:'Economia' },
+  { aba:'jornais', icone:'📰', nome:'Jornais' },
+  { aba:'calendario', icone:'🗓️', nome:'Calendário' },
+  { aba:'campanhas', icone:'🏰', nome:'Campanhas' },
+  { aba:'diario', icone:'📔', nome:'Diário' },
+  { aba:'galeria', icone:'💬', nome:'Galeria' },
+  { aba:'noctavell', icone:'🕯️', nome:'Véu' },
+  { aba:'sistemas', icone:'⚙️', nome:'Sistemas' }
+];
+
+function atualizarNavegacaoMobile() {
+  document.querySelectorAll('.mobile-nav-item[data-mobile-aba]').forEach(btn => {
+    btn.classList.toggle('ativo', btn.dataset.mobileAba === abaAtual);
+  });
+  renderizarMenuMobileMais();
+}
+
+function navegarMobile(nomeAba) {
+  if (nomeAba === 'rolagens') {
+    window.__cronicasPermitirAbaRolagens = { ate: Date.now() + 1500 };
+  }
+  mudarAba(nomeAba, { __navegacaoRolagensAutorizada: nomeAba === 'rolagens' });
+  fecharMenuMobileMais();
+}
+
+function renderizarMenuMobileMais() {
+  const grid = document.getElementById('mobile-more-grid');
+  if (!grid) return;
+  const disponiveis = MOBILE_NAV_ITEMS.filter(item => {
+    const btn = document.querySelector(`.abas-navegacao button[onclick*="'${item.aba}'"]`);
+    if (!btn) return false;
+    const st = getComputedStyle(btn);
+    return st.display !== 'none' && st.visibility !== 'hidden';
+  });
+  grid.innerHTML = disponiveis.map(item => `
+    <button type="button" class="mobile-more-item" onclick="navegarMobile('${item.aba}')">
+      <span>${item.icone}</span><strong>${escaparHTML(item.nome)}</strong>
+    </button>`).join('');
+}
+
+function alternarMenuMobileMais(event) {
+  if (event) { event.preventDefault(); event.stopPropagation(); }
+  const menu = document.getElementById('mobile-more-menu');
+  const btn = document.getElementById('btn-mobile-mais');
+  if (!menu) return;
+  const aberto = !menu.classList.contains('aberto');
+  menu.classList.toggle('aberto', aberto);
+  menu.setAttribute('aria-hidden', String(!aberto));
+  btn?.setAttribute('aria-expanded', String(aberto));
+  if (aberto) renderizarMenuMobileMais();
+}
+
+function fecharMenuMobileMais() {
+  const menu = document.getElementById('mobile-more-menu');
+  const btn = document.getElementById('btn-mobile-mais');
+  menu?.classList.remove('aberto');
+  menu?.setAttribute('aria-hidden', 'true');
+  btn?.setAttribute('aria-expanded', 'false');
+}
+
+function inicializarInteracoesMobile() {
+  atualizarNavegacaoMobile();
+  window.addEventListener('orientationchange', () => setTimeout(() => {
+    prepararSidebarResponsiva();
+    atualizarNavegacaoMobile();
+  }, 120));
+  window.addEventListener('resize', () => {
+    prepararSidebarResponsiva();
+    if (window.innerWidth > 900) fecharMenuMobileMais();
+    atualizarNavegacaoMobile();
+  });
+
+  // Melhora de toque para zoom por pinça sem substituir a lógica existente do VTT.
+  const estadoPinch = new Map();
+  let distanciaAnterior = null;
+  document.addEventListener('pointerdown', (e) => {
+    const canvas = e.target.closest?.('#vtt-canvas');
+    if (!canvas || e.pointerType === 'mouse') return;
+    estadoPinch.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (estadoPinch.size === 2) {
+      const p = [...estadoPinch.values()];
+      distanciaAnterior = Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+    }
+  }, { passive:true });
+  document.addEventListener('pointermove', (e) => {
+    if (!estadoPinch.has(e.pointerId)) return;
+    estadoPinch.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (estadoPinch.size !== 2 || !vttZoom || !document.getElementById('vtt-canvas')) return;
+    const p = [...estadoPinch.values()];
+    const distanciaAtual = Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+    if (!distanciaAnterior || !Number.isFinite(distanciaAtual)) return;
+    const delta = (distanciaAtual - distanciaAnterior) / Math.max(1, distanciaAnterior);
+    if (Math.abs(delta) >= 0.018 && ehMestreGlobal) {
+      const proximo = Math.max(50, Math.min(300, Math.round(vttZoom * (1 + delta))));
+      if (proximo !== vttZoom) {
+        vttZoom = proximo;
+        atualizarTransformMapaVTT();
+      }
+      distanciaAnterior = distanciaAtual;
+      e.preventDefault();
+    }
+  }, { passive:false });
+  const limparPinch = (e) => { estadoPinch.delete(e.pointerId); if (estadoPinch.size < 2) distanciaAnterior = null; };
+  document.addEventListener('pointerup', limparPinch, { passive:true });
+  document.addEventListener('pointercancel', limparPinch, { passive:true });
+}
+
+// ==========================================================
+// FIM FASE 1.5
+// ==========================================================
+
 // ==========================================
 // EXPORTAÇÕES GLOBAIS
 // ==========================================
@@ -5604,6 +5726,9 @@ window.alternarModoImersivoMapa = alternarModoImersivoMapa;
 window.tocarSom = tocarSom;
 window.limparAtividadeCentral = limparAtividadeCentral;
 window.centralAdicionarAtividade = centralAdicionarAtividade;
+window.navegarMobile = navegarMobile;
+window.alternarMenuMobileMais = alternarMenuMobileMais;
+window.fecharMenuMobileMais = fecharMenuMobileMais;
 
 // Exposição global dos controles do Bestiário para os botões inline da interface.
 window.inicializarBestiarioElarion = inicializarBestiarioElarion;

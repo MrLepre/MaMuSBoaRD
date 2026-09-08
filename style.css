@@ -1892,3 +1892,63 @@ body.tema-sistema .xp-fill {
 .central-sistema-widget-seta{color:var(--cam-gold);font-size:1.15rem;text-align:center}
 @media(max-width:1100px){.central-sistema-widgets{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.central-sistema-widgets{grid-template-columns:1fr}.central-sistema-card{padding:13px}.central-system-badge{font-size:.56rem}.central-sistema-widget{padding:11px}}
+
+
+/* ==========================================================
+   FASE 1.5 — MOBILE / TABLET / TOUCH
+   ========================================================== */
+.mobile-bottom-nav,.mobile-more-menu{display:none}
+
+@media(max-width:900px){
+  body{padding-bottom:70px;overscroll-behavior-y:contain}
+  #conteudo-aplicacao main{padding-bottom:96px}
+  .mobile-bottom-nav{
+    display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:1200;
+    min-height:64px;padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));
+    background:color-mix(in srgb,var(--cam-panel) 96%,#000);border-top:1px solid rgba(var(--cam-gold-rgb),.2);
+    box-shadow:0 -12px 30px rgba(0,0,0,.32);backdrop-filter:blur(12px)
+  }
+  .mobile-nav-item{appearance:none;border:0;background:transparent;color:#928d85;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:50px;padding:6px 3px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .mobile-nav-item span{font-size:1.15rem;line-height:1.1}
+  .mobile-nav-item small{font-size:.58rem;line-height:1.1;font-family:'Cinzel',serif;font-weight:800;letter-spacing:.02em}
+  .mobile-nav-item.ativo{color:var(--cam-gold-light);background:color-mix(in srgb,var(--cam-primary) 16%,transparent)}
+  .mobile-nav-item:active{transform:scale(.96)}
+
+  .mobile-more-menu{position:fixed;inset:0;z-index:1250;pointer-events:none;opacity:0;transition:opacity .18s ease}
+  .mobile-more-menu.aberto{display:block;pointer-events:auto;opacity:1}
+  .mobile-more-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.56);backdrop-filter:blur(2px)}
+  .mobile-more-sheet{position:absolute;left:0;right:0;bottom:0;max-height:min(76vh,620px);overflow:auto;padding:10px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,color-mix(in srgb,var(--cam-panel) 98%,#000),color-mix(in srgb,var(--cam-bg) 94%,#000));border-top:1px solid rgba(var(--cam-gold-rgb),.22);border-radius:18px 18px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.42);transform:translateY(18px);transition:transform .2s ease}
+  .mobile-more-menu.aberto .mobile-more-sheet{transform:translateY(0)}
+  .mobile-more-handle{width:38px;height:4px;border-radius:999px;background:rgba(255,255,255,.22);margin:2px auto 10px}
+  .mobile-more-cabecalho{display:flex;justify-content:space-between;align-items:center;padding:3px 2px 12px;color:var(--cam-gold-light);font-family:'Cinzel',serif}
+  .mobile-more-cabecalho button{width:34px;height:34px;border:1px solid rgba(var(--cam-gold-rgb),.18);background:transparent;color:var(--cam-text);border-radius:9px;cursor:pointer}
+  .mobile-more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .mobile-more-item{min-height:72px;padding:9px 5px;border:1px solid rgba(var(--cam-gold-rgb),.11);border-radius:12px;background:rgba(255,255,255,.018);color:var(--cam-text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation}
+  .mobile-more-item span{font-size:1.35rem}
+  .mobile-more-item strong{font-family:'Cinzel',serif;font-size:.67rem;text-align:center;line-height:1.2}
+
+  /* Alvos de toque mais generosos nos controles principais. */
+  button,input,select,textarea{touch-action:manipulation}
+  .btn-acao,.btn-secundario,.btn-ficha-principal,.btn-perigo{min-height:42px}
+  .vtt-wrapper button,.vtt-wrapper input[type="range"]{min-height:40px}
+}
+
+@media(max-width:620px){
+  .mobile-bottom-nav{min-height:62px}
+  .mobile-more-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .mobile-more-item{min-height:68px}
+  .contexto-campanha{margin-bottom:8px}
+  .central-hero h2{font-size:1.45rem}
+  .central-hero-texto p{font-size:.82rem}
+}
+
+@media(min-width:901px) and (max-width:1180px){
+  #conteudo-aplicacao main{padding-left:16px;padding-right:16px}
+  .sidebar-navegacao{width:224px}
+  #conteudo-aplicacao{margin-left:224px}
+  #app-shell.sidebar-recolhida #conteudo-aplicacao{margin-left:72px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mobile-more-menu,.mobile-more-sheet{transition:none}
+}

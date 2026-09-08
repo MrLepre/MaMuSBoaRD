@@ -1,0 +1,13 @@
+MaMuSBoaRD — Fase 1.5
+
+Implementado:
+- navegação inferior mobile com Central, Mapa, Dados, Ficha e Mais;
+- menu “Mais” em formato bottom sheet;
+- sidebar desktop preservada;
+- melhorias de alvos de toque;
+- suporte inicial a pinch-zoom no mapa para Mestre sem substituir a mecânica existente;
+- manifest PWA e service worker de shell;
+- responsividade tablet/horizontal;
+- sincronização do item ativo na navegação móvel.
+
+A fase não altera a estrutura dos módulos de mapa, tokens, fichas, campanhas ou Realtime.
