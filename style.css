@@ -1952,3 +1952,72 @@ body.tema-sistema .xp-fill {
 @media(prefers-reduced-motion:reduce){
   .mobile-more-menu,.mobile-more-sheet{transition:none}
 }
+
+/* ==========================================================
+   PATCH — SCROLL VERTICAL MOBILE / TABLET
+   O documento inteiro deve continuar rolável fora de mapas/modais.
+   ========================================================== */
+html {
+  min-height: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto !important;
+  touch-action: pan-y !important;
+}
+
+body {
+  min-height: 100%;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto !important;
+  touch-action: pan-y !important;
+}
+
+#app-shell,
+#conteudo-aplicacao,
+#conteudo-aplicacao main {
+  height: auto !important;
+  min-height: 0;
+}
+
+#conteudo-aplicacao {
+  overflow: visible !important;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding-bottom: 82px !important;
+    overflow-y: auto !important;
+    touch-action: pan-y !important;
+  }
+
+  #app-shell {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #conteudo-aplicacao {
+    min-height: calc(100vh - 64px) !important;
+    overflow: visible !important;
+  }
+
+  #conteudo-aplicacao main {
+    overflow: visible !important;
+  }
+
+  /* A navegação móvel continua touch-friendly, mas não captura o gesto vertical. */
+  .mobile-bottom-nav,
+  .mobile-more-menu,
+  .mobile-more-sheet,
+  .sidebar-navegacao {
+    touch-action: auto;
+  }
+
+  /* Só o mapa deve consumir o gesto para pan/zoom. */
+  .vtt-wrapper,
+  .vtt-token {
+    touch-action: none !important;
+  }
+}
