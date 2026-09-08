@@ -2139,3 +2139,130 @@ body {
     scroll-margin-top: 64px;
   }
 }
+
+/* ==========================================================
+   FASE 1.5 — MOBILE NAV v6
+   No celular, a sidebar NÃO participa do layout nem captura gestos.
+   A navegação móvel oficial é a barra inferior + menu Mais.
+   ========================================================== */
+@media (max-width: 900px) {
+  /* Elimina completamente a sidebar e o overlay de navegação no mobile. */
+  #sidebar-navegacao,
+  .sidebar-navegacao,
+  #overlay-menu-navegacao,
+  .overlay-menu-navegacao,
+  #btn-menu-mobile,
+  .btn-menu-mobile {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* O shell não reserva espaço para a sidebar. */
+  #app-shell,
+  #conteudo-aplicacao {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  /* O documento continua sendo a área de rolagem principal. */
+  html {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+    touch-action: pan-y !important;
+  }
+  body {
+    display: block !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+    touch-action: pan-y !important;
+    padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Header fixo/compacto sem botão de menu lateral. */
+  #topo-geral {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1200 !important;
+  }
+  .topo-mesa {
+    min-height: 60px !important;
+    padding: 8px 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .topo-marca { min-width: 0 !important; }
+  .logo-mamusboard { min-width: 0 !important; }
+  .logo-texto { white-space: nowrap !important; }
+  .auth-container { min-width: 0 !important; }
+
+  /* O contexto da campanha deixa de ficar sobreposto à navegação. */
+  .contexto-campanha {
+    position: relative !important;
+    top: auto !important;
+    z-index: 10 !important;
+    flex-wrap: wrap !important;
+    padding: 9px 12px !important;
+  }
+
+  /* Workspace ocupa toda a largura. */
+  #conteudo-aplicacao main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 14px 12px calc(96px + env(safe-area-inset-bottom)) !important;
+    overflow: visible !important;
+  }
+  #conteudo-aplicacao .painel {
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  /* Barra inferior é a navegação oficial do mobile. */
+  .mobile-bottom-nav {
+    display: grid !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 5000 !important;
+    min-height: 64px !important;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important;
+    pointer-events: auto !important;
+  }
+  .mobile-nav-item {
+    touch-action: manipulation !important;
+    pointer-events: auto !important;
+  }
+
+  /* O menu Mais é o único painel móvel sobreposto e pode rolar internamente. */
+  .mobile-more-menu {
+    z-index: 6000 !important;
+  }
+  .mobile-more-sheet {
+    max-height: min(78vh, 680px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+
+  /* Nenhuma regra da sidebar deve criar contenção de scroll no mobile. */
+  .abas-navegacao {
+    display: none !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .topo-mesa { min-height: 56px !important; }
+  .status-usuario-texto { font-size: .74rem !important; }
+  .btn-sair { min-height: 38px !important; padding: 7px 10px !important; }
+  .contexto-campanha { gap: 7px !important; }
+  .contexto-campanha-identidade { width: 100% !important; }
+  .btn-contexto-trocar { width: 100% !important; }
+}

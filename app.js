@@ -3708,7 +3708,11 @@ function mudarAba(nomeAba, evento) {
     if (botaoAba) botaoAba.classList.add('ativo');
   }
 
-  if (window.innerWidth <= 900) fecharMenuNavegacao();
+  if (window.innerWidth <= 900) {
+    fecharMenuNavegacao();
+    fecharMenuMobileMais();
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
+  }
   abaAtual = nomeAba;
   atualizarNavegacaoMobile();
   try { localStorage.setItem('cronicas_camelot_aba', nomeAba); } catch (err) {}
@@ -5555,12 +5559,16 @@ function atualizarNavegacaoMobile() {
 
 function navegarMobile(nomeAba) {
   if (!nomeAba) return;
+
+  fecharMenuNavegacao();
+
   if (nomeAba === 'rolagens') {
     window.__cronicasPermitirAbaRolagens = { ate: Date.now() + 1500 };
     mudarAba('rolagens', { __navegacaoRolagensAutorizada: true, origem: 'mobile-bottom-nav' });
   } else {
     mudarAba(nomeAba);
   }
+
   fecharMenuMobileMais();
 }
 
