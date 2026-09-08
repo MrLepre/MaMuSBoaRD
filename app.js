@@ -1456,6 +1456,8 @@ function atualizarContextoCampanha() {
   const sistema = document.getElementById('campanha-ativa-sistema');
   if (!contexto || !nome || !sistema) return;
 
+  renderizarDashboardSistema();
+
   if (!campanhaAtual) {
     contexto.style.display = 'none';
     nome.textContent = 'Nenhuma campanha';
@@ -3167,6 +3169,160 @@ function centralFormatarData() {
 function centralAnoGenerico() {
   const possivel = Number(campanhaAtual?.ano_atual ?? campanhaAtual?.ano ?? 1);
   return Number.isFinite(possivel) && possivel > 0 ? possivel : 1;
+}
+
+const CENTRAL_DASHBOARDS = {
+  legado: {
+    titulo: 'Crônicas de Camelot',
+    descricao: 'Mesa medieval, personagens, mapa e recursos da campanha.',
+    badge: '⚔️ Camelot',
+    widgets: [
+      {icon:'🛡️', titulo:'Minha Ficha', texto:'Personagem, atributos e evolução.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mesa Tática', texto:'Mapa, grid, tokens e HP.', aba:'mapa'},
+      {icon:'🎲', titulo:'Rolagens', texto:'Dados e histórico da mesa.', aba:'rolagens'}
+    ]
+  },
+  elarion: {
+    titulo: 'Elarion — Sistema de Joias e Luvas',
+    descricao: 'A Central destaca os elementos mais importantes de Elarion: Joias, Luvas e progressão.',
+    badge: '💎 Elarion',
+    widgets: [
+      {icon:'💎', titulo:'Joias', texto:'Consulte a ficha para acompanhar suas Joias e combinações.', aba:'ficha'},
+      {icon:'🧤', titulo:'Luvas', texto:'Acompanhe sua fase e evolução da Luva.', aba:'ficha'},
+      {icon:'📈', titulo:'Progressão', texto:'Evolução do personagem e melhorias.', aba:'ficha'},
+      {icon:'📖', titulo:'Bestiário', texto:'Criaturas disponíveis e criação de tokens.', aba:'bestiario'}
+    ]
+  },
+  eter_brasas: {
+    titulo: 'Éter & Brasas',
+    descricao: 'O painel do sistema reúne calendário, economia e notícias do mundo.',
+    badge: '🔥 Éter & Brasas',
+    widgets: [
+      {icon:'🗓️', titulo:'Calendário', texto:'Ano, dia atual e marcos do calendário.', aba:'calendario'},
+      {icon:'💰', titulo:'Economia', texto:'Mercados, mercadorias e eventos econômicos.', aba:'economia'},
+      {icon:'📰', titulo:'Jornais', texto:'Últimos acontecimentos publicados na campanha.', aba:'jornais'},
+      {icon:'📖', titulo:'Bestiário', texto:'Criaturas e criação de tokens.', aba:'bestiario'}
+    ]
+  },
+  noctavell: {
+    titulo: 'Noctavell',
+    descricao: 'O painel destaca Véu, Pactos e recursos sobrenaturais do personagem.',
+    badge: '🕯️ Noctavell',
+    widgets: [
+      {icon:'🕯️', titulo:'Véu', texto:'Acessar os módulos sobrenaturais da campanha.', aba:'noctavell'},
+      {icon:'👁️', titulo:'Entidades', texto:'Consultar as entidades e informações do Véu.', aba:'noctavell'},
+      {icon:'🧠', titulo:'Sanidade', texto:'Acompanhar a situação do personagem.', aba:'ficha'},
+      {icon:'🤝', titulo:'Pactos', texto:'Gerenciar informações do personagem.', aba:'noctavell'}
+    ]
+  },
+  olimpia_pangeia: {
+    titulo: 'Olímpia — Pangeia',
+    descricao: 'A Central prioriza personagem, progressão e exploração do mundo.',
+    badge: '🌌 Pangeia',
+    widgets: [
+      {icon:'⚔️', titulo:'Classe', texto:'Abrir ficha e acompanhar classe e estilo.', aba:'ficha'},
+      {icon:'💎', titulo:'Jóias', texto:'Abrir ficha para acompanhar as Joias.', aba:'ficha'},
+      {icon:'📈', titulo:'Progressão', texto:'Nível, XP e evolução do personagem.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mapa', texto:'Explorar a mesa e o mundo da campanha.', aba:'mapa'}
+    ]
+  },
+  sobreviventes_fronteira: {
+    titulo: 'Sobreviventes da Fronteira',
+    descricao: 'Painel focado em progressão, órbitas, Moldagem de Mana e sobrevivência.',
+    badge: '🌀 Sobreviventes',
+    widgets: [
+      {icon:'🧱', titulo:'Linhagem', texto:'Grau de Linhagem e progressão.', aba:'ficha'},
+      {icon:'🌌', titulo:'Órbitas', texto:'Acompanhar a construção do personagem.', aba:'ficha'},
+      {icon:'✨', titulo:'Moldagem de Mana', texto:'Consultar e evoluir técnicas.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mapa', texto:'Abrir a mesa tática.', aba:'mapa'}
+    ]
+  },
+  noites_em_tokyo: {
+    titulo: 'Noites em Tokyo',
+    descricao: 'A Central destaca RC, Kagune, Fome, CCG e progressão.',
+    badge: '🌃 Noites em Tokyo',
+    widgets: [
+      {icon:'🩸', titulo:'RC / Kakuja', texto:'Abrir ficha para acompanhar RC e evolução.', aba:'ficha'},
+      {icon:'👁️', titulo:'Kagune', texto:'Consultar a biologia e o combate.', aba:'ficha'},
+      {icon:'🍖', titulo:'Fome', texto:'Acompanhar Fome e recursos do personagem.', aba:'ficha'},
+      {icon:'🏢', titulo:'CCG', texto:'Arquétipos, Quinques e informações do sistema.', aba:'ficha'}
+    ]
+  },
+  world_trigger: {
+    titulo: 'World Trigger RPG',
+    descricao: 'Painel tático para agentes, Squads, Trion e leitura do campo.',
+    badge: '⚡ World Trigger',
+    widgets: [
+      {icon:'👥', titulo:'Squad', texto:'Seu Squad, composição e NPCs.', aba:'ficha'},
+      {icon:'📡', titulo:'Radar', texto:'Abrir a mesa para visualizar os sinais detectados.', aba:'mapa'},
+      {icon:'🛡️', titulo:'Triggers', texto:'Consultar seu equipamento e configurações.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mapa Tático', texto:'Campo de batalha, cobertura e FOV.', aba:'mapa'}
+    ]
+  }
+};
+
+function centralTipoSistema() {
+  const tipo = String(sistemaAtual?.configuracao?.tipo || '').toLowerCase();
+  if (CENTRAL_DASHBOARDS[tipo]) return tipo;
+  const nome = String(sistemaAtual?.nome || '').toLowerCase();
+  if (/world\s*trigger|trion/.test(nome)) return 'world_trigger';
+  if (/noites\s+em\s+tokyo/.test(nome)) return 'noites_em_tokyo';
+  if (/éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome)) return 'eter_brasas';
+  if (/noctavell/.test(nome)) return 'noctavell';
+  if (/olímpia|olimpia|pangeia/.test(nome)) return 'olimpia_pangeia';
+  if (/sobreviventes\s+da\s+fronteira/.test(nome)) return 'sobreviventes_fronteira';
+  if (/elarion/.test(nome)) return 'elarion';
+  if (/camelot/.test(nome)) return 'legado';
+  return 'generico';
+}
+
+function centralDashboardGenerico() {
+  const cfg = sistemaAtual?.configuracao || {};
+  const dados = Array.isArray(cfg.dados) ? cfg.dados : [];
+  const atributos = Array.isArray(cfg.atributos) ? cfg.atributos : [];
+  const recursos = Array.isArray(cfg.recursos) ? cfg.recursos : [];
+  const pericias = Array.isArray(cfg.pericias) ? cfg.pericias : [];
+  return {
+    titulo: sistemaAtual?.nome || 'Sistema RPG',
+    descricao: 'Painel gerado automaticamente a partir da configuração deste sistema.',
+    badge: '⚙️ Sistema',
+    widgets: [
+      {icon:'👤', titulo:'Personagem', texto:`${atributos.length || 0} atributos · ${recursos.length || 0} recursos`, aba:'ficha'},
+      {icon:'🎲', titulo:'Dados', texto:`${dados.length || 0} tipos de dado configurados`, aba:'rolagens'},
+      {icon:'📚', titulo:'Perícias', texto:`${pericias.length || 0} perícias cadastradas`, aba:'ficha'},
+      {icon:'🗺️', titulo:'Mesa', texto:'Mapa, tokens e sessão da campanha.', aba:'mapa'}
+    ]
+  };
+}
+
+function renderizarDashboardSistema() {
+  const card = document.getElementById('central-sistema-card');
+  const titulo = document.getElementById('central-sistema-titulo');
+  const descricao = document.getElementById('central-sistema-descricao');
+  const badge = document.getElementById('central-sistema-badge');
+  const widgets = document.getElementById('central-sistema-widgets');
+  if (!card || !widgets) return;
+
+  if (!campanhaAtual || !sistemaAtual) {
+    card.style.display = 'none';
+    widgets.innerHTML = '';
+    return;
+  }
+
+  const tipo = centralTipoSistema();
+  const dashboard = CENTRAL_DASHBOARDS[tipo] || centralDashboardGenerico();
+  card.style.display = 'block';
+  if (titulo) titulo.textContent = dashboard.titulo;
+  if (descricao) descricao.textContent = dashboard.descricao;
+  if (badge) badge.textContent = dashboard.badge;
+
+  widgets.innerHTML = dashboard.widgets.map(w => `
+    <button type="button" class="central-sistema-widget" onclick="mudarAba('${escaparHTML(w.aba)}')">
+      <span class="central-sistema-widget-icone">${w.icon}</span>
+      <span class="central-sistema-widget-corpo"><strong>${escaparTextoCentral(w.titulo)}</strong><small>${escaparTextoCentral(w.texto)}</small></span>
+      <span class="central-sistema-widget-seta">›</span>
+    </button>
+  `).join('');
 }
 
 function atualizarAcoesCentral() {

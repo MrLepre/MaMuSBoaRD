@@ -1876,3 +1876,19 @@ body.tema-sistema .xp-fill {
 .central-atividade-card{margin-top:12px}.central-atividade-lista{display:grid;gap:6px}.central-atividade-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 10px;border:1px solid rgba(var(--cam-gold-rgb),.08);background:rgba(255,255,255,.015);border-radius:9px}.central-atividade-icone{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:7px;background:rgba(var(--cam-gold-rgb),.07);font-size:.9rem}.central-atividade-texto{min-width:0;color:#c1bbb3;font-size:.76rem;line-height:1.35}.central-atividade-texto strong{color:var(--cam-text);font-weight:700}.central-atividade-tempo{color:#716c66;font-size:.62rem;white-space:nowrap}
 .central-atividade-vazio{padding:16px 8px}
 @media(max-width:760px){.central-sessao-card{grid-template-columns:1fr}.central-sessao-acoes{justify-content:stretch}.central-sessao-acoes button{flex:1}.central-atividade-item{grid-template-columns:26px minmax(0,1fr)}.central-atividade-tempo{grid-column:2}}
+
+/* ============================================================
+   FASE 1.4 — DASHBOARD DINÂMICO POR SISTEMA
+   ============================================================ */
+.central-sistema-card{margin:14px 0;padding:16px;border:1px solid rgba(var(--cam-gold-rgb),.16);border-radius:12px;background:linear-gradient(145deg,color-mix(in srgb,var(--cam-panel) 97%,#000),color-mix(in srgb,var(--cam-bg) 94%,#000));box-shadow:0 10px 26px rgba(0,0,0,.10)}
+.central-sistema-titulo{margin-bottom:5px}.central-sistema-titulo h3{font-size:1.04rem;color:var(--cam-text)}
+.central-system-badge{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;border:1px solid rgba(var(--cam-gold-rgb),.18);background:rgba(var(--cam-gold-rgb),.05);color:var(--cam-gold-light);font-family:'Cinzel',serif;font-size:.61rem;font-weight:800;white-space:nowrap}
+.central-sistema-descricao{color:#938d85;font-size:.78rem;line-height:1.45;margin:0 0 12px}
+.central-sistema-widgets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.central-sistema-widget{display:grid;grid-template-columns:34px minmax(0,1fr) 16px;gap:9px;align-items:center;min-width:0;text-align:left;padding:10px;border:1px solid rgba(var(--cam-gold-rgb),.10);border-radius:10px;background:rgba(255,255,255,.018);color:var(--cam-text);cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.central-sistema-widget:hover{transform:translateY(-1px);border-color:rgba(var(--cam-gold-rgb),.3);background:rgba(var(--cam-gold-rgb),.05)}
+.central-sistema-widget-icone{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(var(--cam-gold-rgb),.08);font-size:1.05rem}
+.central-sistema-widget-corpo{min-width:0}.central-sistema-widget-corpo strong{display:block;color:var(--cam-text);font-family:'Cinzel',serif;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.central-sistema-widget-corpo small{display:block;margin-top:3px;color:#847e77;font-size:.65rem;line-height:1.3}
+.central-sistema-widget-seta{color:var(--cam-gold);font-size:1.15rem;text-align:center}
+@media(max-width:1100px){.central-sistema-widgets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.central-sistema-widgets{grid-template-columns:1fr}.central-sistema-card{padding:13px}.central-system-badge{font-size:.56rem}.central-sistema-widget{padding:11px}}
