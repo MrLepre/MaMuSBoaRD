@@ -5599,7 +5599,67 @@ function fecharMenuMobileMais() {
   btn?.setAttribute('aria-expanded', 'false');
 }
 
+function inicializarScrollTouchMobile() {
+  if (window.__mamusTouchScrollInicializado) return;
+  window.__mamusTouchScrollInicializado = true;
+
+  let inicioX = 0;
+  let inicioY = 0;
+  let ultimoY = 0;
+  let arrastandoPagina = false;
+  let ignorar = false;
+
+  const elementoDeveManterGestosProprios = (el) => !!el?.closest?.(
+    '#vtt-canvas, .vtt-wrapper, .mobile-more-sheet, .abas-navegacao, input, textarea, select, [contenteditable=\"true\"]'
+  );
+
+  document.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) {
+      arrastandoPagina = false;
+      ignorar = true;
+      return;
+    }
+    const t = event.touches[0];
+    inicioX = ultimoY = t.clientX;
+    inicioY = t.clientY;
+    arrastandoPagina = false;
+    ignorar = elementoDeveManterGestosProprios(event.target);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (event) => {
+    if (ignorar || event.touches.length !== 1) return;
+    const t = event.touches[0];
+    const dx = t.clientX - inicioX;
+    const dy = t.clientY - inicioY;
+
+    if (!arrastandoPagina) {
+      if (Math.abs(dy) < 8 || Math.abs(dy) < Math.abs(dx) * 1.05) return;
+      arrastandoPagina = true;
+    }
+
+    const deltaY = t.clientY - ultimoY;
+    if (!Number.isFinite(deltaY) || deltaY === 0) return;
+
+    // Fallback de rolagem para navegadores móveis que prendem o gesto no
+    // documento por causa de wrappers/fixed overlays. Não toca no VTT.
+    window.scrollBy(0, -deltaY);
+    ultimoY = t.clientY;
+    event.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    arrastandoPagina = false;
+    ignorar = false;
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', () => {
+    arrastandoPagina = false;
+    ignorar = false;
+  }, { passive: true });
+}
+
 function inicializarInteracoesMobile() {
+  inicializarScrollTouchMobile();
   atualizarNavegacaoMobile();
   window.addEventListener('orientationchange', () => setTimeout(() => {
     prepararSidebarResponsiva();

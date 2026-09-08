@@ -2119,3 +2119,23 @@ body {
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+
+/* ==========================================================
+   PATCH v5 — FALLBACK REAL DE SCROLL TOUCH
+   O documento é rolado via JS somente para gestos verticais fora
+   de mapa, abas horizontais, campos e painel Mais. Isso evita que
+   overlays/fixed wrappers de navegadores móveis impeçam o scroll.
+   ========================================================== */
+@media (max-width: 900px) {
+  html, body {
+    overscroll-behavior-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  body {
+    position: relative !important;
+  }
+  #conteudo-aplicacao, #conteudo-aplicacao main, #conteudo-aplicacao .painel {
+    scroll-margin-top: 64px;
+  }
+}
