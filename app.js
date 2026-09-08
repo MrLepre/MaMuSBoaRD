@@ -5554,10 +5554,13 @@ function atualizarNavegacaoMobile() {
 }
 
 function navegarMobile(nomeAba) {
+  if (!nomeAba) return;
   if (nomeAba === 'rolagens') {
     window.__cronicasPermitirAbaRolagens = { ate: Date.now() + 1500 };
+    mudarAba('rolagens', { __navegacaoRolagensAutorizada: true, origem: 'mobile-bottom-nav' });
+  } else {
+    mudarAba(nomeAba);
   }
-  mudarAba(nomeAba, { __navegacaoRolagensAutorizada: nomeAba === 'rolagens' });
   fecharMenuMobileMais();
 }
 
