@@ -36,6 +36,8 @@ let sessaoAtual = null;
 let diarioAtual = null;
 let diarioImagens = [];
 let sessoesCampanha = [];
+let centralAtividades = [];
+const centralAtividadesMaximas = 20;
 let tokensCarregadosCampanhaId = null;
 let carregandoTokensCampanhaId = null;
 const timersPersistenciaTokens = new Map();
@@ -869,6 +871,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   atualizarVisibilidadeAcoesRapidas();
   atualizarGruposNavegacao();
   renderizarCentralCampanha();
+  setInterval(() => { if (abaAtual === 'inicio' && campanhaAtual) renderizarAtividadesCentral(); }, 60000);
 
   if (!supabaseClient && window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -914,6 +917,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         .on('broadcast', { event: 'novo_mapa' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
           exibirMapaNaTela(payload.payload.url);
+          centralAdicionarAtividade('🗺️', 'O Mestre atualizou o mapa da campanha');
           setTimeout(() => carregarTokensCampanha(true), 120);
           mostrarPopup('🗺️ O Mestre atualizou o Mapa de Batalha!');
         })
@@ -935,11 +939,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           atualizarTransformMapaVTT();
         })
         .on('broadcast', { event: 'sessao_atualizada' }, async (payload) => {
-          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return; await carregarSessaoAtual(); renderizarCentralCampanha(); if(abaAtual==='inicio') carregarResumoCentralCampanha(true); if(abaAtual==='diario') carregarDiarioAtual(); if(abaAtual==='sessoes' && ehMestreGlobal) carregarSessoesCampanha();
+          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return; await carregarSessaoAtual(); centralAdicionarAtividade(dados.status==='aberta'?'🎬':'📕', `Sessão ${dados.numero || ''} ${dados.status==='aberta'?'iniciada':'atualizada'}`, dados.nome || ''); renderizarCentralCampanha(); if(abaAtual==='inicio') carregarResumoCentralCampanha(true); if(abaAtual==='diario') carregarDiarioAtual(); if(abaAtual==='sessoes' && ehMestreGlobal) carregarSessoesCampanha();
         })
         .on('broadcast', { event: 'nova_rolagem' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
           registrarRolagemHistorico(payload.payload.descricao, payload.payload.resultado, true);
+          centralAdicionarAtividade('🎲', String(payload.payload.descricao || 'Nova rolagem'), String(payload.payload.resultado ?? ''));
         })
         .on('broadcast', { event: 'galeria_mostrar_imagem' }, (payload) => {
           const dados = payload.payload || {};
@@ -960,12 +965,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .on('broadcast', { event: 'jornal_atualizado' }, (payload) => {
           if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          if (abaAtual === 'jornais') carregarJornaisAtual(true); if (abaAtual === 'inicio') carregarResumoCentralCampanha(true);
+          if (abaAtual === 'jornais') carregarJornaisAtual(true); if (abaAtual === 'inicio') { centralAdicionarAtividade('📰','Novo jornal publicado'); carregarResumoCentralCampanha(true); }
   if (abaAtual === 'calendario') carregarCalendarioAtual(true);
         })
         .on('broadcast', { event: 'calendario_atualizado' }, (payload) => {
           const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return;
           calendarioDados={ano:Math.max(1,Number(dados.ano)||1),dia:Math.max(1,Math.min(365,Number(dados.dia_do_ano)||1))};
+          centralAdicionarAtividade('🗓️', `Calendário avançou para o dia ${calendarioDados.dia}`, `Ano ${calendarioDados.ano}`);
           calendarioCarregadoCampanha=obterCampanhaIdAtual(); renderizarCalendario();
         })
         .on('broadcast', { event: 'vtt_mover_token' }, (payload) => {
@@ -1655,9 +1661,13 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   diarioAtual = null;
   diarioImagens = [];
   sessoesCampanha = [];
+  centralAtividades = [];
   resetarDadosEconomiaJornalAoTrocarCampanha();
   resetarCalendarioAoTrocarCampanha();
+  carregarAtividadesCentral();
   await carregarSessaoAtual();
+  renderizarCentralSessao();
+  renderizarAtividadesCentral();
 
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session?.user) carregarFichaDoUsuario(session.user.id);
@@ -2857,7 +2867,7 @@ async function iniciarSessao(){
   const {data:{session}}=await supabaseClient.auth.getSession();
   const {data,error}=await supabaseClient.from('sessoes_campanha').insert({campanha_id:obterCampanhaIdAtual(),numero,nome:nome.trim().slice(0,120)||`Sessão ${numero}`,status:'aberta',iniciada_em:new Date().toISOString(),iniciada_por:session?.user?.id}).select('*').single();
   if(error) return mostrarPopup('❌ Não foi possível iniciar a sessão: '+error.message);
-  sessaoAtual=data; tocarSom('success'); vibrarPadrao([30,40,30]);
+  sessaoAtual=data; centralAdicionarAtividade('🎬', `Sessão ${numero} iniciada`, data.nome || ''); tocarSom('success'); vibrarPadrao([30,40,30]);
   atualizarStatusSessaoUI(); renderizarControleSessaoMestre(); atualizarEditorDiarioUI();
   if(abaAtual==='sessoes') carregarSessoesCampanha();
   mostrarPopup(`🎬 Sessão ${numero} iniciada! As rolagens e diários agora serão catalogados nela.`);
@@ -2872,7 +2882,7 @@ async function encerrarSessao(){
   const {count:rolagens}=await supabaseClient.from('sessao_rolagens').select('id',{count:'exact',head:true}).eq('sessao_id',data.id);
   const {count:diarios}=await supabaseClient.from('sessao_diarios').select('id',{count:'exact',head:true}).eq('sessao_id',data.id);
   const {data:final}=await supabaseClient.from('sessoes_campanha').update({total_rolagens:rolagens||0,total_diarios:diarios||0}).eq('id',data.id).select('*').single();
-  sessaoAtual=final||data; atualizarStatusSessaoUI(); atualizarEditorDiarioUI(); renderizarControleSessaoMestre();
+  sessaoAtual=final||data; centralAdicionarAtividade('📕', `Sessão ${sessaoAtual.numero} encerrada`, sessaoAtual.nome || ''); atualizarStatusSessaoUI(); atualizarEditorDiarioUI(); renderizarControleSessaoMestre();
   if(abaAtual==='sessoes') carregarSessoesCampanha();
   mostrarPopup(`📕 Sessão ${sessaoAtual.numero} encerrada. ${rolagens||0} rolagens e ${diarios||0} diários catalogados.`);
   if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:sessaoAtual.id,status:'encerrada',numero:sessaoAtual.numero}});
@@ -3298,6 +3308,110 @@ function centralRenderizarPersonagem() {
   }
 }
 
+
+function centralAtividadeStorageKey() {
+  return `mamusboard_atividade_${obterCampanhaIdAtual() || 'sem-campanha'}`;
+}
+
+function carregarAtividadesCentral() {
+  centralAtividades = [];
+  if (!campanhaAtual) return;
+  try {
+    const salvo = JSON.parse(localStorage.getItem(centralAtividadeStorageKey()) || '[]');
+    if (Array.isArray(salvo)) centralAtividades = salvo.slice(0, centralAtividadesMaximas);
+  } catch (err) {}
+}
+
+function salvarAtividadesCentral() {
+  if (!campanhaAtual) return;
+  try { localStorage.setItem(centralAtividadeStorageKey(), JSON.stringify(centralAtividades.slice(0, centralAtividadesMaximas))); } catch (err) {}
+}
+
+function centralAdicionarAtividade(icone, texto, meta = '') {
+  if (!campanhaAtual || !texto) return;
+  const item = { id: `${Date.now()}_${Math.random().toString(16).slice(2)}`, icone: icone || '•', texto: String(texto).slice(0, 240), meta: String(meta || '').slice(0, 80), quando: new Date().toISOString() };
+  centralAtividades.unshift(item);
+  centralAtividades = centralAtividades.slice(0, centralAtividadesMaximas);
+  salvarAtividadesCentral();
+  renderizarAtividadesCentral();
+}
+
+function centralTempoRelativo(iso) {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return '';
+  const mins = Math.max(0, Math.floor((Date.now() - t) / 60000));
+  if (mins < 1) return 'agora';
+  if (mins < 60) return `há ${mins} min`;
+  const horas = Math.floor(mins / 60);
+  if (horas < 24) return `há ${horas} h`;
+  const dias = Math.floor(horas / 24);
+  return `há ${dias} d`;
+}
+
+function renderizarAtividadesCentral() {
+  const box = document.getElementById('central-atividade');
+  if (!box) return;
+  if (!campanhaAtual) {
+    box.innerHTML = '<p class="texto-vazio">Selecione uma campanha para acompanhar a atividade da mesa.</p>';
+    return;
+  }
+  if (!centralAtividades.length) {
+    box.innerHTML = '<div class="central-atividade-vazio"><p class="texto-vazio">Nenhuma atividade recente nesta campanha.</p></div>';
+    return;
+  }
+  box.innerHTML = centralAtividades.slice(0, 10).map(a => `
+    <div class="central-atividade-item">
+      <span class="central-atividade-icone">${escaparHTML(a.icone)}</span>
+      <div class="central-atividade-texto">${escaparHTML(a.texto)}${a.meta ? ` <strong>· ${escaparHTML(a.meta)}</strong>` : ''}</div>
+      <span class="central-atividade-tempo">${escaparHTML(centralTempoRelativo(a.quando))}</span>
+    </div>
+  `).join('');
+}
+
+function limparAtividadeCentral() {
+  centralAtividades = [];
+  salvarAtividadesCentral();
+  renderizarAtividadesCentral();
+  mostrarPopup('🧹 Atividade recente limpa neste dispositivo.');
+}
+
+function renderizarCentralSessao() {
+  const titulo = document.getElementById('central-sessao-titulo');
+  const status = document.getElementById('central-sessao-status');
+  const descricao = document.getElementById('central-sessao-descricao');
+  const meta = document.getElementById('central-sessao-meta');
+  const acoes = document.getElementById('central-sessao-acoes');
+  if (!titulo || !status || !descricao || !meta || !acoes) return;
+  meta.innerHTML = '';
+  acoes.innerHTML = '';
+  if (!campanhaAtual) {
+    titulo.textContent = 'Selecione uma campanha';
+    status.className = 'central-session-badge central-session-badge-vazia';
+    status.textContent = 'SEM CAMPANHA';
+    descricao.textContent = 'Escolha uma campanha para consultar a sessão atual.';
+    return;
+  }
+  if (!sessaoAtual) {
+    titulo.textContent = 'Nenhuma sessão iniciada';
+    status.className = 'central-session-badge central-session-badge-vazia';
+    status.textContent = 'AGUARDANDO';
+    descricao.textContent = ehMestreGlobal ? 'A mesa está pronta. Inicie uma sessão quando todos estiverem preparados.' : 'O Mestre ainda não iniciou uma sessão nesta campanha.';
+    if (ehMestreGlobal && campanhaAtual.status !== 'encerrada') acoes.innerHTML = '<button type="button" class="btn-ficha-principal" onclick="iniciarSessao()">🎬 Iniciar Sessão</button>';
+    else acoes.innerHTML = '<button type="button" class="btn-secundario" onclick="mudarAba(\'sessoes\')">🎬 Ver Sessões</button>';
+    return;
+  }
+  const aberta = sessaoAtual.status === 'aberta';
+  titulo.textContent = `Sessão ${sessaoAtual.numero}${sessaoAtual.nome ? ` · ${sessaoAtual.nome}` : ''}`;
+  status.className = `central-session-badge ${aberta ? 'central-session-badge-aberta' : 'central-session-badge-encerrada'}`;
+  status.textContent = aberta ? '● AO VIVO' : 'ENCERRADA';
+  descricao.textContent = aberta ? 'As rolagens e os diários estão sendo catalogados nesta sessão.' : 'Esta foi a última sessão selecionada para a campanha.';
+  if (sessaoAtual.iniciada_em) meta.innerHTML += `<span>Início: ${escaparHTML(new Date(sessaoAtual.iniciada_em).toLocaleString('pt-BR'))}</span>`;
+  if (sessaoAtual.encerrada_em) meta.innerHTML += `<span>Fim: ${escaparHTML(new Date(sessaoAtual.encerrada_em).toLocaleString('pt-BR'))}</span>`;
+  if (sessaoAtual.total_rolagens != null) meta.innerHTML += `<span>🎲 ${escaparHTML(sessaoAtual.total_rolagens)} rolagens</span>`;
+  if (sessaoAtual.total_diarios != null) meta.innerHTML += `<span>📔 ${escaparHTML(sessaoAtual.total_diarios)} diários</span>`;
+  acoes.innerHTML = `<button type="button" class="btn-secundario" onclick="mudarAba('sessoes')">📖 Ver Sessão</button>${aberta && ehMestreGlobal ? '<button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar</button>' : ''}`;
+}
+
 function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
   const titulo = document.getElementById('central-titulo');
   const subtitulo = document.getElementById('central-subtitulo');
@@ -3354,6 +3468,8 @@ function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
     }
   }
   centralRenderizarPersonagem();
+  renderizarCentralSessao();
+  renderizarAtividadesCentral();
   atualizarAcoesCentral();
 }
 
@@ -3371,14 +3487,25 @@ async function carregarResumoCentralCampanha(force = false) {
 
   const dados = { totalFichas: null, temMapa: false, nomeMapa: '', ultimaNoticia: null };
   try {
-    const [fichasRes, mapaRes, jornalRes] = await Promise.all([
+    const [fichasRes, mapaRes, jornalRes, sessaoRes] = await Promise.all([
       supabaseClient.from('fichas').select('id', { count: 'exact', head: true }).eq('campanha_id', id),
       supabaseClient.from('mapas').select('url_mapa').eq('campanha_id', id).limit(1).maybeSingle(),
-      supabaseClient.from('jornais_campanha').select('titulo,manchete,conteudo,categoria,regiao,publicado_em').eq('campanha_id', id).eq('publicado', true).order('publicado_em', { ascending: false }).limit(1).maybeSingle()
+      supabaseClient.from('jornais_campanha').select('titulo,manchete,conteudo,categoria,regiao,publicado_em').eq('campanha_id', id).eq('publicado', true).order('publicado_em', { ascending: false }).limit(1).maybeSingle(),
+      supabaseClient.from('sessoes_campanha').select('numero,nome,status,iniciada_em,encerrada_em,total_rolagens,total_diarios').eq('campanha_id', id).order('numero', { ascending: false }).limit(1).maybeSingle()
     ]);
     if (!fichasRes.error) dados.totalFichas = fichasRes.count ?? 0;
     if (!mapaRes.error && mapaRes.data?.url_mapa) { dados.temMapa = true; dados.nomeMapa = 'Mapa publicado'; }
     if (!jornalRes.error) dados.ultimaNoticia = jornalRes.data || null;
+    if (!sessaoAtual && !sessaoRes.error && sessaoRes.data) sessaoAtual = sessaoRes.data;
+    if (sessaoRes.data && centralAtividades.length === 0) {
+      const s = sessaoRes.data;
+      centralAtividades.push({id:`sessao_${s.numero}`,icone:s.status==='aberta'?'🎬':'📕',texto:`Sessão ${s.numero} ${s.status==='aberta'?'foi iniciada':'foi encerrada'}`,meta:s.nome||'',quando:s.encerrada_em||s.iniciada_em||new Date().toISOString()});
+    }
+    if (dados.ultimaNoticia && centralAtividades.length < centralAtividadesMaximas) {
+      centralAtividades.push({id:`jornal_${dados.ultimaNoticia.publicado_em}`,icone:'📰',texto:`Novo jornal: ${dados.ultimaNoticia.titulo || 'Notícia publicada'}`,meta:dados.ultimaNoticia.regiao || '',quando:dados.ultimaNoticia.publicado_em || new Date().toISOString()});
+    }
+    centralAtividades = centralAtividades.slice(0, centralAtividadesMaximas);
+    salvarAtividadesCentral();
   } catch (err) {
     console.warn('Resumo da central indisponível:', err);
   }
@@ -3569,6 +3696,7 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
 
   fichaUltimoSalvamento = agora;
   fichaStatusCentral = 'salva';
+  centralAdicionarAtividade('👤', `${nomeChar} atualizou a ficha`, ehEdicaoMestre ? 'Mestre' : 'Meu personagem');
   renderizarCentralCampanha();
   mostrarPopup(
     ehEdicaoMestre
@@ -4809,7 +4937,10 @@ function registrarRolagemHistorico(descricao, resultado, veioDoBroadcast = false
   historico.prepend(item);
   mostrarPopup(`🎲 ${textoRes}`);
 
-  if (!veioDoBroadcast) registrarRolagemNaSessao(descricao, textoRes);
+  if (!veioDoBroadcast) {
+    registrarRolagemNaSessao(descricao, textoRes);
+    centralAdicionarAtividade('🎲', String(descricao || 'Nova rolagem'), String(textoRes || ''));
+  }
 
   if (!veioDoBroadcast && canalMesa) {
     canalMesa.send({
@@ -5315,6 +5446,8 @@ window.definirFerramentaMapaTaticoWT = definirFerramentaMapaTaticoWT;
 window.limparMapaTaticoWT = limparMapaTaticoWT;
 window.alternarModoImersivoMapa = alternarModoImersivoMapa;
 window.tocarSom = tocarSom;
+window.limparAtividadeCentral = limparAtividadeCentral;
+window.centralAdicionarAtividade = centralAdicionarAtividade;
 
 // Exposição global dos controles do Bestiário para os botões inline da interface.
 window.inicializarBestiarioElarion = inicializarBestiarioElarion;

@@ -156,12 +156,29 @@
             <button type="button" onclick="mudarAba('rolagens')"><span>🎲</span><strong>Salão de dados</strong><small>Rolagens e histórico</small></button>
           </div>
 
+          <section class="central-sessao-card" id="central-sessao-card">
+            <div class="central-sessao-principal">
+              <div class="central-card-titulo central-sessao-titulo">
+                <div><span class="eyebrow-galeria">SESSÃO ATUAL</span><h3 id="central-sessao-titulo">Nenhuma sessão em andamento</h3></div>
+                <span id="central-sessao-status" class="central-session-badge central-session-badge-vazia">SEM SESSÃO</span>
+              </div>
+              <p id="central-sessao-descricao" class="central-sessao-descricao">O Mestre ainda não iniciou uma sessão nesta campanha.</p>
+              <div class="central-sessao-meta" id="central-sessao-meta"></div>
+            </div>
+            <div class="central-sessao-acoes" id="central-sessao-acoes"></div>
+          </section>
+
           <div class="central-kpis">
             <article class="central-kpi"><span>📅</span><div><small>DATA DA CAMPANHA</small><strong id="central-kpi-data">—</strong><em id="central-kpi-data-detalhe">Selecione uma campanha</em></div></article>
             <article class="central-kpi"><span>🎬</span><div><small>SESSÃO</small><strong id="central-kpi-sessao">Nenhuma</strong><em id="central-kpi-sessao-detalhe">Nenhuma sessão ativa</em></div></article>
             <article class="central-kpi"><span>👥</span><div><small>PERSONAGENS</small><strong id="central-kpi-grupo">—</strong><em>Fichas na campanha</em></div></article>
             <article class="central-kpi"><span>🗺️</span><div><small>MAPA</small><strong id="central-kpi-mapa">—</strong><em id="central-kpi-mapa-detalhe">Estado do mapa</em></div></article>
           </div>
+
+          <section class="central-painel-card central-atividade-card">
+            <div class="central-card-titulo"><div><span class="eyebrow-galeria">TEMPO REAL</span><h3>⚡ Atividade recente</h3></div><button type="button" class="btn-pequeno" onclick="limparAtividadeCentral()">Limpar</button></div>
+            <div id="central-atividade" class="central-atividade-lista"><p class="texto-vazio">Nenhuma atividade recente nesta campanha.</p></div>
+          </section>
 
           <div class="central-grid-inferior">
             <section class="central-painel-card">
