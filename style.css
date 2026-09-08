@@ -1794,3 +1794,38 @@ body.tema-sistema .xp-fill {
 /* Ajustes finais da Fase 1 */
 @media(min-width:901px){ .status-conexao{ left:272px; } }
 @media(max-width:900px){ .status-conexao{ left:50%; transform:translateX(-50%); } }
+
+
+/* ==========================================================
+   FASE 1.1 — SIDEBAR RECOLHÍVEL + WORKSPACE
+   ========================================================== */
+.sidebar-cabecalho-linha{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.sidebar-cabecalho-marca{min-width:0}
+.btn-recolher-sidebar{width:32px;height:32px;min-height:32px!important;flex:0 0 32px;display:flex;align-items:center;justify-content:center;padding:0!important;border:1px solid rgba(var(--cam-gold-rgb),.22);border-radius:8px;background:rgba(255,255,255,.025);color:var(--cam-text);cursor:pointer;font-family:Arial,sans-serif;font-size:1.35rem;line-height:1;box-shadow:none}
+.btn-recolher-sidebar:hover{color:var(--cam-gold-light);border-color:var(--cam-gold);background:rgba(var(--cam-gold-rgb),.08);transform:none}
+#conteudo-aplicacao{margin-left:258px;transition:margin-left .24s ease}
+.sidebar-navegacao{width:258px;transition:width .24s ease,box-shadow .24s ease}
+#app-shell.sidebar-recolhida .sidebar-navegacao,.sidebar-navegacao.recolhida{width:76px}
+#app-shell.sidebar-recolhida #conteudo-aplicacao{margin-left:76px}
+#app-shell.sidebar-recolhida .sidebar-cabecalho{padding:14px 8px 12px}
+#app-shell.sidebar-recolhida .sidebar-cabecalho-linha{justify-content:center}
+#app-shell.sidebar-recolhida .sidebar-cabecalho-marca{display:none}
+#app-shell.sidebar-recolhida .nav-grupo-titulo{display:none}
+#app-shell.sidebar-recolhida .nav-grupo{margin-bottom:10px}
+#app-shell.sidebar-recolhida .abas-navegacao{padding:12px 8px}
+#app-shell.sidebar-recolhida .abas-navegacao button{justify-content:center;gap:0;padding:9px 6px}
+#app-shell.sidebar-recolhida .abas-navegacao button span:first-child{width:28px;flex-basis:28px;font-size:1.05rem}
+#app-shell.sidebar-recolhida .abas-navegacao button span:nth-child(2){display:none}
+#app-shell.sidebar-recolhida .sidebar-rodape{padding:11px 8px 14px}
+#app-shell.sidebar-recolhida .sidebar-status{justify-content:center}
+#app-shell.sidebar-recolhida .sidebar-status span:last-child,#app-shell.sidebar-recolhida .sidebar-rodape small{display:none}
+
+/* A barra de contexto fica no fluxo do workspace; não cobre o mapa nem os controles do VTT. */
+.contexto-campanha{position:relative!important;top:auto!important;z-index:3!important;margin:0}
+#conteudo-aplicacao main{width:100%;max-width:none}
+
+@media(max-width:900px){
+  #conteudo-aplicacao,#app-shell.sidebar-recolhida #conteudo-aplicacao{margin-left:0}
+  .sidebar-navegacao.recolhida,#app-shell.sidebar-recolhida .sidebar-navegacao{width:min(86vw,300px)}
+  .btn-recolher-sidebar{display:none}
+}

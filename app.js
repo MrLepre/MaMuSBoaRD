@@ -855,6 +855,7 @@ try {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  restaurarEstadoSidebar();
   document.getElementById('diario-arquivos')?.addEventListener('change', adicionarImagensDiario);
   let timerAutoSaveDiario=null;
   ['diario-titulo','diario-conteudo'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{ if(!sessaoEhEditavel()) return; clearTimeout(timerAutoSaveDiario); timerAutoSaveDiario=setTimeout(()=>salvarDiarioAtual(false),1800); }));
@@ -3040,6 +3041,50 @@ function abrirLeitorGuia(g){if(!g)return;const leitor=document.getElementById('g
 function fecharLeitorGuia(){const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),lista=document.getElementById('guias-lista');if(frame)frame.src='about:blank';if(leitor)leitor.style.display='none';if(lista)lista.style.display='grid';}
 
 // --- NAVEGAÇÃO / SHELL DA APLICAÇÃO ---
+function aplicarEstadoSidebar(recolhida, persistir = true) {
+  const shell = document.getElementById('app-shell');
+  const sidebar = document.getElementById('sidebar-navegacao');
+  const botao = document.getElementById('btn-recolher-sidebar');
+  if (!shell || !sidebar || !botao) return;
+
+  const usarRecolhida = !!recolhida && window.innerWidth > 900;
+  shell.classList.toggle('sidebar-recolhida', usarRecolhida);
+  sidebar.classList.toggle('recolhida', usarRecolhida);
+
+  botao.setAttribute('aria-expanded', String(!usarRecolhida));
+  botao.setAttribute('aria-label', usarRecolhida ? 'Expandir menu lateral' : 'Recolher menu lateral');
+  botao.title = usarRecolhida ? 'Expandir menu lateral' : 'Recolher menu lateral';
+  botao.textContent = usarRecolhida ? '›' : '‹';
+
+  sidebar.querySelectorAll('.abas-navegacao button[data-nav-group-item]').forEach(btn => {
+    const label = btn.querySelector('span:nth-child(2)')?.textContent?.trim();
+    if (label) btn.title = usarRecolhida ? label : '';
+  });
+
+  if (persistir) {
+    try { localStorage.setItem('mamusboard_sidebar_recolhida', usarRecolhida ? '1' : '0'); } catch (err) {}
+  }
+}
+
+function alternarSidebarNavegacao(event) {
+  if (event) { event.preventDefault(); event.stopPropagation(); }
+  const shell = document.getElementById('app-shell');
+  if (!shell) return;
+  aplicarEstadoSidebar(!shell.classList.contains('sidebar-recolhida'), true);
+}
+
+function restaurarEstadoSidebar() {
+  let recolhida = false;
+  try { recolhida = localStorage.getItem('mamusboard_sidebar_recolhida') === '1'; } catch (err) {}
+  aplicarEstadoSidebar(recolhida, false);
+}
+
+function prepararSidebarResponsiva() {
+  const shell = document.getElementById('app-shell');
+  const recolhida = shell?.classList.contains('sidebar-recolhida') || false;
+  aplicarEstadoSidebar(recolhida, false);
+}
+
 function alternarMenuNavegacao(event) {
   if (event) event.stopPropagation();
   const sidebar = document.getElementById('sidebar-navegacao');
@@ -3082,6 +3127,8 @@ function atualizarGruposNavegacao() {
 function atualizarNavegacaoMobile() {
   atualizarGruposNavegacao();
 }
+
+window.addEventListener('resize', prepararSidebarResponsiva);
 
 // --- CENTRAL DA CAMPANHA ---
 function escaparTextoCentral(valor) {

@@ -44,8 +44,13 @@
   <div id="app-shell">
     <aside id="sidebar-navegacao" class="sidebar-navegacao" aria-label="Navegação principal">
       <div class="sidebar-cabecalho">
-        <span class="sidebar-overline">MESA VIRTUAL</span>
-        <strong>Central de Comando</strong>
+        <div class="sidebar-cabecalho-linha">
+          <div class="sidebar-cabecalho-marca">
+            <span class="sidebar-overline">MESA VIRTUAL</span>
+            <strong>Central de Comando</strong>
+          </div>
+          <button type="button" id="btn-recolher-sidebar" class="btn-recolher-sidebar" aria-label="Recolher menu lateral" aria-expanded="true" title="Recolher menu lateral" onclick="alternarSidebarNavegacao(event)">‹</button>
+        </div>
       </div>
       <nav class="abas-navegacao" aria-label="Módulos da mesa">
         <div class="nav-grupo" data-nav-group="mesa">
