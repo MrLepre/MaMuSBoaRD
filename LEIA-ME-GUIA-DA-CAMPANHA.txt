@@ -1,0 +1,9 @@
+MaMuSBoaRD — Acesso ao Guia da Campanha
+
+Alterações desta versão:
+- A navegação de desktop passa a identificar explicitamente "Guia da Campanha".
+- A barra de contexto da campanha ganhou um botão direto "📚 Guia da Campanha" quando a campanha ativa possui um guia cadastrado.
+- No mobile, "Guia da Campanha" aparece como acesso direto entre os atalhos da navegação móvel e também no menu Mais, conforme o layout.
+- O conteúdo do guia continua sendo carregado a partir do sistema da campanha ativa usando a estrutura existente GUIAS_RPG.
+- Não foi ativada nem implementada a Fase 1.6.
+- Não foram alteradas as mecânicas do VTT, fichas, campanhas, tokens, World Trigger, rolagens, economia, calendário ou Realtime.

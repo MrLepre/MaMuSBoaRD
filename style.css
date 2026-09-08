@@ -2266,3 +2266,34 @@ body {
   .contexto-campanha-identidade { width: 100% !important; }
   .btn-contexto-trocar { width: 100% !important; }
 }
+
+/* ==========================================================
+   CORREÇÃO — GUIA DA CAMPANHA
+   ========================================================== */
+.contexto-campanha-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-contexto-guia {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent, #d4af37);
+  border-radius: 10px;
+  background: rgba(212,175,55,.10);
+  color: var(--text, #fff);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-contexto-guia:hover {
+  background: rgba(212,175,55,.18);
+}
+
+@media (max-width: 900px) {
+  .contexto-campanha-acoes { width: 100%; justify-content: flex-start; }
+  .btn-contexto-guia, .btn-contexto-trocar { flex: 1 1 auto; }
+}
