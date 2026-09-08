@@ -1,0 +1,19 @@
+MaMuSBoaRD — Fase 1.5 Mobile Fix v7
+
+Correção estrutural do mobile.
+
+1. Adicionado meta viewport obrigatório:
+   width=device-width, initial-scale=1, viewport-fit=cover
+
+2. Isso permite que as media queries de até 900px realmente sejam aplicadas
+   no viewport do celular.
+
+3. No mobile (<900px), a sidebar é ocultada e a navegação oficial é a barra
+   inferior + menu Mais.
+
+4. O service worker foi versionado para v7 e mudou para network-first,
+   evitando que index.html/app.js/style.css antigos fiquem presos no cache.
+
+5. Versões de CSS/JS receberam cache-buster v7.
+
+Não foram alteradas as regras do mapa, tokens, fichas, campanhas ou Realtime.
