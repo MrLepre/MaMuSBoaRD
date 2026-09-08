@@ -1,0 +1,50 @@
+MaMuSBoaRD — FASE 1: UX / SHELL / CENTRAL DA CAMPANHA
+
+Base:
+- Projeto original MaMuSBoaRD-main(1).zip enviado em 08/09/2026.
+- Foram alterados somente index.html, style.css e app.js.
+- Nenhum SQL é necessário para esta etapa.
+
+O que entrou:
+1. Novo Shell da aplicação:
+   - cabeçalho global mais compacto;
+   - navegação lateral no desktop;
+   - menu lateral em formato de drawer no celular;
+   - grupos de navegação: MESA, MUNDO, CAMPANHA e MESTRE;
+   - contexto da campanha destacado acima do conteúdo.
+
+2. Nova aba CENTRAL:
+   - dashboard inicial da campanha;
+   - ações rápidas para personagem, grupo, mapa e rolagens;
+   - KPIs de data, sessão, personagens e mapa;
+   - última notícia publicada;
+   - atalhos para módulos do mundo;
+   - estado especial quando nenhuma campanha está selecionada.
+
+3. Integração com o estado existente:
+   - campanha ativa e sistema continuam sendo as fontes do tema;
+   - sessão atual é reutilizada;
+   - calendário de Éter & Brasas é reutilizado quando disponível;
+   - número de fichas, presença do mapa e última notícia são consultados pela central;
+   - cache leve de 30s evita consultas repetidas ao trocar de aba.
+
+4. Mobile:
+   - o menu pode ser aberto/fechado sem modificar os módulos internos;
+   - a navegação fecha automaticamente ao selecionar uma aba;
+   - a área de conteúdo aproveita toda a largura disponível.
+
+5. Compatibilidade:
+   - os IDs existentes dos botões foram preservados;
+   - mudarAba continua sendo o mecanismo central de navegação;
+   - mapa, tokens, zoom, grid, rolagens, galeria, fichas, campanhas e sistemas não foram reescritos;
+   - Fog of War não foi reintroduzido.
+
+Validação realizada:
+- node --check app.js: OK
+- estrutura HTML verificada com BeautifulSoup: 1 <main>, 18 <section>, dashboard presente.
+
+Próxima etapa sugerida:
+- refinamento visual da Central com dados da ficha do jogador;
+- estados de carregamento/erro mais elegantes;
+- painel do Mestre integrado ao mesmo Shell;
+- segunda rodada de ajustes mobile depois de teste real no celular.

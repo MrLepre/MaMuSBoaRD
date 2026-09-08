@@ -22,7 +22,8 @@ let mapaModoImersivo = false;
 let audioContext = null;
 let ultimoTokenInteragido = null;
 let abasCarregadas = { mapa: false, galeria: false };
-let abaAtual = 'ficha';
+let abaAtual = 'inicio';
+let centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
 let pastaGaleriaAtual = 'Todas';
 let dadosGaleriaAtual = [];
 let imagemMestreAberta = false;
@@ -863,6 +864,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.body.style.overflowX = 'hidden';
   document.body.style.touchAction = 'pan-y';
   atualizarVisibilidadeAcoesRapidas();
+  atualizarGruposNavegacao();
+  renderizarCentralCampanha();
 
   if (!supabaseClient && window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -873,7 +876,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const abaSalva = localStorage.getItem('cronicas_camelot_aba');
-    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais', 'calendario', 'diario', 'sessoes'].includes(abaSalva)) {
+    if (['inicio', 'ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais', 'calendario', 'diario', 'sessoes'].includes(abaSalva)) {
       mudarAba(abaSalva, abaSalva === 'rolagens' ? { __restauracaoAbaSalva: true } : undefined);
     }
   } catch (err) {}
@@ -929,7 +932,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           atualizarTransformMapaVTT();
         })
         .on('broadcast', { event: 'sessao_atualizada' }, async (payload) => {
-          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return; await carregarSessaoAtual(); if(abaAtual==='diario') carregarDiarioAtual(); if(abaAtual==='sessoes' && ehMestreGlobal) carregarSessoesCampanha();
+          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return; await carregarSessaoAtual(); renderizarCentralCampanha(); if(abaAtual==='inicio') carregarResumoCentralCampanha(true); if(abaAtual==='diario') carregarDiarioAtual(); if(abaAtual==='sessoes' && ehMestreGlobal) carregarSessoesCampanha();
         })
         .on('broadcast', { event: 'nova_rolagem' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
@@ -954,7 +957,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
         .on('broadcast', { event: 'jornal_atualizado' }, (payload) => {
           if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          if (abaAtual === 'jornais') carregarJornaisAtual(true);
+          if (abaAtual === 'jornais') carregarJornaisAtual(true); if (abaAtual === 'inicio') carregarResumoCentralCampanha(true);
   if (abaAtual === 'calendario') carregarCalendarioAtual(true);
         })
         .on('broadcast', { event: 'calendario_atualizado' }, (payload) => {
@@ -1119,6 +1122,8 @@ async function fazerLogout() {
   sistemaAtual = null;
   aplicarTemaMesa();
   atualizarVisibilidadeAcoesRapidas();
+  centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
+  renderizarCentralCampanha();
   garantirAbasEconomiaJornaisVisiveis();
   campanhasDisponiveis = [];
   sessaoAtual = null; diarioAtual = null; diarioImagens = []; sessoesCampanha = [];
@@ -1155,6 +1160,7 @@ function atualizarInterfaceAuth(user) {
     const btnAbaSessoes = document.getElementById('btn-aba-sessoes');
     if (btnAbaSessoes) btnAbaSessoes.style.display = ehMestreGlobal ? 'inline-flex' : 'none';
     if (btnNovoSistema) btnNovoSistema.style.display = ehMestreGlobal ? 'inline-flex' : 'none';
+    atualizarGruposNavegacao();
     if (ehMestreGlobal) {
       if (badgeMestre) badgeMestre.style.display = 'inline-block';
       if (painelMapaMestre) painelMapaMestre.style.display = 'block';
@@ -1172,6 +1178,7 @@ function atualizarInterfaceAuth(user) {
     const btnNovoSistema = document.getElementById('btn-novo-sistema');
     if (btnAbaSistemas) btnAbaSistemas.style.display = 'none';
     if (btnNovoSistema) btnNovoSistema.style.display = 'none';
+    atualizarGruposNavegacao();
     if (formLogin) formLogin.style.display = 'flex';
     if (statusUsuario) statusUsuario.style.display = 'none';
     if (painelMapaMestre) painelMapaMestre.style.display = 'none';
@@ -1624,6 +1631,9 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   salvarCampanhaLocalmente();
   atualizarContextoCampanha();
+  centralResumoCache = { campanhaId: campanhaAtual.id, atualizadoEm: 0, dados: null };
+  renderizarCentralCampanha();
+  atualizarGruposNavegacao();
   renderizarListaCampanhas();
 
   // Limpa estados carregados de recursos da campanha anterior.
@@ -1649,6 +1659,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   if (abaAtual === 'galeria') { abasCarregadas.galeria = true; carregarGaleria(true); }
   if (abaAtual === 'diario') carregarDiarioAtual();
   if (abaAtual === 'sessoes' && ehMestreGlobal) carregarSessoesCampanha();
+  if (abaAtual === 'inicio') carregarResumoCentralCampanha(true);
 
   if (mostrarFeedback) mostrarPopup(`🏰 Campanha ativa: ${campanha.nome}`);
 }
@@ -3028,9 +3039,188 @@ function carregarGuiasRPG(){const lista=document.getElementById('guias-lista'),s
 function abrirLeitorGuia(g){if(!g)return;const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),titulo=document.getElementById('guia-leitor-titulo'),link=document.getElementById('guia-abrir-original');if(!leitor||!frame)return;frame.src=g.arquivo;if(titulo)titulo.textContent=g.titulo;if(link)link.href=g.arquivo;leitor.style.display='block';const lista=document.getElementById('guias-lista');if(lista)lista.style.display='none';leitor.scrollIntoView({behavior:'smooth',block:'start'});}
 function fecharLeitorGuia(){const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),lista=document.getElementById('guias-lista');if(frame)frame.src='about:blank';if(leitor)leitor.style.display='none';if(lista)lista.style.display='grid';}
 
+// --- NAVEGAÇÃO / SHELL DA APLICAÇÃO ---
+function alternarMenuNavegacao(event) {
+  if (event) event.stopPropagation();
+  const sidebar = document.getElementById('sidebar-navegacao');
+  const overlay = document.getElementById('overlay-menu-navegacao');
+  const botao = document.getElementById('btn-menu-mobile');
+  if (!sidebar || !overlay || !botao) return;
+  const aberto = !sidebar.classList.contains('aberto');
+  sidebar.classList.toggle('aberto', aberto);
+  overlay.classList.toggle('aberto', aberto);
+  overlay.setAttribute('aria-hidden', String(!aberto));
+  botao.setAttribute('aria-expanded', String(aberto));
+  botao.setAttribute('aria-label', aberto ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+  document.body.classList.toggle('menu-mobile-aberto', aberto);
+}
+
+function fecharMenuNavegacao() {
+  const sidebar = document.getElementById('sidebar-navegacao');
+  const overlay = document.getElementById('overlay-menu-navegacao');
+  const botao = document.getElementById('btn-menu-mobile');
+  sidebar?.classList.remove('aberto');
+  overlay?.classList.remove('aberto');
+  overlay?.setAttribute('aria-hidden', 'true');
+  botao?.setAttribute('aria-expanded', 'false');
+  botao?.setAttribute('aria-label', 'Abrir menu de navegação');
+  document.body.classList.remove('menu-mobile-aberto');
+}
+
+function atualizarGruposNavegacao() {
+  document.querySelectorAll('.nav-grupo').forEach(grupo => {
+    const botoes = [...grupo.querySelectorAll('button[data-nav-group-item]')];
+    if (!botoes.length) return;
+    const visivel = botoes.some(btn => {
+      const st = getComputedStyle(btn);
+      return st.display !== 'none' && st.visibility !== 'hidden' && btn.offsetParent !== null;
+    });
+    grupo.classList.toggle('grupo-vazio', !visivel);
+  });
+}
+
+function atualizarNavegacaoMobile() {
+  atualizarGruposNavegacao();
+}
+
+// --- CENTRAL DA CAMPANHA ---
+function escaparTextoCentral(valor) {
+  return escaparHTML(valor ?? '');
+}
+
+function centralFormatarData() {
+  if (!campanhaAtual) return { titulo: '—', detalhe: 'Selecione uma campanha' };
+  try {
+    if (typeof sistemaEhEterBrasas === 'function' && sistemaEhEterBrasas() && typeof nomeDataCalendario === 'function') {
+      const data = nomeDataCalendario(calendarioDados.ano, calendarioDados.dia);
+      return { titulo: data.titulo, detalhe: data.detalhe };
+    }
+  } catch (err) {}
+  return { titulo: `Ano ${centralAnoGenerico()}`, detalhe: sistemaAtual?.nome || 'Sistema ativo' };
+}
+
+function centralAnoGenerico() {
+  const possivel = Number(campanhaAtual?.ano_atual ?? campanhaAtual?.ano ?? 1);
+  return Number.isFinite(possivel) && possivel > 0 ? possivel : 1;
+}
+
+function atualizarAcoesCentral() {
+  const temCampanha = Boolean(campanhaAtual);
+  ['central-btn-mapa','central-btn-rolagem'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = !temCampanha;
+    btn.title = temCampanha ? '' : 'Selecione uma campanha primeiro';
+  });
+  const botaoCalendario = document.querySelector('.central-lista-atalhos button[onclick*="calendario"]');
+  const botaoBestiario = document.querySelector('.central-lista-atalhos button[onclick*="bestiario"]');
+  if (botaoCalendario) {
+    const disponivel = typeof sistemaEhEterBrasas === 'function' && sistemaEhEterBrasas();
+    botaoCalendario.disabled = !disponivel;
+    botaoCalendario.style.opacity = disponivel ? '' : '.45';
+  }
+  if (botaoBestiario) {
+    const disponivel = Boolean(sistemaAtual && tipoSistemaComBestiario(sistemaAtual));
+    botaoBestiario.disabled = !disponivel;
+    botaoBestiario.style.opacity = disponivel ? '' : '.45';
+  }
+}
+
+function tipoSistemaComBestiario(sistema) {
+  const tipo = String(sistema?.configuracao?.tipo || '').toLowerCase();
+  const nome = String(sistema?.nome || '').toLowerCase();
+  return ['elarion','eter_brasas'].includes(tipo) || /elarion|éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome);
+}
+
+function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
+  const titulo = document.getElementById('central-titulo');
+  const subtitulo = document.getElementById('central-subtitulo');
+  const semCampanha = document.getElementById('central-sem-campanha');
+  const dataKpi = document.getElementById('central-kpi-data');
+  const dataDetalhe = document.getElementById('central-kpi-data-detalhe');
+  const sessaoKpi = document.getElementById('central-kpi-sessao');
+  const sessaoDetalhe = document.getElementById('central-kpi-sessao-detalhe');
+  const grupoKpi = document.getElementById('central-kpi-grupo');
+  const mapaKpi = document.getElementById('central-kpi-mapa');
+  const mapaDetalhe = document.getElementById('central-kpi-mapa-detalhe');
+  const noticia = document.getElementById('central-ultima-noticia');
+  const contexto = document.getElementById('contexto-campanha');
+
+  if (!campanhaAtual) {
+    if (titulo) titulo.textContent = 'Bem-vindo ao MaMuSBoaRD';
+    if (subtitulo) subtitulo.textContent = 'Selecione uma campanha para abrir sua mesa virtual.';
+    if (semCampanha) semCampanha.style.display = 'flex';
+    if (dataKpi) dataKpi.textContent = '—';
+    if (dataDetalhe) dataDetalhe.textContent = 'Selecione uma campanha';
+    if (sessaoKpi) sessaoKpi.textContent = 'Nenhuma';
+    if (sessaoDetalhe) sessaoDetalhe.textContent = 'Nenhuma sessão ativa';
+    if (grupoKpi) grupoKpi.textContent = '—';
+    if (mapaKpi) mapaKpi.textContent = '—';
+    if (mapaDetalhe) mapaDetalhe.textContent = 'Selecione uma campanha';
+    if (noticia) noticia.innerHTML = '<p class="texto-vazio">Selecione uma campanha para carregar as novidades.</p>';
+    if (contexto) contexto.style.display = 'none';
+    atualizarAcoesCentral();
+    return;
+  }
+
+  if (titulo) titulo.textContent = campanhaAtual.nome || 'Campanha';
+  if (subtitulo) subtitulo.textContent = sistemaAtual?.nome ? `Sistema: ${sistemaAtual.nome} • Sua central de comando para esta mesa.` : 'Sua central de comando para esta mesa.';
+  if (semCampanha) semCampanha.style.display = 'none';
+
+  const data = centralFormatarData();
+  if (dataKpi) dataKpi.textContent = data.titulo;
+  if (dataDetalhe) dataDetalhe.textContent = data.detalhe;
+
+  const sessao = sessaoAtual;
+  if (sessaoKpi) sessaoKpi.textContent = sessao ? `#${sessao.numero}` : 'Nenhuma';
+  if (sessaoDetalhe) sessaoDetalhe.textContent = sessao ? `${sessao.nome || `Sessão ${sessao.numero}`} • ${sessao.status === 'aberta' ? 'em andamento' : 'encerrada'}` : 'Nenhuma sessão ativa';
+
+  if (grupoKpi) grupoKpi.textContent = dados.totalFichas != null ? String(dados.totalFichas) : '—';
+  if (mapaKpi) mapaKpi.textContent = dados.temMapa ? 'Pronto' : 'Sem mapa';
+  if (mapaDetalhe) mapaDetalhe.textContent = dados.temMapa ? (dados.nomeMapa || 'Mapa da campanha') : 'O Mestre ainda não publicou um mapa';
+
+  if (noticia) {
+    if (dados.ultimaNoticia) {
+      noticia.innerHTML = `<article class="central-noticia-detalhe"><span>${escaparTextoCentral(dados.ultimaNoticia.categoria || 'Mundo')}</span><h4>${escaparTextoCentral(dados.ultimaNoticia.titulo || 'Notícia')}</h4><p>${escaparTextoCentral(dados.ultimaNoticia.manchete || dados.ultimaNoticia.conteudo || 'Sem resumo.')}</p><small>${escaparTextoCentral(dados.ultimaNoticia.regiao || 'Mundo')}</small></article>`;
+    } else {
+      noticia.innerHTML = '<p class="texto-vazio">Nenhuma notícia publicada nesta campanha.</p>';
+    }
+  }
+  atualizarAcoesCentral();
+}
+
+async function carregarResumoCentralCampanha(force = false) {
+  if (!campanhaAtual || !supabaseClient) {
+    renderizarCentralCampanha();
+    return;
+  }
+  const id = obterCampanhaIdAtual();
+  const agora = Date.now();
+  if (!force && centralResumoCache.campanhaId === id && agora - centralResumoCache.atualizadoEm < 30000) {
+    renderizarCentralCampanha(centralResumoCache.dados || {});
+    return;
+  }
+
+  const dados = { totalFichas: null, temMapa: false, nomeMapa: '', ultimaNoticia: null };
+  try {
+    const [fichasRes, mapaRes, jornalRes] = await Promise.all([
+      supabaseClient.from('fichas').select('id', { count: 'exact', head: true }).eq('campanha_id', id),
+      supabaseClient.from('mapas').select('url_mapa').eq('campanha_id', id).limit(1).maybeSingle(),
+      supabaseClient.from('jornais_campanha').select('titulo,manchete,conteudo,categoria,regiao,publicado_em').eq('campanha_id', id).eq('publicado', true).order('publicado_em', { ascending: false }).limit(1).maybeSingle()
+    ]);
+    if (!fichasRes.error) dados.totalFichas = fichasRes.count ?? 0;
+    if (!mapaRes.error && mapaRes.data?.url_mapa) { dados.temMapa = true; dados.nomeMapa = 'Mapa publicado'; }
+    if (!jornalRes.error) dados.ultimaNoticia = jornalRes.data || null;
+  } catch (err) {
+    console.warn('Resumo da central indisponível:', err);
+  }
+  centralResumoCache = { campanhaId: id, atualizadoEm: Date.now(), dados };
+  renderizarCentralCampanha(dados);
+}
+
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'calendario', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
+  const abasValidas = ['inicio', 'ficha', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'calendario', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -3066,8 +3256,11 @@ function mudarAba(nomeAba, evento) {
     if (botaoAba) botaoAba.classList.add('ativo');
   }
 
+  if (window.innerWidth <= 900) fecharMenuNavegacao();
   abaAtual = nomeAba;
   try { localStorage.setItem('cronicas_camelot_aba', nomeAba); } catch (err) {}
+
+  if (nomeAba === 'inicio') { renderizarCentralCampanha(); carregarResumoCentralCampanha(); }
 
   // Carregamento sob demanda: a mesa abre mais rápido e cada recurso é
   // consultado somente quando realmente é necessário.

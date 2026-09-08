@@ -13,10 +13,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- Container da interface superior para permitir occultação/expansão -->
+  <!-- Cabeçalho global da aplicação -->
   <div id="topo-geral">
     <header class="topo-mesa">
-      <h1>MaMuSBoaRD</h1>
+      <div class="topo-marca">
+        <button type="button" id="btn-menu-mobile" class="btn-menu-mobile" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="sidebar-navegacao" onclick="alternarMenuNavegacao(event)">☰</button>
+        <button type="button" class="logo-mamusboard" onclick="mudarAba('inicio')" aria-label="Ir para a Central da Campanha">
+          <span class="logo-icone">⚔</span>
+          <span class="logo-texto">MaMuSBoaRD</span>
+        </button>
+      </div>
       <div class="auth-container" aria-label="Autenticação">
         <div id="form-login" class="form-login">
           <input type="text" id="auth-nick" placeholder="Seu Nick / Nome">
@@ -25,39 +31,121 @@
           <button onclick="fazerCadastro()" class="btn-secundario">Criar Conta</button>
         </div>
         <div id="status-usuario" style="display: none; align-items: center; gap: 10px;">
-          <span style="color: #04d361;">Logado como: <strong id="user-nick-display"></strong></span>
-          <span id="badge-mestre" style="display: none; background: #c5a059; color: #121214; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">MESTRE</span>
+          <span class="status-usuario-texto">🟢 <strong id="user-nick-display"></strong></span>
+          <span id="badge-mestre" class="badge-mestre" style="display: none;">MESTRE</span>
           <button onclick="fazerLogout()" class="btn-perigo btn-sair">Sair</button>
         </div>
       </div>
     </header>
-
-    <nav class="abas-navegacao">
-      <button class="ativo" onclick="mudarAba('ficha', event)">Minha Ficha</button>
-      <button onclick="mudarAba('campanhas', event)">Campanhas</button>
-      <button id="btn-aba-sistemas" onclick="mudarAba('sistemas', event)" style="display:none;">Sistemas RPG</button>
-      <button id="btn-aba-bestiario" onclick="mudarAba('bestiario', event)" style="display:none;">📖 Bestiário</button>
-      <button id="btn-aba-guias" class="aba-mundo" onclick="mudarAba('guias', event)" style="display:none;">📚 Guias do RPG</button>
-      <button id="btn-aba-noctavell" class="aba-mundo" onclick="mudarAba('noctavell', event)" style="display:none;">🕯️ Véu</button>
-      <button id="btn-aba-economia" class="aba-mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo">💰 Economia</button>
-      <button id="btn-aba-jornais" class="aba-mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo">📰 Jornais</button>
-      <button id="btn-aba-calendario" class="aba-mundo" onclick="mudarAba('calendario', event)" aria-label="Calendário das Brasas">🗓️ Calendário</button>
-      <button onclick="mudarAba('grupo', event)">Fichas do Grupo</button>
-      <button onclick="mudarAba('mapa', event)">Mapa</button>
-      <button onclick="mudarAba('rolagens', event)">Rolagens</button>
-      <button id="btn-aba-diario" onclick="mudarAba('diario', event)">📔 Meu Diário</button>
-      <button id="btn-aba-sessoes" onclick="mudarAba('sessoes', event)" style="display:none;">🎬 Sessões</button>
-      <button onclick="mudarAba('galeria', event)">Chat & Galeria</button>
-    </nav>
-
-    <div id="contexto-campanha" class="contexto-campanha" style="display:none;">
-      <span class="contexto-campanha-rotulo">🏰 Campanha ativa</span>
-      <strong id="campanha-ativa-nome">Carregando...</strong>
-      <span class="contexto-campanha-sistema" id="campanha-ativa-sistema">Sistema: —</span>
-    </div>
   </div>
 
-  <!-- Central de Ações Rápidas -->
+  <div id="overlay-menu-navegacao" class="overlay-menu-navegacao" aria-hidden="true" onclick="fecharMenuNavegacao()"></div>
+
+  <div id="app-shell">
+    <aside id="sidebar-navegacao" class="sidebar-navegacao" aria-label="Navegação principal">
+      <div class="sidebar-cabecalho">
+        <span class="sidebar-overline">MESA VIRTUAL</span>
+        <strong>Central de Comando</strong>
+      </div>
+      <nav class="abas-navegacao" aria-label="Módulos da mesa">
+        <div class="nav-grupo" data-nav-group="mesa">
+          <div class="nav-grupo-titulo">MESA</div>
+          <button class="ativo nav-principal" data-nav-group-item="mesa" onclick="mudarAba('inicio', event)"><span>⌂</span><span>Central</span></button>
+          <button data-nav-group-item="mesa" onclick="mudarAba('ficha', event)"><span>👤</span><span>Minha Ficha</span></button>
+          <button data-nav-group-item="mesa" onclick="mudarAba('grupo', event)"><span>👥</span><span>Fichas do Grupo</span></button>
+          <button data-nav-group-item="mesa" onclick="mudarAba('mapa', event)"><span>🗺️</span><span>Mapa Tático</span></button>
+          <button data-nav-group-item="mesa" onclick="mudarAba('rolagens', event)"><span>🎲</span><span>Rolagens</span></button>
+        </div>
+
+        <div class="nav-grupo" data-nav-group="mundo">
+          <div class="nav-grupo-titulo">MUNDO</div>
+          <button id="btn-aba-bestiario" data-nav-group-item="mundo" onclick="mudarAba('bestiario', event)" style="display:none;"><span>📖</span><span>Bestiário</span></button>
+          <button id="btn-aba-guias" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('guias', event)" style="display:none;"><span>📚</span><span>Guias do RPG</span></button>
+          <button id="btn-aba-noctavell" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('noctavell', event)" style="display:none;"><span>🕯️</span><span>Véu</span></button>
+          <button id="btn-aba-economia" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo"><span>💰</span><span>Economia</span></button>
+          <button id="btn-aba-jornais" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo"><span>📰</span><span>Jornais</span></button>
+          <button id="btn-aba-calendario" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('calendario', event)" aria-label="Calendário das Brasas"><span>🗓️</span><span>Calendário</span></button>
+        </div>
+
+        <div class="nav-grupo" data-nav-group="campanha">
+          <div class="nav-grupo-titulo">CAMPANHA</div>
+          <button data-nav-group-item="campanha" onclick="mudarAba('campanhas', event)"><span>🏰</span><span>Campanhas</span></button>
+          <button id="btn-aba-sessoes" data-nav-group-item="campanha" onclick="mudarAba('sessoes', event)" style="display:none;"><span>🎬</span><span>Sessões</span></button>
+          <button id="btn-aba-diario" data-nav-group-item="campanha" onclick="mudarAba('diario', event)"><span>📔</span><span>Meu Diário</span></button>
+          <button data-nav-group-item="campanha" onclick="mudarAba('galeria', event)"><span>💬</span><span>Chat & Galeria</span></button>
+        </div>
+
+        <div class="nav-grupo" data-nav-group="mestre">
+          <div class="nav-grupo-titulo">MESTRE</div>
+          <button id="btn-aba-sistemas" data-nav-group-item="mestre" onclick="mudarAba('sistemas', event)" style="display:none;"><span>⚙️</span><span>Sistemas RPG</span></button>
+        </div>
+      </nav>
+      <div class="sidebar-rodape">
+        <div class="sidebar-status"><span class="sidebar-status-dot"></span><span>Távola sincronizada</span></div>
+        <small>MaMuSBoaRD • VTT multicampanha</small>
+      </div>
+    </aside>
+
+    <div id="conteudo-aplicacao">
+      <div id="contexto-campanha" class="contexto-campanha" style="display:none;">
+        <div class="contexto-campanha-identidade">
+          <span class="contexto-campanha-rotulo">CAMPANHA ATIVA</span>
+          <strong id="campanha-ativa-nome">Nenhuma campanha</strong>
+        </div>
+        <span class="contexto-campanha-sistema" id="campanha-ativa-sistema">Sistema: —</span>
+        <button type="button" class="btn-contexto-trocar" onclick="mudarAba('campanhas')">Trocar campanha</button>
+      </div>
+
+      <main>
+        <section id="aba-inicio" class="painel ativo painel-central">
+          <div class="central-hero">
+            <div class="central-hero-texto">
+              <span class="eyebrow-galeria">CENTRAL DA CAMPANHA</span>
+              <h2 id="central-titulo">Bem-vindo ao MaMuSBoaRD</h2>
+              <p id="central-subtitulo">Selecione uma campanha para abrir sua mesa virtual.</p>
+            </div>
+            <div class="central-hero-acoes">
+              <button type="button" id="central-btn-mapa" class="btn-ficha-principal" onclick="mudarAba('mapa')">🗺️ Abrir Mapa</button>
+              <button type="button" id="central-btn-rolagem" class="btn-secundario" onclick="mudarAba('rolagens')">🎲 Rolar Dados</button>
+            </div>
+          </div>
+
+          <div class="central-acoes-rapidas">
+            <button type="button" onclick="mudarAba('ficha')"><span>👤</span><strong>Meu personagem</strong><small>Ficha, evolução e inventário</small></button>
+            <button type="button" onclick="mudarAba('grupo')"><span>👥</span><strong>Meu grupo</strong><small>Ver os personagens da campanha</small></button>
+            <button type="button" onclick="mudarAba('mapa')"><span>⚔️</span><strong>Mesa tática</strong><small>Mapa, tokens e combate</small></button>
+            <button type="button" onclick="mudarAba('rolagens')"><span>🎲</span><strong>Salão de dados</strong><small>Rolagens e histórico</small></button>
+          </div>
+
+          <div class="central-kpis">
+            <article class="central-kpi"><span>📅</span><div><small>DATA DA CAMPANHA</small><strong id="central-kpi-data">—</strong><em id="central-kpi-data-detalhe">Selecione uma campanha</em></div></article>
+            <article class="central-kpi"><span>🎬</span><div><small>SESSÃO</small><strong id="central-kpi-sessao">Nenhuma</strong><em id="central-kpi-sessao-detalhe">Nenhuma sessão ativa</em></div></article>
+            <article class="central-kpi"><span>👥</span><div><small>PERSONAGENS</small><strong id="central-kpi-grupo">—</strong><em>Fichas na campanha</em></div></article>
+            <article class="central-kpi"><span>🗺️</span><div><small>MAPA</small><strong id="central-kpi-mapa">—</strong><em id="central-kpi-mapa-detalhe">Estado do mapa</em></div></article>
+          </div>
+
+          <div class="central-grid-inferior">
+            <section class="central-painel-card">
+              <div class="central-card-titulo"><div><span class="eyebrow-galeria">NOVIDADE</span><h3>📰 Últimos acontecimentos</h3></div><button type="button" class="btn-pequeno" onclick="mudarAba('jornais')">Ver jornal</button></div>
+              <div id="central-ultima-noticia" class="central-noticia"><p class="texto-vazio">Selecione uma campanha para carregar as novidades.</p></div>
+            </section>
+            <section class="central-painel-card">
+              <div class="central-card-titulo"><div><span class="eyebrow-galeria">ACESSO RÁPIDO</span><h3>⚡ Atalhos da mesa</h3></div></div>
+              <div class="central-lista-atalhos">
+                <button type="button" onclick="mudarAba('calendario')"><span>🗓️</span><div><strong>Calendário</strong><small>Tempo e eventos do mundo</small></div></button>
+                <button type="button" onclick="mudarAba('bestiario')"><span>📖</span><div><strong>Bestiário</strong><small>Criaturas e criação de tokens</small></div></button>
+                <button type="button" onclick="mudarAba('galeria')"><span>🖼️</span><div><strong>Galeria</strong><small>Imagens e comunicação</small></div></button>
+              </div>
+            </section>
+          </div>
+
+          <div id="central-sem-campanha" class="central-sem-campanha">
+            <div><span>🏰</span><div><strong>Nenhuma campanha ativa</strong><p>Entre em uma campanha existente ou crie uma nova para liberar os módulos da mesa.</p></div></div>
+            <button type="button" class="btn-ficha-principal" onclick="mudarAba('campanhas')">🏰 Escolher campanha</button>
+          </div>
+        </section>
+
+
   <div id="acoes-rapidas" class="acoes-rapidas" aria-label="Ações rápidas">
     <button type="button" id="btn-acoes-rapidas" class="btn-acoes-rapidas" aria-expanded="false" aria-controls="menu-acoes-rapidas" aria-label="Abrir ações rápidas" onclick="alternarAcoesRapidas(event)">
       <span class="acoes-rapidas-icone">＋</span>
@@ -85,7 +173,6 @@
     </div>
   </div>
 
-  <main>
     <section id="aba-guias" class="painel">
       <div class="cabecalho-campanhas">
         <div>
