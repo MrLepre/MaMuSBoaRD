@@ -3740,11 +3740,63 @@ async function fazerUploadMapa() {
 async function carregarMapaAtual() {
   if (!supabaseClient) return;
   const campanhaId = obterCampanhaIdAtual();
-  if (!campanhaId) return;
-  const { data } = await supabaseClient.from('mapas').select('url_mapa').eq('campanha_id', campanhaId).limit(1).maybeSingle();
-  if (data && data.url_mapa) {
+  const container = document.getElementById('container-mapa');
+  if (!campanhaId) {
+    if (container) container.innerHTML = '<p class="estado-galeria">Selecione uma campanha para carregar o mapa.</p>';
+    return;
+  }
+
+  // Sempre consulta o mapa vinculado explicitamente à campanha atual.
+  const { data, error } = await supabaseClient
+    .from('mapas')
+    .select('id,url_mapa')
+    .eq('campanha_id', campanhaId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erro ao carregar mapa da campanha:', error);
+    if (container) {
+      container.innerHTML = `
+        <div class="estado-galeria">
+          <strong>Não foi possível carregar o mapa.</strong><br>
+          <small>${escaparHTML(error.message || 'Erro desconhecido do Supabase.')}</small>
+        </div>`;
+    }
+    return;
+  }
+
+  if (data?.url_mapa) {
     exibirMapaNaTela(data.url_mapa);
     setTimeout(() => carregarTokensCampanha(true), 80);
+    return;
+  }
+
+  // Compatibilidade com mapas antigos criados antes da arquitetura multicampanha:
+  // se uma campanha de World Trigger ainda não tiver seu próprio mapa, procura
+  // um único registro legado sem campanha. Não grava esse vínculo automaticamente.
+  // Assim não há risco de mover um mapa entre campanhas silenciosamente.
+  if (worldTriggerAtivo()) {
+    const { data: legado, error: erroLegado } = await supabaseClient
+      .from('mapas')
+      .select('id,url_mapa')
+      .is('campanha_id', null)
+      .limit(2);
+
+    if (!erroLegado && Array.isArray(legado) && legado.length === 1 && legado[0]?.url_mapa) {
+      exibirMapaNaTela(legado[0].url_mapa);
+      setTimeout(() => carregarTokensCampanha(true), 80);
+      if (ehMestreGlobal) mostrarPopup('🗺️ Mapa legado carregado. Publique um novo mapa para vinculá-lo a esta campanha World Trigger.');
+      return;
+    }
+  }
+
+  if (container) {
+    container.innerHTML = `
+      <div class="estado-galeria">
+        <strong>🗺️ Nenhum mapa publicado nesta campanha.</strong><br>
+        ${ehMestreGlobal ? '<small>Use “Enviar Novo Mapa” no painel do Mestre para publicar o mapa desta campanha.</small>' : '<small>Aguarde o Mestre publicar o mapa da campanha.</small>'}
+      </div>`;
   }
 }
 
