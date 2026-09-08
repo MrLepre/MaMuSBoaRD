@@ -2021,3 +2021,101 @@ body {
     touch-action: none !important;
   }
 }
+
+/* ==========================================================
+   PATCH DEFINITIVO — SCROLL DE PÁGINA MOBILE/TABLET v4
+   A página inteira é o container de rolagem. Nenhum wrapper geral
+   pode capturar o gesto vertical. O VTT permanece independente.
+   ========================================================== */
+@media (max-width: 900px) {
+  html {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    height: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+
+  body {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+
+  #topo-geral {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1200 !important;
+  }
+
+  #app-shell {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #conteudo-aplicacao {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-left: 0 !important;
+    overflow: visible !important;
+  }
+
+  #conteudo-aplicacao main {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding-top: 14px !important;
+    padding-bottom: 98px !important;
+    -webkit-transform: none !important;
+    transform: none !important;
+  }
+
+  /* Nenhum painel deve criar uma viewport própria. */
+  #conteudo-aplicacao .painel {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Elementos fixos continuam fixos, mas nunca interferem com o scroll do documento. */
+  .mobile-bottom-nav,
+  .mobile-more-menu {
+    touch-action: auto !important;
+  }
+
+  /* O menu lateral móvel é o único painel de navegação que pode ter scroll próprio. */
+  .sidebar-navegacao.aberto {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+
+  /* O mapa mantém sua própria captura de gestos. */
+  .vtt-wrapper,
+  .vtt-wrapper * {
+    touch-action: none;
+  }
+
+  /* Campos e controles continuam utilizáveis sem bloquear a rolagem da página. */
+  input, select, textarea, button, a, label, summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
