@@ -3015,36 +3015,27 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
 
   let resultado;
 
-  const campanhaId = obterCampanhaIdAtual();
-  const dadosSalvar = {
-    user_id: idDestino,
-    nome_personagem: nomeChar,
-    dados_ficha: dadosFichaAtual,
-    updated_at: new Date().toISOString(),
-    campanha_id: campanhaId
-  };
-
-  // Não dependemos de uma constraint UNIQUE antiga para salvar.
-  // Primeiro localizamos a ficha desta pessoa nesta campanha.
-  const buscaExistente = await supabaseClient
-    .from('fichas')
-    .select('id')
-    .eq('user_id', idDestino)
-    .eq('campanha_id', campanhaId)
-    .limit(1)
-    .maybeSingle();
-
-  if (buscaExistente.error) {
-    resultado = { error: buscaExistente.error };
-  } else if (buscaExistente.data?.id) {
+  if (ehEdicaoMestre) {
     resultado = await supabaseClient
       .from('fichas')
-      .update(dadosSalvar)
-      .eq('id', buscaExistente.data.id);
+      .update({
+        nome_personagem: nomeChar,
+        dados_ficha: dadosFichaAtual,
+        updated_at: new Date(),
+        campanha_id: obterCampanhaIdAtual()
+      })
+      .eq('user_id', idDestino)
+      .eq('campanha_id', obterCampanhaIdAtual());
   } else {
     resultado = await supabaseClient
       .from('fichas')
-      .insert(dadosSalvar);
+      .upsert({
+        user_id: session.user.id,
+        nome_personagem: nomeChar,
+        dados_ficha: dadosFichaAtual,
+        updated_at: new Date(),
+        campanha_id: obterCampanhaIdAtual()
+      }, { onConflict: 'user_id,campanha_id' });
   }
 
   if (resultado.error) {

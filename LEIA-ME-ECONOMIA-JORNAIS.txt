@@ -20,3 +20,6 @@
 4) Segurança
 - RLS usa eh_membro_da_campanha() e eh_mestre_da_campanha().
 - Nenhum registro econômico/jornal é compartilhado entre campanhas.
+
+
+Drops do bestiário: o Mestre pode usar '📦 Importar Drops do Bestiário' na Economia para importar, por campanha, os drops comerciáveis catalogados no bestiário Éter & Brasas. Drops narrativos como documentos, mapas, manuscritos, chaves, selos e relíquias de lore são mantidos no bestiário, mas não são importados como mercadorias automaticamente.
