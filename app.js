@@ -24,6 +24,8 @@ let ultimoTokenInteragido = null;
 let abasCarregadas = { mapa: false, galeria: false };
 let abaAtual = 'inicio';
 let centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
+let fichaUltimoSalvamento = null;
+let fichaStatusCentral = 'sem_ficha';
 let pastaGaleriaAtual = 'Todas';
 let dadosGaleriaAtual = [];
 let imagemMestreAberta = false;
@@ -1050,7 +1052,9 @@ window.addEventListener('message', async (event) => {
   if (foiEdicao && event.data.userId) {
     fichaEditandoUserId = event.data.userId;
   }
+  fichaStatusCentral = foiEdicao ? 'salvando' : 'salvando';
   renderizarFichaNaTela(dadosFichaAtual);
+  renderizarCentralCampanha();
   fecharCriadorFicha();
 
   const nome = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Personagem';
@@ -1117,6 +1121,8 @@ async function fazerLogout() {
   await supabaseClient.auth.signOut();
   atualizarInterfaceAuth(null);
   dadosFichaAtual = null;
+  fichaUltimoSalvamento = null;
+  fichaStatusCentral = 'sem_ficha';
   limparEstadoPersistenciaTokens();
   document.getElementById('vtt-tokens-camada')?.replaceChildren();
   campanhaAtual = null;
@@ -1639,6 +1645,8 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   // Limpa estados carregados de recursos da campanha anterior.
   dadosFichaAtual = null;
+  fichaUltimoSalvamento = null;
+  fichaStatusCentral = 'sem_ficha';
   limparEstadoPersistenciaTokens();
   abasCarregadas = { mapa: false, galeria: false };
   dadosGaleriaAtual = [];
@@ -3179,6 +3187,117 @@ function tipoSistemaComBestiario(sistema) {
   return ['elarion','eter_brasas'].includes(tipo) || /elarion|éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome);
 }
 
+
+function centralLerValor(obj, caminhos) {
+  for (const caminho of caminhos) {
+    const partes = caminho.split('.');
+    let atual = obj;
+    for (const parte of partes) {
+      if (atual == null) { atual = undefined; break; }
+      atual = atual[parte];
+    }
+    if (atual !== undefined && atual !== null && String(atual).trim() !== '') return atual;
+  }
+  return null;
+}
+
+function centralEncontrarRecurso(dados) {
+  const atual = centralLerValor(dados, [
+    'vida_atual','pv_atual','hp_atual','vida.atual','pv.atual','hp.atual',
+    'combate.vida.atual','combate.pv.atual','combate.hp.atual','recursos.pv.atual'
+  ]);
+  const max = centralLerValor(dados, [
+    'vida_max','pv_max','hp_max','vida.max','pv.max','hp.max',
+    'combate.vida.max','combate.pv.max','combate.hp.max','recursos.pv.max'
+  ]);
+  if (atual === null && max === null) return null;
+  const a = Number(atual); const m = Number(max);
+  return { atual: Number.isFinite(a) ? a : atual, max: Number.isFinite(m) && m > 0 ? m : max };
+}
+
+function centralEncontrarRecursoSecundario(dados) {
+  const candidatos = [
+    ['Vigor','vigor_atual','vigor_max'],
+    ['Fadiga','fadiga_atual','fadiga_max'],
+    ['Mana','mana_atual','mana_max'],
+    ['Energia','energia_atual','energia_max'],
+    ['Trion','trion_atual','trion_max'],
+    ['RC','rc.atual','rc.max']
+  ];
+  for (const [nome, atualPath, maxPath] of candidatos) {
+    const atual = centralLerValor(dados,[atualPath]);
+    const max = centralLerValor(dados,[maxPath]);
+    if (atual !== null || max !== null) return { nome, atual, max };
+  }
+  return null;
+}
+
+function centralEncontrarNivel(dados) {
+  const valor = centralLerValor(dados,['nivel','nível','level','progressao.nivel','progressão.nivel']);
+  return valor == null ? null : valor;
+}
+
+function centralEncontrarXP(dados) {
+  const atual = centralLerValor(dados,['xp_atual','xp','experiencia','experiência','progressao.xp','progressão.xp']);
+  const proximo = centralLerValor(dados,['xp_proximo_nivel','xp_proximo','proximo_nivel_xp','progressao.xp_proximo','progressão.xp_proximo']);
+  return atual == null && proximo == null ? null : { atual, proximo };
+}
+
+function centralFormatarSalvamento() {
+  if (fichaStatusCentral === 'nao_salva') return { classe:'central-save-status-alerta', texto:'● Alterações não salvas' };
+  if (fichaStatusCentral === 'salvando') return { classe:'central-save-status-salvando', texto:'⟳ Salvando ficha...' };
+  if (!fichaUltimoSalvamento) return { classe:'central-save-status-vazio', texto:'Sem ficha' };
+  const data = new Date(fichaUltimoSalvamento);
+  if (Number.isNaN(data.getTime())) return { classe:'central-save-status-ok', texto:'✓ Salva na nuvem' };
+  return { classe:'central-save-status-ok', texto:`✓ Salva às ${data.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}` };
+}
+
+function centralRenderizarPersonagem() {
+  const titulo = document.getElementById('central-personagem-titulo');
+  const conteudo = document.getElementById('central-personagem-conteudo');
+  const status = document.getElementById('central-ficha-status');
+  const mestreCard = document.getElementById('central-mestre-card');
+  const mestreJogadores = document.getElementById('central-mestre-jogadores');
+  const mestreSessao = document.getElementById('central-mestre-sessao');
+  const mestreMapa = document.getElementById('central-mestre-mapa');
+  if (!titulo || !conteudo || !status) return;
+
+  const salvar = centralFormatarSalvamento();
+  status.className = `central-save-status ${salvar.classe}`;
+  status.textContent = salvar.texto;
+
+  if (!campanhaAtual || !dadosFichaAtual) {
+    titulo.textContent = 'Nenhum personagem carregado';
+    conteudo.innerHTML = `<div class="central-personagem-vazio"><span>👤</span><div><strong>${campanhaAtual ? 'Você ainda não possui uma ficha nesta campanha.' : 'Nenhuma campanha selecionada.'}</strong><p>${campanhaAtual ? 'Importe uma ficha existente ou crie seu personagem diretamente pela mesa.' : 'Escolha uma campanha para carregar o personagem correspondente.'}</p></div></div><div class="central-personagem-acoes">${campanhaAtual ? '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'ficha\')">👤 Abrir Minha Ficha</button>' : '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'campanhas\')">🏰 Escolher Campanha</button>'}</div>`;
+  } else {
+    const nome = centralLerValor(dadosFichaAtual,['nome','personagem_nome','identidade.nome']) || 'Personagem';
+    const nivel = centralEncontrarNivel(dadosFichaAtual);
+    const xp = centralEncontrarXP(dadosFichaAtual);
+    const recurso = centralEncontrarRecurso(dadosFichaAtual);
+    const secundario = centralEncontrarRecursoSecundario(dadosFichaAtual);
+    const pct = recurso?.max && Number(recurso.max) > 0 ? Math.max(0,Math.min(100,(Number(recurso.atual)||0)/Number(recurso.max)*100)) : null;
+    const xpTexto = xp ? `${escaparTextoCentral(xp.atual ?? '0')}${xp.proximo != null ? ` / ${escaparTextoCentral(xp.proximo)}` : ''}` : 'Não informado';
+    titulo.textContent = nome;
+    conteudo.innerHTML = `
+      <div class="central-personagem-identidade"><div class="central-personagem-avatar">${nome.charAt(0).toUpperCase()}</div><div><strong>${escaparTextoCentral(nome)}</strong><small>${nivel != null ? `Nível ${escaparTextoCentral(nivel)}` : 'Personagem da campanha'}${sistemaAtual?.nome ? ` • ${escaparTextoCentral(sistemaAtual.nome)}` : ''}</small></div></div>
+      <div class="central-personagem-metricas">
+        <div class="central-personagem-metrica"><small>XP</small><strong>${xpTexto}</strong></div>
+        ${recurso ? `<div class="central-personagem-metrica central-personagem-recurso"><small>PV / VIDA</small><strong>${escaparTextoCentral(recurso.atual)}${recurso.max != null ? ` / ${escaparTextoCentral(recurso.max)}` : ''}</strong>${pct != null ? `<div class="central-barra"><span style="width:${pct}%"></span></div>` : ''}</div>` : ''}
+        ${secundario ? `<div class="central-personagem-metrica"><small>${escaparTextoCentral(secundario.nome)}</small><strong>${escaparTextoCentral(secundario.atual ?? '—')}${secundario.max != null ? ` / ${escaparTextoCentral(secundario.max)}` : ''}</strong></div>` : ''}
+      </div>
+      <div class="central-personagem-acoes"><button type="button" class="btn-ficha-principal" onclick="abrirFichaAtualCompleta()">📖 Abrir Ficha</button><button type="button" class="btn-secundario" onclick="abrirEditorFichaAtual()">✏️ Editar</button><button type="button" class="btn-secundario" onclick="mudarAba('ficha')">⚙️ Gerenciar</button></div>`;
+  }
+
+  if (mestreCard) {
+    mestreCard.style.display = ehMestreGlobal && campanhaAtual ? 'block' : 'none';
+    if (ehMestreGlobal && campanhaAtual) {
+      if (mestreJogadores) mestreJogadores.textContent = centralResumoCache.dados?.totalFichas != null ? String(centralResumoCache.dados.totalFichas) : '—';
+      if (mestreSessao) mestreSessao.textContent = sessaoAtual ? `#${sessaoAtual.numero}` : '—';
+      if (mestreMapa) mestreMapa.textContent = centralResumoCache.dados?.temMapa ? 'Pronto' : '—';
+    }
+  }
+}
+
 function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
   const titulo = document.getElementById('central-titulo');
   const subtitulo = document.getElementById('central-subtitulo');
@@ -3206,6 +3325,7 @@ function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
     if (mapaDetalhe) mapaDetalhe.textContent = 'Selecione uma campanha';
     if (noticia) noticia.innerHTML = '<p class="texto-vazio">Selecione uma campanha para carregar as novidades.</p>';
     if (contexto) contexto.style.display = 'none';
+    centralRenderizarPersonagem();
     atualizarAcoesCentral();
     return;
   }
@@ -3233,6 +3353,7 @@ function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
       noticia.innerHTML = '<p class="texto-vazio">Nenhuma notícia publicada nesta campanha.</p>';
     }
   }
+  centralRenderizarPersonagem();
   atualizarAcoesCentral();
 }
 
@@ -3350,7 +3471,10 @@ function importarArquivoJSON(event) {
   reader.onload = function(e) {
     try {
       dadosFichaAtual = JSON.parse(e.target.result);
+      fichaUltimoSalvamento = null;
+      fichaStatusCentral = 'nao_salva';
       renderizarFichaNaTela(dadosFichaAtual);
+      renderizarCentralCampanha();
       mostrarPopup('📄 Ficha JSON lida com sucesso! Clique em "Salvar na Nuvem".');
     } catch (err) {
       alert('Arquivo JSON inválido.');
@@ -3443,6 +3567,9 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
     return;
   }
 
+  fichaUltimoSalvamento = agora;
+  fichaStatusCentral = 'salva';
+  renderizarCentralCampanha();
   mostrarPopup(
     ehEdicaoMestre
       ? '👑 Ficha do jogador atualizada pelo Mestre!'
@@ -3466,7 +3593,10 @@ async function carregarFichaDoUsuario(userId) {
 
   if (data && data.dados_ficha) {
     dadosFichaAtual = data.dados_ficha;
+    fichaUltimoSalvamento = data.updated_at || null;
+    fichaStatusCentral = 'salva';
     renderizarFichaNaTela(dadosFichaAtual);
+    renderizarCentralCampanha();
     if (worldTriggerAtivo()) { worldTriggerEstado.triggersAtivos = normalizarTriggersFichaWT(dadosFichaAtual); sincronizarSquadNPCsEstadoWT(dadosFichaAtual); salvarEstadoWorldTrigger(); renderizarPainelWTSeNecessario(); }
   }
 }

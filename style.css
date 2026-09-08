@@ -1829,3 +1829,37 @@ body.tema-sistema .xp-fill {
   .sidebar-navegacao.recolhida,#app-shell.sidebar-recolhida .sidebar-navegacao{width:min(86vw,300px)}
   .btn-recolher-sidebar{display:none}
 }
+
+/* =========================================================
+   FASE 1.2 — CENTRAL DO PERSONAGEM / PAINEL DO MESTRE
+========================================================= */
+.central-dashboard-principal{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr);gap:12px;margin:14px 0}
+.central-personagem-card,.central-mestre-card{min-width:0;padding:16px;border:1px solid rgba(var(--cam-gold-rgb),.15);background:linear-gradient(145deg,color-mix(in srgb,var(--cam-panel) 96%,#000),color-mix(in srgb,var(--cam-bg) 93%,#000));border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.central-save-status{display:inline-flex;align-items:center;white-space:nowrap;padding:5px 9px;border-radius:999px;font-size:.64rem;font-weight:800;letter-spacing:.03em;border:1px solid transparent}
+.central-save-status-ok{color:#a7efba;background:rgba(83,194,119,.08);border-color:rgba(83,194,119,.22)}
+.central-save-status-alerta{color:#ffd49a;background:rgba(242,161,73,.08);border-color:rgba(242,161,73,.25)}
+.central-save-status-salvando{color:var(--cam-gold-light);background:rgba(var(--cam-gold-rgb),.08);border-color:rgba(var(--cam-gold-rgb),.22)}
+.central-save-status-vazio{color:#8a857e;background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.07)}
+.central-personagem-conteudo{min-height:118px;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.central-personagem-vazio{display:flex;align-items:center;gap:12px;color:#8f8a83}
+.central-personagem-vazio>span{font-size:2rem;opacity:.8}
+.central-personagem-vazio strong{display:block;color:var(--cam-text);font-family:'Cinzel',serif;font-size:.88rem}
+.central-personagem-vazio p{margin:4px 0 0;font-size:.76rem;line-height:1.45}
+.central-personagem-identidade{display:flex;align-items:center;gap:12px}
+.central-personagem-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1.25rem;font-weight:900;color:var(--cam-gold-light);background:linear-gradient(145deg,rgba(var(--cam-gold-rgb),.18),rgba(255,255,255,.035));border:1px solid rgba(var(--cam-gold-rgb),.25)}
+.central-personagem-identidade strong{display:block;color:var(--cam-text);font-family:'Cinzel',serif;font-size:1.05rem}
+.central-personagem-identidade small{display:block;color:#8c8780;margin-top:3px;font-size:.73rem}
+.central-personagem-metricas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.central-personagem-metrica{padding:10px 11px;border-radius:9px;border:1px solid rgba(var(--cam-gold-rgb),.1);background:rgba(255,255,255,.018)}
+.central-personagem-metrica small{display:block;color:var(--cam-gold);font-family:'Cinzel',serif;font-size:.57rem;letter-spacing:.1em;font-weight:800}
+.central-personagem-metrica strong{display:block;color:var(--cam-text);margin-top:4px;font-family:'Cinzel',serif;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.central-barra{height:4px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin-top:7px}.central-barra span{display:block;height:100%;background:var(--cam-gold);border-radius:999px}
+.central-personagem-acoes{display:flex;gap:7px;flex-wrap:wrap}
+.central-personagem-acoes button{min-height:36px!important}
+.central-mestre-resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:2px}
+.central-mestre-resumo>div{padding:12px 8px;text-align:center;border:1px solid rgba(var(--cam-gold-rgb),.1);border-radius:9px;background:rgba(255,255,255,.017)}
+.central-mestre-resumo strong{display:block;color:var(--cam-text);font-family:'Cinzel',serif;font-size:1.05rem}.central-mestre-resumo small{display:block;color:#817c75;font-size:.62rem;margin-top:3px}
+.central-mestre-acoes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.central-mestre-acoes button{padding:9px 7px;border:1px solid rgba(var(--cam-gold-rgb),.15);background:rgba(255,255,255,.018);color:var(--cam-text);border-radius:8px;cursor:pointer;font-family:'Cinzel',serif;font-size:.7rem}.central-mestre-acoes button:hover{border-color:var(--cam-gold);background:rgba(var(--cam-gold-rgb),.06)}
+
+@media (max-width:980px){.central-dashboard-principal{grid-template-columns:1fr}.central-personagem-metricas{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:650px){.central-personagem-metricas{grid-template-columns:1fr 1fr}.central-personagem-metrica:last-child:nth-child(3){grid-column:1/-1}.central-card-titulo{align-items:flex-start}.central-save-status{font-size:.58rem}.central-mestre-acoes{grid-template-columns:1fr}.central-personagem-acoes{display:grid;grid-template-columns:1fr 1fr}.central-personagem-acoes button:last-child{grid-column:1/-1}.central-personagem-vazio{align-items:flex-start}}

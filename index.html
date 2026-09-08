@@ -115,6 +115,40 @@
             </div>
           </div>
 
+          <div class="central-dashboard-principal">
+            <section class="central-personagem-card" id="central-personagem-card">
+              <div class="central-card-titulo">
+                <div><span class="eyebrow-galeria">SEU PERSONAGEM</span><h3 id="central-personagem-titulo">Nenhum personagem carregado</h3></div>
+                <span id="central-ficha-status" class="central-save-status central-save-status-vazio">Sem ficha</span>
+              </div>
+              <div id="central-personagem-conteudo" class="central-personagem-conteudo">
+                <div class="central-personagem-vazio">
+                  <span>👤</span>
+                  <div><strong>Você ainda não possui uma ficha nesta campanha.</strong><p>Importe uma ficha existente ou crie seu personagem diretamente pela mesa.</p></div>
+                </div>
+                <div class="central-personagem-acoes">
+                  <button type="button" class="btn-ficha-principal" onclick="mudarAba('ficha')">👤 Abrir Minha Ficha</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="central-mestre-card" id="central-mestre-card" style="display:none;">
+              <div class="central-card-titulo">
+                <div><span class="eyebrow-galeria">MESTRE</span><h3>👑 Painel da Mesa</h3></div>
+              </div>
+              <div class="central-mestre-resumo" id="central-mestre-resumo">
+                <div><strong id="central-mestre-jogadores">—</strong><small>Personagens</small></div>
+                <div><strong id="central-mestre-sessao">—</strong><small>Sessão atual</small></div>
+                <div><strong id="central-mestre-mapa">—</strong><small>Mapa</small></div>
+              </div>
+              <div class="central-mestre-acoes">
+                <button type="button" onclick="mudarAba('sessoes')">🎬 Sessões</button>
+                <button type="button" onclick="mudarAba('mapa')">🗺️ Mapa</button>
+                <button type="button" onclick="mudarAba('grupo')">👥 Grupo</button>
+              </div>
+            </section>
+          </div>
+
           <div class="central-acoes-rapidas">
             <button type="button" onclick="mudarAba('ficha')"><span>👤</span><strong>Meu personagem</strong><small>Ficha, evolução e inventário</small></button>
             <button type="button" onclick="mudarAba('grupo')"><span>👥</span><strong>Meu grupo</strong><small>Ver os personagens da campanha</small></button>

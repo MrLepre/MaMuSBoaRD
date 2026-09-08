@@ -1,0 +1,19 @@
+MaMuSBoaRD — Fase 1.2
+
+Objetivo
+- Transformar a Central da Campanha em um painel realmente útil para a sessão.
+- Mostrar o personagem do usuário, status de salvamento, XP, nível e recursos detectados.
+- Adicionar um painel resumido de Mestre quando a conta tem permissão de Mestre.
+
+Principais alterações
+- Card "Seu Personagem" na Central.
+- Status da ficha: sem ficha, alterações não salvas, salvando e salva na nuvem.
+- Último horário de salvamento vindo do campo updated_at do Supabase.
+- Detecção compatível de nome, nível, XP, PV/Vida e recurso secundário em diferentes sistemas.
+- Ações rápidas: Abrir Ficha, Editar e Gerenciar.
+- Card "Painel da Mesa" para o Mestre com personagens, sessão e mapa.
+- Responsividade para telas menores.
+- Nenhuma alteração proposital na lógica de mapa, tokens, rolagens, campanhas, sistemas ou Realtime.
+
+Base
+Esta versão foi feita sobre MaMuSBoaRD-WorldTrigger-mapa-corrigido-v4, que já inclui a correção de mapa do World Trigger e a correção de duplicate key das fichas.
