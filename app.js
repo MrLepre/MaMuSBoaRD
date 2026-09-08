@@ -3361,45 +3361,93 @@ function importarArquivoJSON(event) {
 
 async function salvarFichaNoSupabase(userIdDestino = null) {
   if (!supabaseClient) return alert('Supabase não conectado.');
+
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) return alert('Você precisa estar logado para salvar sua ficha!');
-  if (!dadosFichaAtual) return alert('Importe um arquivo JSON de ficha primeiro!');
-  if (!obterCampanhaIdAtual()) return alert('Selecione uma campanha antes de salvar a ficha.');
+  if (!dadosFichaAtual) return alert('Nenhuma ficha carregada para salvar.');
+
+  const campanhaId = obterCampanhaIdAtual();
+  if (!campanhaId) return alert('Selecione uma campanha antes de salvar a ficha.');
 
   const nomeChar = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Personagem';
-  const ehEdicaoMestre = Boolean(ehMestreGlobal && userIdDestino && userIdDestino !== session.user.id);
   const idDestino = userIdDestino || session.user.id;
+  const ehEdicaoMestre = Boolean(ehMestreGlobal && userIdDestino && userIdDestino !== session.user.id);
+  const agora = new Date().toISOString();
+
+  /*
+   * IMPORTANTE:
+   * Não usamos mais upsert com onConflict aqui.
+   * O banco possui histórico de versões antigas da tabela `fichas` e algumas
+   * instalações podem ainda ter constraints UNIQUE legadas em `user_id`.
+   * O fluxo explícito SELECT -> UPDATE/INSERT é mais tolerante a esse cenário
+   * e evita que o PostgREST dependa de uma constraint específica para resolver
+   * o conflito.
+   */
+  const consultaExistente = await supabaseClient
+    .from('fichas')
+    .select('id')
+    .eq('user_id', idDestino)
+    .eq('campanha_id', campanhaId)
+    .maybeSingle();
+
+  if (consultaExistente.error) {
+    console.error('Erro ao localizar ficha antes de salvar:', consultaExistente.error);
+    mostrarPopup('❌ Não foi possível localizar sua ficha: ' + consultaExistente.error.message);
+    return;
+  }
 
   let resultado;
 
-  if (ehEdicaoMestre) {
+  if (consultaExistente.data?.id) {
+    // Ficha desta campanha já existe: atualizamos exatamente aquela linha.
     resultado = await supabaseClient
       .from('fichas')
       .update({
         nome_personagem: nomeChar,
         dados_ficha: dadosFichaAtual,
-        updated_at: new Date(),
-        campanha_id: obterCampanhaIdAtual()
+        updated_at: agora
       })
-      .eq('user_id', idDestino)
-      .eq('campanha_id', obterCampanhaIdAtual());
+      .eq('id', consultaExistente.data.id)
+      .eq('campanha_id', campanhaId)
+      .select('id')
+      .single();
   } else {
+    // Primeira ficha deste jogador nesta campanha.
     resultado = await supabaseClient
       .from('fichas')
-      .upsert({
-        user_id: session.user.id,
+      .insert({
+        user_id: idDestino,
         nome_personagem: nomeChar,
         dados_ficha: dadosFichaAtual,
-        updated_at: new Date(),
-        campanha_id: obterCampanhaIdAtual()
-      }, { onConflict: 'user_id,campanha_id' });
+        updated_at: agora,
+        campanha_id: campanhaId
+      })
+      .select('id')
+      .single();
+
+    /*
+     * Se uma instalação antiga ainda possuir UNIQUE(user_id), o INSERT acima
+     * continuará sendo bloqueado pelo banco. Nesse caso mostramos uma mensagem
+     * específica em vez de um erro genérico/"duplicate key".
+     */
+    if (resultado.error && /duplicate key|unique constraint|violates unique/i.test(resultado.error.message || '')) {
+      console.error('Constraint UNIQUE legada detectada em fichas:', resultado.error);
+      mostrarPopup('❌ O Supabase ainda possui uma regra UNIQUE antiga em fichas. Execute o SQL de correção de fichas no projeto e tente novamente.');
+      return;
+    }
   }
 
   if (resultado.error) {
+    console.error('Erro ao salvar ficha:', resultado.error);
     mostrarPopup('❌ Erro ao salvar: ' + resultado.error.message);
-  } else {
-    mostrarPopup(ehEdicaoMestre ? '👑 Ficha do jogador atualizada pelo Mestre!' : '💾 Ficha salva na nuvem com sucesso!');
+    return;
   }
+
+  mostrarPopup(
+    ehEdicaoMestre
+      ? '👑 Ficha do jogador atualizada pelo Mestre!'
+      : '💾 Ficha salva na nuvem com sucesso!'
+  );
 }
 
 async function carregarFichaDoUsuario(userId) {
