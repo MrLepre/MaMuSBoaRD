@@ -2426,7 +2426,12 @@ function bestiarioEhElarionAtivo(){
   const tipo=sistemaAtual?.configuracao?.tipo;
   return tipo==='elarion'||tipo==='eter_brasas';
 }
-function bestiarioArquivoAtivo(){return sistemaAtual?.configuracao?.bestiario_arquivo || (sistemaAtual?.configuracao?.tipo==='eter_brasas'?'bestiario-eter-brasas.json':'bestiario-elarion.json');}
+function bestiarioArquivoAtivo(){
+  const tipo=sistemaAtual?.configuracao?.tipo;
+  if(tipo==='eter_brasas') return 'bestiario-eter-brasas.json';
+  if(tipo==='elarion') return 'bestiario-elarion.json';
+  return sistemaAtual?.configuracao?.bestiario_arquivo || 'bestiario-elarion.json';
+}
 async function inicializarBestiarioElarion(){
   const btn=document.getElementById('btn-aba-bestiario');
   if(!btn) return;

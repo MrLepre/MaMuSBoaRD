@@ -11,4 +11,4 @@ Incluído nesta etapa:
 - moedas importadas da planilha valores moedas.xlsx
 - bestiário Mestre com criação de token no mapa
 
-Guia do Jogador atualizado para a versão oficial fornecida pelo Mestre. A configuração do sistema deve seguir este guia como referência principal.
+Observação: o Guia contém trechos com versões diferentes de algumas regras. Esta primeira integração usa a versão mais específica do capítulo de criação/regras básicas encontrada no Guia (atributos iniciam em 0, 10 pontos, 5 perícias treinadas, CDs 10/14/18/22). As versões alternativas permanecem para decisão posterior, sem serem apagadas.

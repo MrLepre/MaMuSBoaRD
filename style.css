@@ -1617,10 +1617,3 @@ body.tema-sistema .xp-fill {
 
 /* Biblioteca de Guias do RPG */
 .guias-lista{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px}.guia-card{display:flex;gap:14px;align-items:flex-start;background:var(--viz-card,#151923);border:1px solid rgba(201,168,91,.28);border-radius:12px;padding:16px;min-width:0}.guia-card-icone{font-size:2rem;line-height:1}.guia-card-corpo{min-width:0;flex:1}.guia-card h3{margin:0 0 5px}.guia-card p{margin:0 0 12px;color:var(--muted-color,#a8a8b3)}.guia-leitor{margin-top:16px}.guia-leitor-barra{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:10px 12px;background:var(--panel-bg,#151923);border:1px solid rgba(201,168,91,.28);border-radius:10px}.guia-leitor-barra strong{flex:1;min-width:180px}.guia-link-original{text-decoration:none}.guia-leitor iframe{width:100%;height:72vh;min-height:520px;border:1px solid rgba(201,168,91,.28);border-radius:10px;background:#0b0d12}@media(max-width:640px){.guias-lista{grid-template-columns:1fr}.guia-leitor iframe{height:70vh;min-height:480px}.guia-card{padding:14px}}
-
-.bestiario-loot-resumo{font-size:.82rem;color:var(--texto-secundario,#b8b2a8);margin:.55rem 0}
-.bestiario-drops{display:grid;gap:.5rem}
-.bestiario-drop{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start;padding:.55rem .65rem;border:1px solid var(--borda,#4a4035);border-radius:8px;background:rgba(255,255,255,.025)}
-.bestiario-drop strong{min-width:0}
-.bestiario-drop span{font-size:.8rem;white-space:nowrap;color:var(--texto-secundario,#b8b2a8)}
-@media(max-width:760px){.bestiario-drop{display:block}.bestiario-drop span{display:block;margin-top:.25rem;white-space:normal}}
