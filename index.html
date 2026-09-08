@@ -41,6 +41,7 @@
       <button id="btn-aba-noctavell" class="aba-mundo" onclick="mudarAba('noctavell', event)" style="display:none;">🕯️ Véu</button>
       <button id="btn-aba-economia" class="aba-mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo">💰 Economia</button>
       <button id="btn-aba-jornais" class="aba-mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo">📰 Jornais</button>
+      <button id="btn-aba-calendario" class="aba-mundo" onclick="mudarAba('calendario', event)" aria-label="Calendário das Brasas">🗓️ Calendário</button>
       <button onclick="mudarAba('grupo', event)">Fichas do Grupo</button>
       <button onclick="mudarAba('mapa', event)">Mapa</button>
       <button onclick="mudarAba('rolagens', event)">Rolagens</button>
@@ -339,6 +340,39 @@
         <select id="jornal-regiao"><option value="">Todas as regiões</option></select>
       </div>
       <div id="lista-jornais" class="jornal-grid"></div>
+    </section>
+
+    <section id="aba-calendario" class="painel">
+      <div class="cabecalho-campanhas">
+        <div>
+          <span class="eyebrow-galeria">🗓️ Calendário das Brasas</span>
+          <h2>Calendário de Éter & Brasas</h2>
+          <p class="subtexto-galeria">365 dias por ano: 10 meses de 36 dias e 5 Dias Livres. O Dia do Eclipse ocorre a cada 4 anos.</p>
+        </div>
+      </div>
+      <div id="calendario-sem-campanha" class="estado-galeria">Selecione uma campanha de Éter & Brasas para carregar o calendário.</div>
+      <div id="calendario-painel" style="display:none;">
+        <div class="calendario-cabecalho">
+          <div class="calendario-data-atual">
+            <span class="calendario-rotulo">DATA ATUAL DA CAMPANHA</span>
+            <strong id="calendario-data-titulo">Ano 1 • Dia 1</strong>
+            <span id="calendario-data-detalhe">Aurora • Brasal, dia 1</span>
+          </div>
+          <div class="calendario-controles-mestre" id="calendario-controles-mestre" style="display:none;">
+            <button type="button" class="btn-secundario" onclick="alterarDiaCalendario(-1)">◀ Dia anterior</button>
+            <button type="button" class="btn-acao" onclick="alterarDiaCalendario(1)">Dia seguinte ▶</button>
+          </div>
+        </div>
+        <div class="calendario-resumo" id="calendario-resumo"></div>
+        <div class="calendario-legenda" id="calendario-legenda"></div>
+        <div class="calendario-ano-controles">
+          <button type="button" class="btn-secundario" onclick="mudarAnoCalendario(-1)">◀ Ano anterior</button>
+          <strong id="calendario-ano-titulo">Ano 1</strong>
+          <button type="button" class="btn-secundario" onclick="mudarAnoCalendario(1)">Ano seguinte ▶</button>
+        </div>
+        <div id="calendario-ano" class="calendario-ano"></div>
+        <div class="calendario-nota">📜 <strong>Regra oficial:</strong> 10 meses × 36 dias = 360 dias; os Dias Livres são Fornalha Nova (37), Semeadura (146), Veio do Gelo (219), Colheita & Brumas (292) e Brasas Altas (365). O Dia do Eclipse é um dia extra a cada 4 anos.</div>
+      </div>
     </section>
 
     <section id="aba-mapa" class="painel">

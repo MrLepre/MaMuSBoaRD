@@ -873,7 +873,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const abaSalva = localStorage.getItem('cronicas_camelot_aba');
-    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais', 'diario', 'sessoes'].includes(abaSalva)) {
+    if (['ficha', 'grupo', 'mapa', 'rolagens', 'galeria', 'economia', 'jornais', 'calendario', 'diario', 'sessoes'].includes(abaSalva)) {
       mudarAba(abaSalva, abaSalva === 'rolagens' ? { __restauracaoAbaSalva: true } : undefined);
     }
   } catch (err) {}
@@ -955,6 +955,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         .on('broadcast', { event: 'jornal_atualizado' }, (payload) => {
           if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
           if (abaAtual === 'jornais') carregarJornaisAtual(true);
+  if (abaAtual === 'calendario') carregarCalendarioAtual(true);
+        })
+        .on('broadcast', { event: 'calendario_atualizado' }, (payload) => {
+          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return;
+          calendarioDados={ano:Math.max(1,Number(dados.ano)||1),dia:Math.max(1,Math.min(365,Number(dados.dia_do_ano)||1))};
+          calendarioCarregadoCampanha=obterCampanhaIdAtual(); renderizarCalendario();
         })
         .on('broadcast', { event: 'vtt_mover_token' }, (payload) => {
           if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
@@ -1631,6 +1637,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   diarioImagens = [];
   sessoesCampanha = [];
   resetarDadosEconomiaJornalAoTrocarCampanha();
+  resetarCalendarioAoTrocarCampanha();
   await carregarSessaoAtual();
 
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2239,7 +2246,7 @@ function criarConfiguracaoEterBrasas(){
   const pericias=['Armas Brancas','Armas de Impacto','Armas de Distância','Armas de Fogo','Artes Marciais','Montaria de Combate','Canalização Mágica','Técnica Única','Magia Elemental','Magia de Suporte','Magia de Encantamento','Magia de Invocação','Forja & Metalurgia','Arcanotécnica','Alquimia','Herborismo','Medicina','História & Tradições','Investigação','Furtividade','Percepção','Sobrevivência Selvagem','Navegação','Lábia (Blefe)','Resistência','Carisma','Diplomacia','Intimidação','Enganação','Etiqueta Nobre','Mercado & Negócios','Arte & Música','Jogos & Sorte','Acrobacia','Truques Criminosos'];
   const armas=[['Punhal','1d6'],['Espada curta','1d8'],['Espada longa / Lança / Machado','1d10'],['Martelo pesado','1d10'],['Arco','1d8'],['Besta','1d10'],['Revólver','1d10'],['Rifle','1d12']];
   const moedas=[['Lúmen','Ł','Brassanthium'],['Króna','Kr','Frostheim'],['Drom','Ð','Zerathis'],['Cogmark','⚙','Altherion'],['Folha','♣',"Kael'Thir"],['Astreel','✦','Astra'],['Koban','Ꝏ','Kuroshida'],['Vargr','Vm','Drosgard'],['Coroa de Ferro','IC','Valmorra'],['Lunis','☾','Lunareth'],['Dobrão','Db','Drakenshore']];
-  return {versao:1,tipo:'eter_brasas',dados:['d10','d12'],modulos:{testes_2d10:true,tecnica_magica_unica:true,guildas:true,reinos:true,inspiracao:true,impulso_pressao:true,maldição_compartilhada:true,bestiario:true,moedas:true},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:0,min_inicial:-1,max_inicial:4,modificador:'igual ao valor'})),criacao:{pontos_atributos:10,pericias_treinadas:5,bonus_treinada:2,bonus_especialista:4},testes:{formula:'2d10 + Atributo + Perícia',cds:{facil:10,moderado:14,dificil:18,lendario:22},critico_sucesso:'dois 10 (20 natural)',critico_falha:'dois 1 (2 natural)',impulso:'3d10, soma os 2 maiores',pressao:'3d10, soma os 2 menores'},combate:{acao:'1 Ação',movimento:'1 Movimento até ~9m',menor:'1 Ação Menor',reacao:'1 Reação',iniciativa:'2d10 + Agilidade',defesa:'12 + Agilidade + escudo + cobertura'},sobrevivencia:{pv_inicial:'10 + Vitalidade',pv_por_nivel:'+5 + Vitalidade',fome:'0–5',sede:'0–3',cansaco:'0–4'},pericias,armas,armaduras:[['Leve','+1'],['Média','+2'],['Pesada','+3']],moedas},tema:{corPrimaria:'#d97732',corFundo:'#100a07',corPainel:'#241712'},ficha:'ficha-eter-brasas.html',bestiario_arquivo:'bestiario-eter-brasas.json',moedas_arquivo:'moedas-eter-brasas.json'};
+  return {versao:1,tipo:'eter_brasas',dados:['d10','d12'],modulos:{testes_2d10:true,tecnica_magica_unica:true,guildas:true,reinos:true,inspiracao:true,impulso_pressao:true,maldição_compartilhada:true,bestiario:true,moedas:true,calendario:true},regras:{atributos:attrs.map(x=>({sigla:x[0],nome:x[1],base:0,min_inicial:-1,max_inicial:4,modificador:'igual ao valor'})),criacao:{pontos_atributos:10,pericias_treinadas:5,bonus_treinada:2,bonus_especialista:4},testes:{formula:'2d10 + Atributo + Perícia',cds:{facil:10,moderado:14,dificil:18,lendario:22},critico_sucesso:'dois 10 (20 natural)',critico_falha:'dois 1 (2 natural)',impulso:'3d10, soma os 2 maiores',pressao:'3d10, soma os 2 menores'},combate:{acao:'1 Ação',movimento:'1 Movimento até ~9m',menor:'1 Ação Menor',reacao:'1 Reação',iniciativa:'2d10 + Agilidade',defesa:'12 + Agilidade + escudo + cobertura'},sobrevivencia:{pv_inicial:'10 + Vitalidade',pv_por_nivel:'+5 + Vitalidade',fome:'0–5',sede:'0–3',cansaco:'0–4'},pericias,armas,armaduras:[['Leve','+1'],['Média','+2'],['Pesada','+3']],moedas},tema:{corPrimaria:'#d97732',corFundo:'#100a07',corPainel:'#241712'},ficha:'ficha-eter-brasas.html',bestiario_arquivo:'bestiario-eter-brasas.json',moedas_arquivo:'moedas-eter-brasas.json'};
 }
 async function garantirSistemaEterBrasas(){
   if(!ehMestreGlobal||!supabaseClient)return;
@@ -2375,7 +2382,7 @@ async function carregarSistemas(){
   (data||[]).forEach(s=>{
     const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
     const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const modulosNT=cfg.tipo==='noites_em_tokyo'?['🩸 Ghouls','🧬 Kagunes','🔬 RC / Kakuja','⚔️ CCG / Quinques','🌙 Fome / Sanidade']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):modulosNT.length?modulosNT.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
+    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário','🗓️ Calendário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const modulosNT=cfg.tipo==='noites_em_tokyo'?['🩸 Ghouls','🧬 Kagunes','🔬 RC / Kakuja','⚔️ CCG / Quinques','🌙 Fome / Sanidade']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):modulosNT.length?modulosNT.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
     card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${ehMestreGlobal?`<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
     lista.appendChild(card);
   });
@@ -2601,6 +2608,110 @@ async function excluirJornal(id){if(!ehMestreGlobal||!confirm('Apagar esta notí
 function transmitirJornal(){if(canalMesa)canalMesa.send({type:'broadcast',event:'jornal_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),quando:Date.now()}});}
 function resetarDadosEconomiaJornalAoTrocarCampanha(){economiaCarregadaCampanha=null;jornaisCarregadosCampanha=null;economiaDados={mercados:[],itens:[],eventos:[]};jornaisDados=[];fecharEditorEconomia();fecharEditorJornal();}
 
+// --- CALENDÁRIO DAS BRASAS — ÉTER & BRASAS ---
+const CALENDARIO_BRASAS = {
+  diasAno: 365,
+  diasMes: 36,
+  meses: [
+    ['Brasal','mês das brasas novas'],['Ventor','mês dos ventos e rotas'],['Nimbro','mês das chuvas e comércio'],
+    ['Folhar','mês das colheitas verdes'],['Sombral','mês dos segredos e intrigas'],['Glaciar','mês do frio profundo'],
+    ['Aural','mês das auroras e revelações'],['Sevar','mês das separações e julgamentos'],['Ignis','mês do fogo, batalhas e invenções'],['Astra','mês das estrelas e profecias']
+  ],
+  semana: ['Aurora','Ferra','Trama','Rumo','Vela','Eco'],
+  festivais: {
+    37:['Fornalha Nova','juramentos, forjas, inícios'],
+    146:['Semeadura','bênção da terra, plantio'],
+    219:['Veio do Gelo','resistência, lendas'],
+    292:['Colheita & Brumas','máscaras, intriga'],
+    365:['Brasas Altas','contratos eternos, renovações']
+  }
+};
+let calendarioDados = { ano:1, dia:1 };
+let calendarioCarregadoCampanha = null;
+
+function sistemaEhEterBrasas(){ return Boolean(campanhaAtual && sistemaAtual?.configuracao?.tipo === 'eter_brasas'); }
+function diaNormalCalendario(dia){ return Number(dia) >= 1 && Number(dia) <= 365 && !CALENDARIO_BRASAS.festivais[Number(dia)]; }
+function obterInfoDiaCalendario(dia){
+  dia = Math.max(1, Math.min(365, Number(dia)||1));
+  const semana = CALENDARIO_BRASAS.semana[(dia-1)%6];
+  const festival = CALENDARIO_BRASAS.festivais[dia];
+  if(festival) return { dia, semana, festival:true, nome:festival[0], descricao:festival[1], mes:null, diaMes:null };
+  let restante = dia;
+  for(let i=0;i<CALENDARIO_BRASAS.meses.length;i++){
+    if(i===0){ if(restante<=36) return {dia,semana,festival:false,mes:i,diaMes:restante}; restante-=36; }
+    else {
+      // Dias Livres ocupam as posições oficiais definidas pelo manual.
+      const antesDoFestival = [146,219,292,365].includes(dia) ? 0 : 0;
+      const inicio = [38,74,110,147,183,220,256,293,329][i-1];
+      const fim = inicio+35;
+      if(dia>=inicio && dia<=fim) return {dia,semana,festival:false,mes:i,diaMes:dia-inicio+1};
+    }
+  }
+  return {dia,semana,festival:false,mes:9,diaMes:36};
+}
+function nomeDataCalendario(ano,dia){
+  const info=obterInfoDiaCalendario(dia);
+  if(info.festival) return {titulo:`Ano ${ano} • Dia Livre`, detalhe:`${info.nome} • ${info.descricao}`, info};
+  const mes=CALENDARIO_BRASAS.meses[info.mes];
+  return {titulo:`Ano ${ano} • ${mes[0]}, dia ${info.diaMes}`, detalhe:`${info.semana} • ${mes[1]}`, info};
+}
+function renderizarCalendario(){
+  const painel=document.getElementById('calendario-painel'), vazio=document.getElementById('calendario-sem-campanha');
+  if(!painel||!vazio)return;
+  if(!sistemaEhEterBrasas()){painel.style.display='none';vazio.style.display='block';return;}
+  painel.style.display='block';vazio.style.display='none';
+  const d=nomeDataCalendario(calendarioDados.ano,calendarioDados.dia);
+  const t=document.getElementById('calendario-data-titulo'), det=document.getElementById('calendario-data-detalhe');
+  if(t)t.textContent=d.titulo; if(det)det.textContent=d.detalhe;
+  const yt=document.getElementById('calendario-ano-titulo'); if(yt)yt.textContent=`Ano ${calendarioDados.ano}`;
+  const ctrl=document.getElementById('calendario-controles-mestre'); if(ctrl)ctrl.style.display=ehMestreGlobal?'flex':'none';
+  const resumo=document.getElementById('calendario-resumo');
+  if(resumo){ resumo.innerHTML=`<div><span>Ano</span><strong>${calendarioDados.ano}</strong></div><div><span>Dia do ano</span><strong>${calendarioDados.dia}/365</strong></div><div><span>Semana</span><strong>${escaparHTML(d.info.semana)}</strong></div><div><span>Próximo marco</span><strong>${escaparHTML(proximoMarcoCalendario(calendarioDados.dia))}</strong></div>`; }
+  const legenda=document.getElementById('calendario-legenda');
+  if(legenda){ legenda.innerHTML=`<span>☀️ Aurora</span><span>⚒️ Ferra</span><span>🧵 Trama</span><span>🧭 Rumo</span><span>🕯️ Vela</span><span>🔔 Eco</span><span>🎉 Dia Livre</span>`; }
+  const anoEl=document.getElementById('calendario-ano'); if(!anoEl)return;
+  let html='';
+  const blocos=[
+    {mes:0,inicio:1},{mes:1,inicio:38},{mes:2,inicio:74},{mes:3,inicio:110},{festival:37},
+    {mes:4,inicio:147},{mes:5,inicio:183},{festival:146},{mes:6,inicio:220},{mes:7,inicio:256},{festival:219},
+    {mes:8,inicio:293},{mes:9,inicio:329},{festival:292},{festival:365}
+  ];
+  blocos.forEach(b=>{
+    if(b.festival){ const f=CALENDARIO_BRASAS.festivais[b.festival]; html+=`<article class="calendario-festival ${calendarioDados.dia===b.festival?'atual':''}"><span>🎉 DIA LIVRE</span><strong>${escaparHTML(f[0])}</strong><small>Dia ${b.festival} • ${escaparHTML(f[1])}</small></article>`; return; }
+    const m=CALENDARIO_BRASAS.meses[b.mes]; html+=`<article class="calendario-mes"><header><div><span>${String(b.mes+1).padStart(2,'0')}</span><strong>${escaparHTML(m[0])}</strong></div><small>${escaparHTML(m[1])}</small></header><div class="calendario-semana">${CALENDARIO_BRASAS.semana.map(x=>`<span>${escaparHTML(x)}</span>`).join('')}</div><div class="calendario-grade">`;
+    for(let i=0;i<36;i++){ const dia=b.inicio+i; const ativo=dia===calendarioDados.dia; const wk=CALENDARIO_BRASAS.semana[i%6]; html+=`<button type="button" class="calendario-dia ${ativo?'atual':''}" ${ehMestreGlobal?`onclick="definirDiaCalendario(${dia})"`:''} title="${escaparHTML(wk)}">${i+1}</button>`; }
+    html+='</div></article>';
+  });
+  anoEl.innerHTML=html;
+}
+function proximoMarcoCalendario(dia){ const ds=Object.keys(CALENDARIO_BRASAS.festivais).map(Number).filter(x=>x>dia); if(ds.length){const x=Math.min(...ds);return `${CALENDARIO_BRASAS.festivais[x][0]} (dia ${x})`;} return 'Brasal do próximo ano (dia 37)'; }
+async function carregarCalendarioAtual(force=false){
+  if(!sistemaEhEterBrasas()){renderizarCalendario();return;}
+  const id=obterCampanhaIdAtual(); if(!id){renderizarCalendario();return;}
+  if(!force&&calendarioCarregadoCampanha===id){renderizarCalendario();return;}
+  calendarioCarregadoCampanha=id;
+  if(!supabaseClient){renderizarCalendario();return;}
+  const r=await supabaseClient.from('calendario_campanha').select('ano,dia_do_ano').eq('campanha_id',id).maybeSingle();
+  if(r.error){console.error('Calendário:',r.error);renderizarCalendario();return;}
+  if(r.data){calendarioDados={ano:Math.max(1,Number(r.data.ano)||1),dia:Math.max(1,Math.min(365,Number(r.data.dia_do_ano)||1))};}
+  else if(ehMestreGlobal){ const ins=await supabaseClient.from('calendario_campanha').insert({campanha_id:id,ano:1,dia_do_ano:1,atualizado_por:window.usuarioAtualId}).select('ano,dia_do_ano').single(); if(!ins.error&&ins.data) calendarioDados={ano:1,dia:1}; }
+  renderizarCalendario();
+}
+async function salvarCalendarioAtual(){
+  if(!ehMestreGlobal||!supabaseClient||!obterCampanhaIdAtual())return;
+  const id=obterCampanhaIdAtual();
+  const p={campanha_id:id,ano:calendarioDados.ano,dia_do_ano:calendarioDados.dia,atualizado_por:window.usuarioAtualId};
+  const r=await supabaseClient.from('calendario_campanha').update({ano:p.ano,dia_do_ano:p.dia,atualizado_por:p.atualizado_por}).eq('campanha_id',id);
+  if(r.error)return mostrarPopup('❌ Não foi possível atualizar o calendário: '+r.error.message);
+  transmitirCalendario(); renderizarCalendario();
+}
+async function definirDiaCalendario(dia){ if(!ehMestreGlobal||!sistemaEhEterBrasas())return; calendarioDados.dia=Math.max(1,Math.min(365,Number(dia)||1)); await salvarCalendarioAtual(); }
+async function alterarDiaCalendario(delta){ if(!ehMestreGlobal||!sistemaEhEterBrasas())return; let d=calendarioDados.dia+Number(delta||0),a=calendarioDados.ano; if(d>365){d=1;a++;} if(d<1){d=365;a=Math.max(1,a-1);} calendarioDados={ano:a,dia:d}; await salvarCalendarioAtual(); }
+async function mudarAnoCalendario(delta){ if(!ehMestreGlobal||!sistemaEhEterBrasas())return; calendarioDados.ano=Math.max(1,calendarioDados.ano+Number(delta||0)); await salvarCalendarioAtual(); }
+function transmitirCalendario(){if(canalMesa)canalMesa.send({type:'broadcast',event:'calendario_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),ano:calendarioDados.ano,dia_do_ano:calendarioDados.dia,quando:Date.now()}});}
+function resetarCalendarioAoTrocarCampanha(){calendarioCarregadoCampanha=null;calendarioDados={ano:1,dia:1};}
+
+
 // Economia e Jornais pertencem ao sistema Éter & Brasas e ao mundo da
 // campanha ativa. Eles NÃO são abas globais do VTT.
 function campanhaUsaEterBrasas() {
@@ -2614,7 +2725,7 @@ function campanhaUsaEterBrasas() {
 
 function garantirAbasEconomiaJornaisVisiveis() {
   const disponiveis = campanhaUsaEterBrasas();
-  ['economia','jornais'].forEach(nome => {
+  ['economia','jornais','calendario'].forEach(nome => {
     const btn = document.getElementById(`btn-aba-${nome}`);
     if (!btn) return;
     if (disponiveis) {
@@ -2642,7 +2753,7 @@ function garantirAbasEconomiaJornaisVisiveis() {
       btnNoct.style.setProperty('display','none','important'); btnNoct.style.setProperty('visibility','hidden','important'); btnNoct.style.setProperty('opacity','0','important'); btnNoct.style.setProperty('pointer-events','none','important'); btnNoct.setAttribute('aria-hidden','true'); btnNoct.classList.remove('ativo');
     }
   }
-  if (!disponiveis && (abaAtual === 'economia' || abaAtual === 'jornais')) mudarAba('ficha');
+  if (!disponiveis && (abaAtual === 'economia' || abaAtual === 'jornais' || abaAtual === 'calendario')) mudarAba('ficha');
   if (!disponivelNoct && abaAtual === 'noctavell') mudarAba('ficha');
 }
 
@@ -2919,7 +3030,7 @@ function fecharLeitorGuia(){const leitor=document.getElementById('guia-leitor'),
 
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
+  const abasValidas = ['ficha', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'calendario', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -2964,6 +3075,7 @@ function mudarAba(nomeAba, evento) {
   if (nomeAba === 'guias') { carregarGuiasRPG(); }
   if (nomeAba === 'economia') { carregarEconomiaAtual(); }
   if (nomeAba === 'jornais') { carregarJornaisAtual(); }
+  if (nomeAba === 'calendario') { carregarCalendarioAtual(); }
   if (nomeAba === 'noctavell') { carregarTrabalhosNoctavell(); }
   if (nomeAba === 'mapa' && !abasCarregadas.mapa && supabaseClient) {
     abasCarregadas.mapa = true;
@@ -4665,6 +4777,10 @@ window.atualizarVisibilidadeAcoesRapidas = atualizarVisibilidadeAcoesRapidas;
 window.garantirAbasEconomiaJornaisVisiveis=garantirAbasEconomiaJornaisVisiveis;
 window.carregarEconomiaAtual=carregarEconomiaAtual;
 window.recarregarEconomiaAtual=recarregarEconomiaAtual;
+window.carregarCalendarioAtual=carregarCalendarioAtual;
+window.definirDiaCalendario=definirDiaCalendario;
+window.alterarDiaCalendario=alterarDiaCalendario;
+window.mudarAnoCalendario=mudarAnoCalendario;
 window.abrirEditorMercado=abrirEditorMercado;
 window.abrirEditorMercadoria=abrirEditorMercadoria;
 window.abrirEditorEventoEconomico=abrirEditorEventoEconomico;

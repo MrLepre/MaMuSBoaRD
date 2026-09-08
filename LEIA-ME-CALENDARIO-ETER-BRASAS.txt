@@ -1,0 +1,11 @@
+CALENDÁRIO DAS BRASAS — ÉTER & BRASAS
+
+Execute sql-calendario-eter-brasas.sql no Supabase.
+
+Regras oficiais usadas:
+- 365 dias (360 + 5 Dias Livres)
+- 10 meses de 36 dias
+- Brasal, Ventor, Nimbro, Folhar, Sombral, Glaciar, Aural, Sevar, Ignis, Astra
+- Semana de 6 dias: Aurora, Ferra, Trama, Rumo, Vela, Eco
+- Dias Livres: Fornalha Nova (37), Semeadura (146), Veio do Gelo (219), Colheita & Brumas (292), Brasas Altas (365)
+- Dia do Eclipse: extra a cada 4 anos
