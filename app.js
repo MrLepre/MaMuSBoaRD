@@ -2886,7 +2886,7 @@ const GUIAS_RPG = {
     {titulo:'📖 Guia do Agente — RPG de Trion — Manual completo', arquivo:'guias/oficiais/world-trigger-guia-do-agente-completo.pdf', tipo:'pdf'}
   ],
   eter_brasas: [
-    {titulo:'🔥 Éter & Brasas — Guia completo', arquivo:'guias/oficiais/eter-brasas-manual-completo.pdf', tipo:'pdf'}
+    {titulo:'🔥 Éter & Brasas — Guia completo', arquivo:'guias/oficiais/eter-brasas-guia-jogador-2026.pdf', tipo:'pdf'}
   ],
   noctavell: [
     {titulo:'🕯️ Noctavell — Manual completo', arquivo:'guias/oficiais/noctavell-manual-completo.pdf', tipo:'pdf'}
