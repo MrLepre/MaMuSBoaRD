@@ -1,0 +1,9 @@
+FASE 2 — CORREÇÃO DO TEMA AO ENTRAR NA CAMPANHA
+
+Correção crítica: aplicarTemaMesa() usava a variável `tipo` antes de defini-la. Isso gerava ReferenceError durante a entrada na campanha e interrompia a sequência de carregamento.
+
+Agora o tipo do sistema é resolvido antes de aplicar data-sistema-tipo e demais variáveis de tema.
+
+Crônicas de Camelot preserva a paleta original azul real + dourado. Sem campanha, o logo é o PNG oficial original.
+
+Cache atualizado para v13.

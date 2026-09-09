@@ -1462,6 +1462,7 @@ function aplicarTemaMesa() {
   const primaria = valida(tema.corPrimaria) ? tema.corPrimaria : '#c5a059';
   const secundaria = valida(tema.corSecundaria) ? tema.corSecundaria : primaria;
   const fundo = valida(tema.corFundo) ? tema.corFundo : '#090a0f';
+  const tipo = String(sistemaAtual?.configuracao?.tipo || '').toLowerCase();
   const painel = valida(tema.corPainel) ? tema.corPainel : '#151821';
   const painel2 = valida(tema.corPainel2) ? tema.corPainel2 : painel;
   const rgb = hexParaRgb(primaria);
