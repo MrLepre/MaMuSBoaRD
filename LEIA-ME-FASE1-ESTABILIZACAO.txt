@@ -1,0 +1,12 @@
+MaMuSBoaRD — FASE 1: ESTABILIZAÇÃO
+
+Correções aplicadas:
+1. Corrigido ID HTML duplicado `fome` na ficha de Noites em Tokyo; a seção agora usa `painel-fome`.
+2. Padronizado o nome da interface para `Guia da Campanha`.
+3. Atualizado o cache do Service Worker para v9.
+4. Adicionado `sql-fase1-estabilizacao.sql`, que corrige/valida os mestres sem depender de nomes de policies existentes.
+
+Importante:
+- Esta fase não redesenha o site.
+- Esta fase não recria RLS automaticamente.
+- O SQL da fase 1 é deliberadamente não destrutivo para policies: ele altera apenas vínculos de mestres e lista as policies existentes para diagnóstico.

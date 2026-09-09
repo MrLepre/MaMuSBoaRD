@@ -1,6 +1,6 @@
 BIBLIOTECA DE GUIAS — MaMuSBoaRD
 
-A aba "📚 Guias do RPG" aparece quando uma campanha ativa possui um sistema reconhecido.
+A aba "📚 Guia da Campanha" aparece quando uma campanha ativa possui um sistema reconhecido.
 Ela carrega somente os materiais vinculados ao sistema da campanha.
 
 Sistemas contemplados:
