@@ -1417,7 +1417,7 @@ function obterTemaSistemaParaMesa() {
     sobreviventes_fronteira: { corPrimaria:'#c6a15b', corSecundaria:'#a94d42', corFundo:'#0a0d0b', corPainel:'#131814', corPainel2:'#0d120f' },
     noites_em_tokyo: { corPrimaria:'#8b1e3f', corSecundaria:'#c9cbd4', corFundo:'#080a10', corPainel:'#111522', corPainel2:'#171c2b' },
     world_trigger: { corPrimaria:'#39b8ff', corSecundaria:'#7fd7ff', corFundo:'#071018', corPainel:'#0d1822', corPainel2:'#09131b' },
-    legado: { corPrimaria:'#ed1c14', corSecundaria:'#d4af37', corFundo:'#100609', corPainel:'#16090d', corPainel2:'#211016' }
+    legado: { corPrimaria:'#3f8cff', corSecundaria:'#d4af37', corFundo:'#070b14', corPainel:'#101725', corPainel2:'#0b101b' }
   };
   return cfg.tema || temasPorTipo[tipo] || null;
 }
@@ -1441,6 +1441,7 @@ function aplicarTemaMesa() {
   if (!campanhaAtual || !tema) {
     body.classList.remove('tema-sistema');
     body.classList.add('tema-base');
+    body.removeAttribute('data-sistema-tipo');
     root.style.setProperty('--cam-bg', '#100609');
     root.style.setProperty('--cam-panel', '#16090d');
     root.style.setProperty('--cam-panel-alt', '#211016');
@@ -1467,6 +1468,7 @@ function aplicarTemaMesa() {
 
   body.classList.remove('tema-base');
   body.classList.add('tema-sistema');
+  body.setAttribute('data-sistema-tipo', tipo || '');
   root.style.setProperty('--tema-primaria', primaria);
   root.style.setProperty('--tema-secundaria', secundaria);
   root.style.setProperty('--tema-fundo', fundo);
