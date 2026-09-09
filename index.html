@@ -36,8 +36,7 @@
           <button onclick="fazerCadastro()" class="btn-secundario">Criar Conta</button>
         </div>
         <div id="status-usuario" style="display: none; align-items: center; gap: 10px;">
-          <span class="status-usuario-texto">🟢 <strong id="user-nick-display"></strong></span>
-          <span id="badge-mestre" class="badge-mestre" style="display: none;">MESTRE</span>
+          <span class="status-usuario-texto">🟢 <strong id="user-nick-display"></strong></span><span id="badge-master-global" class="badge-master-global" style="display:none;">👑 MASTER</span>
           <button onclick="fazerLogout()" class="btn-perigo btn-sair">Sair</button>
         </div>
       </div>
@@ -103,6 +102,7 @@
           <strong id="campanha-ativa-nome">Nenhuma campanha</strong>
         </div>
         <span class="contexto-campanha-sistema" id="campanha-ativa-sistema">Sistema: —</span>
+        <span class="contexto-campanha-sistema" id="campanha-ativa-papel">Papel: —</span>
         <button type="button" class="btn-contexto-trocar" onclick="mudarAba('campanhas')">Trocar campanha</button>
       </div>
 

@@ -2266,3 +2266,7 @@ body {
   .contexto-campanha-identidade { width: 100% !important; }
   .btn-contexto-trocar { width: 100% !important; }
 }
+
+
+/* Master global */
+.badge-master-global{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid rgba(217,164,65,.55);border-radius:999px;background:rgba(217,164,65,.12);color:#f2c75c;font-size:.72rem;font-weight:800;letter-spacing:.06em;white-space:nowrap;}
