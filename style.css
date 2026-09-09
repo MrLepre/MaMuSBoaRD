@@ -2707,3 +2707,35 @@ body.tema-sistema .logo-layer-base { filter:brightness(0); opacity:.98; z-index:
 body.tema-sistema .logo-layer-red,
 body.tema-sistema .logo-layer-gold { display:block; }
 
+
+
+/* FASE 2.1 — CORREÇÃO DEFINITIVA CAMELOT + LOGO BASE
+   Camelot preserva a paleta original da mesa: azul real + dourado.
+   Sem campanha, somente o PNG oficial original é exibido.
+*/
+body.tema-sistema[data-sistema-tipo="legado"] {
+  --cam-bg:#070b14;
+  --cam-panel:#101725;
+  --cam-panel-alt:#0b101b;
+  --cam-gold:#d4af37;
+  --cam-gold-light:#f3d075;
+  --cam-gold-dark:#8c6d1e;
+  --cam-border:#294c80;
+  --cam-text:#e2d9c5;
+  --cam-blue-royal:#1b2a4a;
+  --cam-primary:#3f8cff;
+}
+
+/* Mantém o PNG original literalmente como única camada da marca na base. */
+body.tema-base .logo-marca-imagem .logo-layer-original {
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  filter:none !important;
+  z-index:10 !important;
+}
+body.tema-base .logo-marca-imagem .logo-layer-base,
+body.tema-base .logo-marca-imagem .logo-layer-red,
+body.tema-base .logo-marca-imagem .logo-layer-gold {
+  display:none !important;
+}
