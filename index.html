@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.5-guide-campaign-v1">
+  <link rel="stylesheet" href="style.css?v=1.5-mobile-nav-v7">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -70,7 +70,7 @@
         <div class="nav-grupo" data-nav-group="mundo">
           <div class="nav-grupo-titulo">MUNDO</div>
           <button id="btn-aba-bestiario" data-nav-group-item="mundo" onclick="mudarAba('bestiario', event)" style="display:none;"><span>📖</span><span>Bestiário</span></button>
-          <button id="btn-aba-guias" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('guias', event)" style="display:none;"><span>📚</span><span>Guia da Campanha</span></button>
+          <button id="btn-aba-guias" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('guias', event)" style="display:none;"><span>📚</span><span>Guias do RPG</span></button>
           <button id="btn-aba-noctavell" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('noctavell', event)" style="display:none;"><span>🕯️</span><span>Véu</span></button>
           <button id="btn-aba-economia" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo"><span>💰</span><span>Economia</span></button>
           <button id="btn-aba-jornais" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo"><span>📰</span><span>Jornais</span></button>
@@ -87,7 +87,7 @@
 
         <div class="nav-grupo" data-nav-group="mestre">
           <div class="nav-grupo-titulo">MESTRE</div>
-          <button id="btn-aba-sistemas" data-nav-group-item="mestre" onclick="mudarAba('sistemas', event)" style="display:none;"><span>⚙️</span><span>Sistemas RPG</span></button>
+          <button id="btn-aba-sistemas" data-nav-group-item="mestre" onclick="mudarAba('sistemas', event)"><span>⚙️</span><span>Sistemas RPG</span></button>
         </div>
       </nav>
       <div class="sidebar-rodape">
@@ -103,7 +103,7 @@
           <strong id="campanha-ativa-nome">Nenhuma campanha</strong>
         </div>
         <span class="contexto-campanha-sistema" id="campanha-ativa-sistema">Sistema: —</span>
-        <div class="contexto-campanha-acoes"><button type="button" id="btn-contexto-guia" class="btn-contexto-guia" onclick="mudarAba('guias')" style="display:none;">📚 Guia da Campanha</button><button type="button" class="btn-contexto-trocar" onclick="mudarAba('campanhas')">Trocar campanha</button></div>
+        <button type="button" class="btn-contexto-trocar" onclick="mudarAba('campanhas')">Trocar campanha</button>
       </div>
 
       <main>
@@ -247,8 +247,8 @@
       <div class="cabecalho-campanhas">
         <div>
           <span class="eyebrow-galeria">📚 Biblioteca da Mesa</span>
-          <h2 style="margin:4px 0 0;">Guia da Campanha</h2>
-          <p id="guias-subtitulo" class="texto-vazio">O guia oficial do sistema da campanha ativa.</p>
+          <h2 style="margin:4px 0 0;">Guias do RPG</h2>
+          <p id="guias-subtitulo" class="texto-vazio">Entre em uma campanha para carregar os materiais do sistema.</p>
         </div>
       </div>
       <div id="guias-lista" class="guias-lista"><div class="estado-galeria">Nenhum guia carregado.</div></div>
@@ -756,7 +756,7 @@
 
   <div id="status-conexao" class="status-conexao" aria-live="polite"><span class="status-ponto"></span><span id="status-conexao-texto">Conectando à Távola...</span></div>
 
-  <script src="app.js?v=1.5-mobile-v8"></script>
+  <script src="app.js?v=1.5-scrollfix-v7"></script>
   <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));}</script>
 </body>
 </html>
