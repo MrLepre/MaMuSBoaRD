@@ -2571,3 +2571,115 @@ textarea:focus-visible {
 .logo-mamusboard:hover .logo-layer-red { filter: brightness(1.08) saturate(1.05); }
 .logo-mamusboard:hover .logo-layer-gold { filter: brightness(1.08) saturate(1.03); }
 .logo-mamusboard:hover .logo-texto { color: var(--cam-gold-light); }
+
+
+/* =========================================================
+   MaMuSBoaRD — FASE 2.1 PATCH: TEMA GLOBAL COESO
+   - Sem campanha: usa o PNG oficial original.
+   - Com campanha: toda a casca global usa o tema do sistema.
+   - Componentes específicos de um sistema continuam podendo manter
+     sua identidade própria quando fizerem parte da mecânica desse sistema.
+   ========================================================= */
+body.tema-sistema {
+  --cam-gold-rgb: 0,0,0; /* overwritten below with theme secondary */
+  --cam-gold-rgb: var(--tema-primary-rgb);
+  --mamus-red: var(--tema-primaria);
+  --mamus-red-deep: color-mix(in srgb, var(--tema-primaria) 62%, #000);
+  --mamus-red-bright: color-mix(in srgb, var(--tema-primaria) 78%, white);
+  --mamus-gold: var(--tema-secundaria, var(--tema-primaria));
+  --mamus-gold-bright: color-mix(in srgb, var(--tema-secundaria, var(--tema-primaria)) 72%, white);
+  --mamus-gold-deep: color-mix(in srgb, var(--tema-secundaria, var(--tema-primaria)) 58%, #000);
+  --mamus-line: color-mix(in srgb, var(--tema-secundaria, var(--tema-primaria)) 22%, transparent);
+  --mamus-line-strong: color-mix(in srgb, var(--tema-secundaria, var(--tema-primaria)) 42%, transparent);
+  --mamus-glow-red: color-mix(in srgb, var(--tema-primaria) 24%, transparent);
+  --mamus-glow-gold: color-mix(in srgb, var(--tema-secundaria, var(--tema-primaria)) 20%, transparent);
+}
+
+body.tema-sistema .topo-mesa,
+body.tema-sistema .sidebar-navegacao {
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb,var(--tema-primaria) 10%,transparent), transparent 30%),
+    linear-gradient(180deg, color-mix(in srgb,var(--tema-painel) 88%,#000), var(--tema-fundo));
+}
+body.tema-sistema .topo-mesa::after {
+  background:linear-gradient(90deg,transparent 0%,var(--tema-primaria) 25%,var(--tema-secundaria,var(--tema-primaria)) 50%,var(--tema-primaria) 75%,transparent 100%);
+}
+body.tema-sistema .sidebar-cabecalho {
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 6%,transparent),transparent);
+}
+body.tema-sistema .abas-navegacao button.ativo {
+  background:linear-gradient(90deg,color-mix(in srgb,var(--tema-primaria) 28%,transparent),transparent 72%);
+  border-color:var(--cam-border);
+}
+body.tema-sistema .abas-navegacao button.ativo::before {
+  background:var(--tema-primaria);
+  box-shadow:0 0 12px color-mix(in srgb,var(--tema-primaria) 35%,transparent);
+}
+body.tema-sistema .abas-navegacao button:hover {
+  background:color-mix(in srgb,var(--tema-primaria) 10%,transparent);
+  border-color:var(--cam-border);
+}
+body.tema-sistema .contexto-campanha {
+  background:linear-gradient(90deg,color-mix(in srgb,var(--tema-fundo) 96%,var(--tema-primaria)),color-mix(in srgb,var(--tema-painel) 92%,var(--tema-primaria)),color-mix(in srgb,var(--tema-fundo) 96%,var(--tema-primaria)));
+}
+body.tema-sistema .contexto-campanha-sistema {
+  background:color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 5%,transparent);
+}
+
+body.tema-sistema .btn-ficha-principal,
+body.tema-sistema .btn-acao:not(.btn-perigo):not(.btn-sair) {
+  border-color:var(--tema-secundaria,var(--tema-primaria)) !important;
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 86%,white),
+    color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 58%,black)) !important;
+  color:color-mix(in srgb,var(--tema-fundo) 88%,black) !important;
+}
+body.tema-sistema .btn-ficha-principal:hover,
+body.tema-sistema .btn-acao:not(.btn-perigo):not(.btn-sair):hover {
+  border-color:var(--mamus-gold-bright) !important;
+  box-shadow:0 0 18px color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 25%,transparent), inset 0 1px 0 rgba(255,255,255,.22);
+}
+body.tema-sistema .btn-secundario {
+  border-color:var(--cam-border) !important;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--tema-painel) 94%,var(--tema-primaria)),var(--tema-fundo)) !important;
+}
+body.tema-sistema input:focus,
+body.tema-sistema select:focus,
+body.tema-sistema textarea:focus {
+  border-color:var(--tema-secundaria,var(--tema-primaria)) !important;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.6),0 0 0 2px color-mix(in srgb,var(--tema-primaria) 16%,transparent),0 0 12px color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 14%,transparent) !important;
+}
+
+body.tema-sistema .central-hero {
+  background:
+    radial-gradient(circle at 92% 18%,color-mix(in srgb,var(--tema-primaria) 18%,transparent),transparent 32%),
+    radial-gradient(circle at 72% 100%,color-mix(in srgb,var(--tema-secundaria,var(--tema-primaria)) 7%,transparent),transparent 30%),
+    linear-gradient(145deg,color-mix(in srgb,var(--tema-painel) 90%,var(--tema-primaria)) 0%,var(--tema-fundo) 72%);
+  border-color:var(--cam-border);
+}
+body.tema-sistema .central-hero h2,
+body.tema-sistema .central-hero .eyebrow-galeria,
+body.tema-sistema .central-kpi small {
+  color:var(--mamus-gold-bright);
+}
+
+/* Logo: PNG original na base; máscaras apenas quando há campanha temática. */
+body.tema-base .logo-layer-base { filter:none; opacity:1; z-index:3; }
+body.tema-base .logo-layer-red,
+body.tema-base .logo-layer-gold { display:none; }
+body.tema-sistema .logo-layer-base { filter:brightness(0); opacity:.98; z-index:0; }
+body.tema-sistema .logo-layer-red,
+body.tema-sistema .logo-layer-gold { display:block; }
+
+/* A palavra MaMuSBoaRD também acompanha o tema da campanha. */
+body.tema-sistema .logo-texto { color:var(--mamus-gold-bright); }
+body.tema-base .logo-texto { color:var(--mamus-gold-bright); }
+
+/* Scrollbar e seleção também deixam de carregar o vermelho global. */
+body.tema-sistema {
+  scrollbar-color:var(--tema-secundaria,var(--tema-primaria)) var(--tema-fundo);
+}
+body.tema-sistema ::selection {
+  background:color-mix(in srgb,var(--tema-primaria) 55%,#000);
+  color:#fff;
+}
