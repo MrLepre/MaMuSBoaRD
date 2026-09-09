@@ -1,0 +1,42 @@
+MaMuSBoaRD — Fase 1 — Teste completo de permissões
+
+1. Execute primeiro: sql-fase1-permissoes-final.sql
+2. Recarregue o schema do PostgREST se o Supabase pedir:
+   NOTIFY pgrst, 'reload schema';
+3. Publique os arquivos do ZIP.
+4. Faça Ctrl+F5 / limpe o cache do Service Worker.
+
+MATRIZ DE TESTE
+
+MrLepre / Master Global
+- Campanhas: listar, entrar, editar, encerrar, apagar.
+- Fichas: visualizar/editar/apagar fichas de qualquer campanha.
+- Mapas: publicar, editar e apagar em qualquer campanha.
+- Galeria: upload pública/privada, visualizar, compartilhar e apagar.
+- Sessões, pedidos, economia, jornais e calendário: ferramentas de Mestre.
+- Sistemas: criar e administrar qualquer sistema.
+
+Guss / Mestre local
+- Crônicas de Camelot: ferramentas de Mestre completas.
+- Outras campanhas: não deve aparecer ferramenta de Mestre.
+- Pode editar fichas da campanha que administra.
+- Pode controlar mapa/galeria/sessões da própria campanha.
+
+Kise / Mestre local
+- Noites Em Tokyo: ferramentas de Mestre completas.
+- Outras campanhas: não deve aparecer ferramenta de Mestre.
+- Pode administrar a ficha, mapa, galeria e recursos da própria campanha.
+
+Jogador
+- Campanha própria/aceita: vê os recursos permitidos ao jogador.
+- Campanha alheia: vê a campanha no catálogo, mas não entra sem ser membro/aprovado.
+- Não vê: controles de mapa do Mestre, upload da galeria, compartilhar imagem para todos,
+  gerenciamento de sessões, pedidos como Mestre, exclusão de fichas ou recursos.
+- Continua podendo criar sua própria campanha e sistemas, conforme a arquitetura definida.
+
+OBSERVAÇÃO
+A auditoria estática encontrou dois pontos que precisavam de correção:
+- Noctavell ainda usava diretamente campanhas.mestre_id = auth.uid().
+- Storage da galeria ainda possuía regras antigas baseadas em mestre@rpg.local.
+
+A migração final corrige ambos sem alterar os dados das campanhas.
