@@ -2515,3 +2515,59 @@ textarea:focus-visible {
   .logo-wordmark small { display:none; }
   .logo-texto { font-size:1rem; }
 }
+
+
+/* =========================================================
+   MaMuSBoaRD — FASE 2.1: EMBLEMA TEMÁTICO
+   O mesmo brasão MaMuS é mantido, mas seus canais vermelho/dourado
+   assumem as cores da campanha ativa.
+   ========================================================= */
+.logo-marca-imagem {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+.logo-marca-imagem .logo-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  pointer-events: none;
+}
+.logo-layer-base {
+  background-image: url('assets/mamus-logo.png');
+  filter: brightness(0);
+  opacity: .98;
+  z-index: 0;
+}
+.logo-layer-red {
+  background: var(--logo-red, #c41624);
+  -webkit-mask-image: url('assets/mamus-logo-red-mask.png');
+  mask-image: url('assets/mamus-logo-red-mask.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  z-index: 1;
+}
+.logo-layer-gold {
+  background: var(--logo-gold, #d9a52e);
+  -webkit-mask-image: url('assets/mamus-logo-gold-mask.png');
+  mask-image: url('assets/mamus-logo-gold-mask.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  z-index: 2;
+}
+.logo-mamusboard:hover .logo-layer-red { filter: brightness(1.08) saturate(1.05); }
+.logo-mamusboard:hover .logo-layer-gold { filter: brightness(1.08) saturate(1.03); }
+.logo-mamusboard:hover .logo-texto { color: var(--cam-gold-light); }
