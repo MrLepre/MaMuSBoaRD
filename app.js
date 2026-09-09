@@ -1422,6 +1422,16 @@ function obterTemaSistemaParaMesa() {
   return cfg.tema || temasPorTipo[tipo] || null;
 }
 
+function aplicarCoresLogoMamus(corVermelho, corDourado) {
+  const root = document.documentElement;
+  if (!root) return;
+  const valida = v => /^#[0-9a-f]{6}$/i.test(String(v || ''));
+  const vermelho = valida(corVermelho) ? corVermelho : '#c41624';
+  const dourado = valida(corDourado) ? corDourado : '#d9a52e';
+  root.style.setProperty('--logo-red', vermelho);
+  root.style.setProperty('--logo-gold', dourado);
+}
+
 function aplicarTemaMesa() {
   const root = document.documentElement;
   const body = document.body;
@@ -1442,6 +1452,7 @@ function aplicarTemaMesa() {
     root.style.setProperty('--cam-primary-rgb', '194,31,50');
     root.style.setProperty('--cam-gold-rgb', '212,175,55');
     root.style.setProperty('--tema-secondary', '#d4af37');
+    aplicarCoresLogoMamus('#c41624', '#d9a52e');
     atualizarMetaThemeColor('#100609');
     return;
   }
@@ -1463,6 +1474,9 @@ function aplicarTemaMesa() {
   root.style.setProperty('--tema-painel-2', painel2);
   root.style.setProperty('--tema-primary-rgb', rgb);
   root.style.setProperty('--cam-gold-rgb', rgb);
+  // O emblema MaMuS acompanha a identidade da campanha: canal vermelho = primária,
+  // canal dourado = secundária. O desenho, contorno preto e proporções permanecem iguais.
+  aplicarCoresLogoMamus(primaria, secundaria);
   atualizarMetaThemeColor(fundo);
 }
 

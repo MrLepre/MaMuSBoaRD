@@ -25,7 +25,11 @@
       <div class="topo-marca">
         <button type="button" id="btn-menu-mobile" class="btn-menu-mobile" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="sidebar-navegacao" onclick="alternarMenuNavegacao(event)">☰</button>
         <button type="button" class="logo-mamusboard" onclick="mudarAba('inicio')" aria-label="Ir para a Central da Campanha">
-          <span class="logo-marca-imagem"><img src="assets/mamus-logo.png" alt="Logo MaMuS" decoding="async"></span>
+          <span class="logo-marca-imagem" aria-label="Logo MaMuS">
+            <span class="logo-layer logo-layer-base" aria-hidden="true"></span>
+            <span class="logo-layer logo-layer-red" aria-hidden="true"></span>
+            <span class="logo-layer logo-layer-gold" aria-hidden="true"></span>
+          </span>
           <span class="logo-wordmark"><span class="logo-texto">MaMuSBoaRD</span><small>MESA VIRTUAL DE RPG</small></span>
         </button>
       </div>
