@@ -1,0 +1,14 @@
+MaMuSBoaRD — Fase 2 — Logo Temático v2
+
+Correções desta versão:
+
+1. Sem campanha selecionada, o cabeçalho usa o PNG original completo do logo MaMuS.
+2. Com campanha selecionada, o logo usa as máscaras temáticas para acompanhar o sistema.
+3. O tema legado/Crônicas de Camelot voltou para vermelho + dourado + preto, em vez do azul da versão de teste.
+4. A casca global do frontend (topo, sidebar, contexto, navegação ativa, botões, foco, hero, cards e indicadores) passa a usar as variáveis do tema da campanha.
+5. Elementos específicos de um sistema podem manter sua própria cor quando forem parte da mecânica visual daquele sistema.
+6. Nenhuma regra de banco/RLS ou funcionalidade da Fase 1 foi alterada.
+
+Fluxo visual:
+MaMuS base -> PNG original
+Campanha ativa -> Sistema -> tema -> logo + frontend global

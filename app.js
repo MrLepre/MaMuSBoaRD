@@ -1417,7 +1417,7 @@ function obterTemaSistemaParaMesa() {
     sobreviventes_fronteira: { corPrimaria:'#c6a15b', corSecundaria:'#a94d42', corFundo:'#0a0d0b', corPainel:'#131814', corPainel2:'#0d120f' },
     noites_em_tokyo: { corPrimaria:'#8b1e3f', corSecundaria:'#c9cbd4', corFundo:'#080a10', corPainel:'#111522', corPainel2:'#171c2b' },
     world_trigger: { corPrimaria:'#39b8ff', corSecundaria:'#7fd7ff', corFundo:'#071018', corPainel:'#0d1822', corPainel2:'#09131b' },
-    legado: { corPrimaria:'#3f8cff', corSecundaria:'#d4af37', corFundo:'#070b14', corPainel:'#101725', corPainel2:'#0b101b' }
+    legado: { corPrimaria:'#c21f32', corSecundaria:'#d4af37', corFundo:'#100609', corPainel:'#16090d', corPainel2:'#211016' }
   };
   return cfg.tema || temasPorTipo[tipo] || null;
 }
