@@ -28,11 +28,11 @@ ATUALIZAÇÃO — MASTER GLOBAL
 - MrLepre (mrlepre@rpg.local / ID 74205e44-2c46-42ff-8ad7-4bf1881fc6af) é o Master global.
 - O Master global possui acesso administrativo acima dos Mestres locais.
 - Kise (kise@rpg.local / ID 35338217-512f-498e-9560-ebdc2a83be49) é o Mestre de Noites em Tokyo.
-- Guss (guss@rpg.local / ID a65baad2-de98-405f-a3b9-6e6e33629baa) é o Mestre de Contos de Camelot.
+- Guss (guss@rpg.local / ID a65baad2-de98-405f-a3b9-6e6e33629baa) é o Mestre de Crônicas de Camelot.
 - O Master global pode administrar qualquer campanha/sistema sem alterar o mestre local da campanha.
 - Qualquer usuário continua podendo criar novas campanhas e sistemas.
 - Execute também: sql-master-global-e-mestres-campanhas.sql
 
 ATUALIZAÇÃO — DEMAIS CAMPANHAS
 
-Ao executar `sql-master-global-e-mestres-campanhas.sql`, além de Noites em Tokyo (Kise) e Contos de Camelot (Guss), todas as demais campanhas que já existirem no banco serão atribuídas ao Master Global MrLepre como mestre. As duas campanhas locais permanecem com seus respectivos mestres.
+Ao executar `sql-master-global-e-mestres-campanhas.sql`, além de Noites em Tokyo (Kise) e Crônicas de Camelot (Guss), todas as demais campanhas que já existirem no banco serão atribuídas ao Master Global MrLepre como mestre. As duas campanhas locais permanecem com seus respectivos mestres.

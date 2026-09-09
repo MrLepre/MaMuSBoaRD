@@ -7,7 +7,7 @@
 --
 -- Mestres locais:
 --   Noites em Tokyo  -> Kise
---   Contos de Camelot -> Guss
+--   Crônicas de Camelot -> Guss
 --
 -- Execute DEPOIS das migrações de multicampanha/RLS existentes.
 -- =============================================================
@@ -214,16 +214,16 @@ from public.campanhas c
 where lower(trim(c.nome)) = lower('Noites em Tokyo')
 on conflict (campanha_id, user_id) do update set papel = 'mestre';
 
--- Contos de Camelot -> Guss
+-- Crônicas de Camelot -> Guss
 update public.campanhas c
 set mestre_id = 'a65baad2-de98-405f-a3b9-6e6e33629baa'::uuid,
     updated_at = now()
-where lower(trim(c.nome)) = lower('Contos de Camelot');
+where lower(trim(c.nome)) = lower('Crônicas de Camelot');
 
 insert into public.campanha_membros (campanha_id, user_id, papel)
 select c.id, 'a65baad2-de98-405f-a3b9-6e6e33629baa'::uuid, 'mestre'
 from public.campanhas c
-where lower(trim(c.nome)) = lower('Contos de Camelot')
+where lower(trim(c.nome)) = lower('Crônicas de Camelot')
 on conflict (campanha_id, user_id) do update set papel = 'mestre';
 
 -- =============================================================
@@ -238,7 +238,7 @@ set mestre_id = '74205e44-2c46-42ff-8ad7-4bf1881fc6af'::uuid,
     updated_at = now()
 where lower(trim(c.nome)) not in (
   lower('Noites em Tokyo'),
-  lower('Contos de Camelot')
+  lower('Crônicas de Camelot')
 );
 
 insert into public.campanha_membros (campanha_id, user_id, papel)
@@ -246,7 +246,7 @@ select c.id, '74205e44-2c46-42ff-8ad7-4bf1881fc6af'::uuid, 'mestre'
 from public.campanhas c
 where lower(trim(c.nome)) not in (
   lower('Noites em Tokyo'),
-  lower('Contos de Camelot')
+  lower('Crônicas de Camelot')
 )
 on conflict (campanha_id, user_id) do update set papel = 'mestre';
 
