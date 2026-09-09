@@ -2270,3 +2270,248 @@ body {
 
 /* Master global */
 .badge-master-global{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid rgba(217,164,65,.55);border-radius:999px;background:rgba(217,164,65,.12);color:#f2c75c;font-size:.72rem;font-weight:800;letter-spacing:.06em;white-space:nowrap;}
+
+/* ==========================================================
+   MaMuSBoaRD — FASE 2.1: IDENTIDADE VISUAL / FRONTEND FOUNDATION
+   Baseada no emblema oficial: preto + vermelho + dourado.
+   Esta camada é aditiva para preservar as funcionalidades da Fase 1.
+   ========================================================== */
+:root {
+  --mamus-black: #050506;
+  --mamus-black-soft: #0a090b;
+  --mamus-red: #c41624;
+  --mamus-red-deep: #760b16;
+  --mamus-red-bright: #ed2435;
+  --mamus-gold: #d9a52e;
+  --mamus-gold-bright: #f4cf68;
+  --mamus-gold-deep: #8c6418;
+  --mamus-ivory: #f0e8d8;
+  --mamus-muted: #a69e91;
+  --mamus-line: rgba(217,165,46,.18);
+  --mamus-line-strong: rgba(217,165,46,.36);
+  --mamus-glow-red: rgba(196,22,36,.22);
+  --mamus-glow-gold: rgba(217,165,46,.18);
+  --mamus-radius-sm: 7px;
+  --mamus-radius-md: 11px;
+  --mamus-radius-lg: 16px;
+  --mamus-shadow: 0 16px 40px rgba(0,0,0,.28);
+  --mamus-transition: 160ms ease;
+}
+
+html { background: var(--mamus-black); }
+body {
+  background-color: var(--cam-bg);
+  background-image:
+    radial-gradient(circle at 50% -10%, rgba(196,22,36,.10) 0%, transparent 38%),
+    radial-gradient(circle at 100% 30%, rgba(217,165,46,.055) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.22));
+}
+
+/* Marca oficial no shell */
+.logo-mamusboard {
+  min-height: 52px;
+  padding: 2px 5px;
+  gap: 10px;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.logo-mamusboard:hover { background: rgba(255,255,255,.025); }
+.logo-marca-imagem {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 52px;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.55));
+}
+.logo-marca-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.logo-wordmark { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+.logo-texto {
+  color: var(--mamus-gold-bright);
+  font-family:'Cinzel',serif;
+  font-weight:900;
+  letter-spacing:.08em;
+  line-height:1;
+  text-shadow: 0 2px 10px rgba(0,0,0,.75);
+}
+.logo-wordmark small {
+  margin-top:4px;
+  color:#81796e;
+  font-family:'Cinzel',serif;
+  font-size:.49rem;
+  font-weight:700;
+  letter-spacing:.18em;
+  white-space:nowrap;
+}
+
+/* Barra superior: metal escuro + filete vermelho */
+#topo-geral { border-bottom: 1px solid rgba(0,0,0,.7); }
+.topo-mesa {
+  position:relative;
+  background:
+    linear-gradient(90deg, rgba(196,22,36,.055), transparent 26%, transparent 74%, rgba(217,165,46,.035)),
+    linear-gradient(180deg, #100b0d 0%, #080709 100%);
+  border-bottom:1px solid var(--mamus-line-strong);
+}
+.topo-mesa::after {
+  content:'';
+  position:absolute;
+  left:0; right:0; bottom:-1px;
+  height:2px;
+  background:linear-gradient(90deg, transparent 0%, var(--mamus-red-deep) 18%, var(--mamus-gold-deep) 50%, var(--mamus-red-deep) 82%, transparent 100%);
+  opacity:.7;
+  pointer-events:none;
+}
+
+/* Sidebar: o vermelho identifica estado/ação; o dourado identifica a marca. */
+.sidebar-navegacao {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(196,22,36,.08), transparent 28%),
+    linear-gradient(180deg,#100b0d 0%,#070709 100%);
+  border-right-color:var(--mamus-line-strong);
+}
+.sidebar-cabecalho { background:linear-gradient(180deg,rgba(217,165,46,.035),transparent); }
+.sidebar-overline { color:var(--mamus-gold-bright); }
+.nav-grupo-titulo { color:var(--mamus-gold); }
+.abas-navegacao button {
+  position:relative;
+  border-radius:var(--mamus-radius-sm);
+  transition:background var(--mamus-transition), border-color var(--mamus-transition), color var(--mamus-transition), transform var(--mamus-transition);
+}
+.abas-navegacao button::before {
+  content:'';
+  position:absolute;
+  left:0; top:9px; bottom:9px;
+  width:2px;
+  border-radius:2px;
+  background:transparent;
+  transition:background var(--mamus-transition), box-shadow var(--mamus-transition);
+}
+.abas-navegacao button.ativo::before {
+  background:var(--mamus-red-bright);
+  box-shadow:0 0 12px var(--mamus-glow-red);
+}
+.abas-navegacao button.ativo {
+  background:linear-gradient(90deg,rgba(196,22,36,.20),rgba(196,22,36,.035) 65%,transparent);
+  border-color:rgba(217,165,46,.25);
+}
+.abas-navegacao button:hover {
+  background:rgba(196,22,36,.075);
+  border-color:rgba(217,165,46,.20);
+}
+
+/* Contexto da campanha */
+.contexto-campanha {
+  background:linear-gradient(90deg,rgba(9,7,9,.97),rgba(16,11,13,.94),rgba(9,7,9,.97));
+  border-bottom-color:var(--mamus-line);
+}
+.contexto-campanha strong { color:var(--mamus-ivory); }
+.contexto-campanha-sistema { border-color:var(--mamus-line-strong); background:rgba(217,165,46,.035); }
+
+/* Linguagem dos painéis */
+.card-secao,
+.card-campanha,
+.card-sistema,
+.card-secao-campanha,
+.central-painel-card,
+.central-personagem-card,
+.central-mestre-card,
+.central-sessao-card,
+.central-atividade-card {
+  border-color:var(--mamus-line);
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
+}
+.card-secao:hover,
+.card-campanha:hover,
+.card-sistema:hover {
+  border-color:var(--mamus-line-strong);
+  box-shadow:0 14px 34px rgba(0,0,0,.25), 0 0 0 1px rgba(217,165,46,.035);
+}
+
+/* Botão primário: dourado de autoridade */
+.btn-ficha-principal,
+.btn-acao:not(.btn-perigo):not(.btn-sair) {
+  border-color:var(--mamus-gold) !important;
+  background:linear-gradient(135deg,#c79628 0%,#8b6117 100%) !important;
+  color:#130e05 !important;
+  text-shadow:none;
+}
+.btn-ficha-principal:hover,
+.btn-acao:not(.btn-perigo):not(.btn-sair):hover {
+  border-color:var(--mamus-gold-bright) !important;
+  background:linear-gradient(135deg,#e4b83f 0%,#a8751d 100%) !important;
+  color:#080604 !important;
+  box-shadow:0 0 18px rgba(217,165,46,.22), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.btn-secundario {
+  border-color:rgba(217,165,46,.30) !important;
+  background:linear-gradient(135deg,#191316,#0b090b) !important;
+}
+.btn-perigo,
+.btn-perigo-campanha {
+  border-color:rgba(237,36,53,.52) !important;
+  background:linear-gradient(135deg,#64131d,#2a090e) !important;
+}
+
+/* Inputs: foco em vermelho + dourado */
+input:focus, select:focus, textarea:focus {
+  border-color:var(--mamus-gold) !important;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.6), 0 0 0 2px rgba(196,22,36,.10), 0 0 12px rgba(217,165,46,.12) !important;
+}
+
+/* Central: hero com assinatura do emblema */
+.central-hero {
+  background:
+    radial-gradient(circle at 92% 18%,rgba(196,22,36,.20),transparent 32%),
+    radial-gradient(circle at 72% 100%,rgba(217,165,46,.06),transparent 30%),
+    linear-gradient(145deg,#130b0e 0%,#09080a 72%);
+  border-color:var(--mamus-line-strong);
+  box-shadow:var(--mamus-shadow);
+}
+.central-hero::before {
+  content:'';
+  position:absolute;
+  right:24px; top:18px;
+  width:120px; height:120px;
+  background:url('assets/mamus-logo.png') center/contain no-repeat;
+  opacity:.065;
+  filter:grayscale(1) brightness(1.8);
+  pointer-events:none;
+}
+.central-hero::after { border-color:rgba(217,165,46,.10); }
+.central-hero h2 { color:var(--mamus-gold-bright); }
+.central-hero .eyebrow-galeria { color:var(--mamus-gold); }
+
+/* Pequenos indicadores de identidade */
+.central-kpi,
+.central-acoes-rapidas button {
+  border-color:var(--mamus-line);
+  background:linear-gradient(145deg,rgba(17,11,13,.94),rgba(8,8,10,.94));
+}
+.central-kpi:hover,
+.central-acoes-rapidas button:hover { border-color:var(--mamus-line-strong); }
+.central-kpi small { color:var(--mamus-gold); }
+
+/* Acessibilidade e feedback */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline:2px solid var(--mamus-gold-bright);
+  outline-offset:2px;
+}
+::selection { background:rgba(196,22,36,.55); color:#fff7e8; }
+
+@media(max-width:620px){
+  .logo-marca-imagem { width:42px; height:42px; flex-basis:42px; }
+  .logo-mamusboard { min-height:46px; gap:7px; }
+  .logo-wordmark small { display:none; }
+  .logo-texto { font-size:1rem; }
+}

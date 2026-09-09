@@ -1,0 +1,29 @@
+MaMuSBoaRD — FASE 2 / FRONTEND + IDENTIDADE VISUAL — V1
+
+Esta primeira entrega inicia a Fase 2 sem reconstruir a aplicação.
+
+FOCO DESTA VERSÃO
+- Usar o emblema oficial do MaMuS como referência visual do shell.
+- Consolidar preto, vermelho e dourado como DNA visual do produto.
+- Criar tokens de design para cores, bordas, raios, sombras e transições.
+- Refinar header, marca, sidebar, contexto da campanha, Central, cards, botões e inputs.
+- Adicionar favicon e ícones PWA derivados do logo oficial.
+- Preservar a estrutura e funcionalidades existentes da Fase 1.
+
+PRINCÍPIO
+MaMuSBoaRD mantém identidade própria; cada sistema RPG pode continuar aplicando seu tema de campanha por cima dela.
+
+NÃO FOI FEITO NESTA ENTREGA
+- Nenhuma reconstrução da VTT.
+- Nenhuma alteração de banco/RLS.
+- Nenhuma mudança nas regras dos sistemas RPG.
+- Nenhuma remoção de funcionalidades existentes.
+
+CACHE
+O Service Worker foi atualizado para uma nova versão para evitar que o navegador continue servindo o CSS antigo.
+
+VALIDAÇÃO RECOMENDADA
+1. Publicar os arquivos.
+2. Fazer Ctrl+F5/limpar cache uma vez.
+3. Testar desktop e celular.
+4. Conferir Central, Campanhas, Ficha, Mapa, Rolagens e Guia da Campanha.
