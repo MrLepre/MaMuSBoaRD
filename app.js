@@ -26,6 +26,12 @@ let abaAtual = 'inicio';
 let centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
 let fichaUltimoSalvamento = null;
 let fichaStatusCentral = 'sem_ficha';
+let fichaAutosaveTimer = null;
+let fichaAutosaveIframe = null;
+let fichaAutosavePendente = false;
+let fichaAutosaveSalvando = false;
+let fichaAutosaveUltimoSnapshot = null;
+
 let pastaGaleriaAtual = 'Todas';
 let dadosGaleriaAtual = [];
 let imagemMestreAberta = false;
@@ -1059,17 +1065,21 @@ window.addEventListener('message', async (event) => {
   if (foiEdicao && event.data.userId) {
     fichaEditandoUserId = event.data.userId;
   }
-  fichaStatusCentral = foiEdicao ? 'salvando' : 'salvando';
+  const ehAutosave = event.data.autosave === true;
+  fichaStatusCentral = 'salvando';
+  fichaAutosavePendente = false;
+  fichaAutosaveUltimoSnapshot = JSON.stringify(dadosFichaAtual);
   renderizarFichaNaTela(dadosFichaAtual);
   renderizarCentralCampanha();
-  fecharCriadorFicha();
-
-  const nome = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Personagem';
-  mostrarPopup(foiEdicao ? `💾 Ficha de ${nome} atualizada!` : `⚔️ Ficha de ${nome} criada na mesa!`);
+  if (!ehAutosave) {
+    fecharCriadorFicha();
+    const nome = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Personagem';
+    mostrarPopup(foiEdicao ? `💾 Ficha de ${nome} atualizada!` : `⚔️ Ficha de ${nome} criada na mesa!`);
+  }
 
   if (supabaseClient) {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) await salvarFichaNoSupabase(fichaEditandoUserId);
+    if (session) await salvarFichaNoSupabase(fichaEditandoUserId, { silencioso: ehAutosave });
   }
 });
 
@@ -2437,12 +2447,88 @@ async function salvarSistema(){
   if(result.error)return mostrarPopup('❌ Erro ao salvar sistema: '+result.error.message);
   fecharNovoSistema(); await carregarSistemas(); mostrarPopup(`⚙️ Sistema "${nome}" salvo com sucesso!`);
 }
+function obterDadosFichaDoIframe(iframe) {
+  try {
+    const w = iframe?.contentWindow;
+    if (!w) return null;
+    if (typeof w.obter === 'function') return w.obter();
+    if (typeof w.collect === 'function') return w.collect();
+    if (typeof w.obterDadosFicha === 'function') return w.obterDadosFicha();
+    if (w.dados && typeof w.dados === 'object') return w.dados;
+  } catch (err) { console.warn('Não foi possível ler a ficha do iframe:', err); }
+  return null;
+}
+
+function enviarSnapshotFichaParaMesa(iframe, autosave = true) {
+  const dados = obterDadosFichaDoIframe(iframe);
+  if (!dados) return false;
+  fichaAutosaveIframe = iframe;
+  dadosFichaAtual = dados;
+  fichaAutosavePendente = autosave;
+  fichaStatusCentral = 'salvando';
+  renderizarFichaNaTela(dadosFichaAtual);
+  renderizarCentralCampanha();
+  try {
+    iframe.contentWindow.postMessage({
+      type: 'cronicas-camelot-ficha-pronta',
+      dados,
+      modo: 'edicao',
+      sistema_id: sistemaAtual?.id,
+      autosave
+    }, window.location.origin);
+    return true;
+  } catch (err) { console.error('Erro ao enviar autosave da ficha:', err); return false; }
+}
+
+function configurarAutosaveFichaIframe(iframe, modo = 'criacao') {
+  if (!iframe || modo !== 'edicao') return;
+  const instalar = () => {
+    try {
+      const doc = iframe.contentDocument;
+      if (!doc?.body) return;
+      fichaAutosaveIframe = iframe;
+      const marcarAlteracao = () => {
+        fichaAutosavePendente = true;
+        fichaStatusCentral = 'nao_salva';
+        renderizarCentralCampanha();
+        clearTimeout(fichaAutosaveTimer);
+        fichaAutosaveTimer = setTimeout(() => enviarSnapshotFichaParaMesa(iframe, true), 1000);
+      };
+      doc.addEventListener('input', marcarAlteracao, true);
+      doc.addEventListener('change', marcarAlteracao, true);
+      iframe.__mamusAutosaveInstalado = true;
+    } catch (err) { console.warn('Autosave não pôde ser instalado nesta ficha:', err); }
+  };
+  if (iframe.__mamusAutosaveInstalado) return;
+  if (iframe.contentDocument?.readyState === 'complete') instalar();
+  else iframe.addEventListener('load', instalar, { once: true });
+}
+
+async function salvarFichaPendenteAgora() {
+  clearTimeout(fichaAutosaveTimer);
+  if (!fichaAutosavePendente || !fichaAutosaveIframe || fichaAutosaveSalvando) return;
+  const dados = obterDadosFichaDoIframe(fichaAutosaveIframe);
+  if (!dados) return;
+  const snapshot = JSON.stringify(dados);
+  if (snapshot === fichaAutosaveUltimoSnapshot) { fichaAutosavePendente = false; return; }
+  fichaAutosaveSalvando = true;
+  fichaStatusCentral = 'salvando';
+  renderizarCentralCampanha();
+  dadosFichaAtual = dados;
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) await salvarFichaNoSupabase(fichaEditandoUserId, { silencioso: true });
+    else { fichaStatusCentral = 'erro'; renderizarCentralCampanha(); }
+  } finally { fichaAutosaveSalvando = false; }
+}
+
 function abrirFichaGenericaNoIframe(iframe, src, sistema, dados = null, modo = 'criacao') {
   if (!iframe || !sistema) return;
   const enviar = () => {
     try {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-sistema', sistema }, window.location.origin);
       if (dados) iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo }, window.location.origin);
+      configurarAutosaveFichaIframe(iframe, modo);
     } catch (err) { console.error('Erro ao enviar sistema para a ficha:', err); }
   };
   iframe.addEventListener('load', enviar, { once: true });
@@ -3413,6 +3499,7 @@ function centralEncontrarXP(dados) {
 function centralFormatarSalvamento() {
   if (fichaStatusCentral === 'nao_salva') return { classe:'central-save-status-alerta', texto:'● Alterações não salvas' };
   if (fichaStatusCentral === 'salvando') return { classe:'central-save-status-salvando', texto:'⟳ Salvando ficha...' };
+  if (fichaStatusCentral === 'erro') return { classe:'central-save-status-alerta', texto:'⚠ Não foi possível salvar' };
   if (!fichaUltimoSalvamento) return { classe:'central-save-status-vazio', texto:'Sem ficha' };
   const data = new Date(fichaUltimoSalvamento);
   if (Number.isNaN(data.getTime())) return { classe:'central-save-status-ok', texto:'✓ Salva na nuvem' };
@@ -3693,6 +3780,8 @@ function mudarAba(nomeAba, evento) {
   }
   if (!abasValidas.includes(nomeAba)) return;
 
+  if (fichaAutosavePendente && nomeAba !== 'ficha') salvarFichaPendenteAgora();
+
   const paineis = document.querySelectorAll('.painel');
   paineis.forEach(p => p.classList.remove('ativo'));
   const botoes = document.querySelectorAll('.abas-navegacao button');
@@ -3772,7 +3861,8 @@ function importarArquivoJSON(event) {
   reader.readAsText(file);
 }
 
-async function salvarFichaNoSupabase(userIdDestino = null) {
+async function salvarFichaNoSupabase(userIdDestino = null, opcoes = {}) {
+  const silencioso = opcoes.silencioso === true;
   if (!supabaseClient) return alert('Supabase não conectado.');
 
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -3786,6 +3876,12 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
   const idDestino = userIdDestino || session.user.id;
   const ehEdicaoMestre = Boolean(ehMestreGlobal && userIdDestino && userIdDestino !== session.user.id);
   const agora = new Date().toISOString();
+  const marcarErroAutosave = (mensagem) => {
+    fichaStatusCentral = 'erro';
+    fichaAutosavePendente = true;
+    renderizarCentralCampanha();
+    if (!silencioso) mostrarPopup(mensagem);
+  };
 
   /*
    * IMPORTANTE:
@@ -3805,7 +3901,7 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
 
   if (consultaExistente.error) {
     console.error('Erro ao localizar ficha antes de salvar:', consultaExistente.error);
-    mostrarPopup('❌ Não foi possível localizar sua ficha: ' + consultaExistente.error.message);
+    marcarErroAutosave('❌ Não foi possível localizar sua ficha: ' + consultaExistente.error.message);
     return;
   }
 
@@ -3845,22 +3941,24 @@ async function salvarFichaNoSupabase(userIdDestino = null) {
      */
     if (resultado.error && /duplicate key|unique constraint|violates unique/i.test(resultado.error.message || '')) {
       console.error('Constraint UNIQUE legada detectada em fichas:', resultado.error);
-      mostrarPopup('❌ O Supabase ainda possui uma regra UNIQUE antiga em fichas. Execute o SQL de correção de fichas no projeto e tente novamente.');
+      marcarErroAutosave('❌ O Supabase ainda possui uma regra UNIQUE antiga em fichas. Execute o SQL de correção de fichas no projeto e tente novamente.');
       return;
     }
   }
 
   if (resultado.error) {
     console.error('Erro ao salvar ficha:', resultado.error);
-    mostrarPopup('❌ Erro ao salvar: ' + resultado.error.message);
+    marcarErroAutosave('❌ Erro ao salvar: ' + resultado.error.message);
     return;
   }
 
   fichaUltimoSalvamento = agora;
   fichaStatusCentral = 'salva';
+  fichaAutosavePendente = false;
+  fichaAutosaveSalvando = false;
   centralAdicionarAtividade('👤', `${nomeChar} atualizou a ficha`, ehEdicaoMestre ? 'Mestre' : 'Meu personagem');
   renderizarCentralCampanha();
-  mostrarPopup(
+  if (!silencioso) mostrarPopup(
     ehEdicaoMestre
       ? '👑 Ficha do jogador atualizada pelo Mestre!'
       : '💾 Ficha salva na nuvem com sucesso!'
@@ -3950,6 +4048,7 @@ function abrirEditorFichaAtual() {
     iframe.src = 'ficha-editor.html?modo=edicao&t=' + Date.now();
     iframe.addEventListener('load', function carregarEdicaoLegadaUmaVez() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
+      configurarAutosaveFichaIframe(iframe, 'edicao');
     }, { once: true });
   } else {
     const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
@@ -3969,6 +4068,7 @@ function abrirEditorFicha(dados, userId = null) {
     iframe.src = 'ficha-editor.html?modo=edicao&t=' + Date.now();
     iframe.addEventListener('load', function carregarEdicaoUmaVez() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
+      configurarAutosaveFichaIframe(iframe, 'edicao');
     }, { once: true });
   } else {
     const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
@@ -3978,10 +4078,12 @@ function abrirEditorFicha(dados, userId = null) {
 }
 
 function fecharCriadorFicha() {
+  salvarFichaPendenteAgora();
   const modal = document.getElementById('modal-criador-ficha');
   const iframe = document.getElementById('iframe-criador-ficha');
   if (modal) modal.style.display = 'none';
   if (iframe) iframe.src = 'about:blank';
+  fichaAutosaveIframe = null;
 }
 
 function abrirFichaCompletaNoIframe(dados) {
