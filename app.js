@@ -1417,7 +1417,7 @@ function obterTemaSistemaParaMesa() {
     sobreviventes_fronteira: { corPrimaria:'#c6a15b', corSecundaria:'#a94d42', corFundo:'#0a0d0b', corPainel:'#131814', corPainel2:'#0d120f' },
     noites_em_tokyo: { corPrimaria:'#8b1e3f', corSecundaria:'#c9cbd4', corFundo:'#080a10', corPainel:'#111522', corPainel2:'#171c2b' },
     world_trigger: { corPrimaria:'#39b8ff', corSecundaria:'#7fd7ff', corFundo:'#071018', corPainel:'#0d1822', corPainel2:'#09131b' },
-    legado: { corPrimaria:'#c21f32', corSecundaria:'#d4af37', corFundo:'#100609', corPainel:'#16090d', corPainel2:'#211016' }
+    legado: { corPrimaria:'#ed1c14', corSecundaria:'#d4af37', corFundo:'#100609', corPainel:'#16090d', corPainel2:'#211016' }
   };
   return cfg.tema || temasPorTipo[tipo] || null;
 }
@@ -1448,8 +1448,8 @@ function aplicarTemaMesa() {
     root.style.setProperty('--cam-gold-light', '#f3d075');
     root.style.setProperty('--cam-gold-dark', '#8c6d1e');
     root.style.setProperty('--cam-border', '#5b252b');
-    root.style.setProperty('--cam-primary', '#c21f32');
-    root.style.setProperty('--cam-primary-rgb', '194,31,50');
+    root.style.setProperty('--cam-primary', '#ed1c14');
+    root.style.setProperty('--cam-primary-rgb', '237,28,20');
     root.style.setProperty('--cam-gold-rgb', '212,175,55');
     root.style.setProperty('--tema-secondary', '#d4af37');
     aplicarCoresLogoMamus('#c41624', '#d9a52e');
