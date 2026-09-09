@@ -2683,3 +2683,27 @@ body.tema-sistema ::selection {
   background:color-mix(in srgb,var(--tema-primaria) 55%,#000);
   color:#fff;
 }
+
+
+/* =========================================================
+   FASE 2.1 — LOGO OFICIAL + TEMA CAMELOT PRESERVADO
+   Sem campanha: o PNG original é exibido diretamente.
+   Com campanha: as máscaras substituem somente os canais cromáticos.
+   ========================================================= */
+.logo-marca-imagem .logo-layer-original {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:contain;
+  display:block;
+  z-index:3;
+  pointer-events:none;
+}
+body.tema-base .logo-layer-original { display:block; }
+body.tema-base .logo-layer-base,
+body.tema-base .logo-layer-red,
+body.tema-base .logo-layer-gold { display:none !important; }
+body.tema-sistema .logo-layer-original { display:none; }
+body.tema-sistema .logo-layer-base { filter:brightness(0); opacity:.98; z-index:0; }
+body.tema-sistema .logo-layer-red,
+body.tema-sistema .logo-layer-gold { display:block; }
+
