@@ -43,6 +43,18 @@
       lastSavedAt: null
     },
 
+    tabletop: {
+      gridAtivo: false,
+      zoom: 100,
+      gridSize: 40,
+      panX: 0,
+      panY: 0,
+      movementUnlocked: false,
+      immersive: false,
+      lastInteractedToken: null,
+      tokensLoadedCampaignId: null
+    },
+
     session: {
       current: null,
       diary: null,
@@ -99,6 +111,15 @@
     state.character.editingUserId = null;
     state.character.saveStatus = 'sem_ficha';
     state.character.lastSavedAt = null;
+    state.tabletop.gridAtivo = false;
+    state.tabletop.zoom = 100;
+    state.tabletop.gridSize = 40;
+    state.tabletop.panX = 0;
+    state.tabletop.panY = 0;
+    state.tabletop.movementUnlocked = false;
+    state.tabletop.immersive = false;
+    state.tabletop.lastInteractedToken = null;
+    state.tabletop.tokensLoadedCampaignId = null;
     state.session.current = null;
     state.session.diary = null;
     state.session.campaigns = [];
