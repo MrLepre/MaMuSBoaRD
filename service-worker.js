@@ -1,5 +1,5 @@
-const CACHE_NAME = 'mamus-cache-v20';
-const SHELL = ['./','./index.html','./style.css','./app.js','./manifest.json','./js/core/state.js','./js/core/bootstrap.js','./js/core/supabase.js','./js/realtime.js','./js/auth/auth.js','./js/campaigns/campaigns.js','./js/systems/systems.js','./js/characters/characters.js'];
+const CACHE_NAME = 'mamus-cache-v21';
+const SHELL = ['./','./index.html','./style.css','./app.js','./manifest.json','./js/core/state.js','./js/core/bootstrap.js','./js/core/supabase.js','./js/realtime.js','./js/auth/auth.js','./js/campaigns/campaigns.js','./js/systems/systems.js','./js/characters/characters.js','./js/tabletop/tabletop.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });
