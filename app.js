@@ -1518,7 +1518,7 @@ function criarTokenDoBestiario(idx){
   const base='monstro_'+normalizarIdTokenWT(m.nome)+'_'+Date.now();
   criarElementoToken(base,m.nome,10,10,55,'',Number(m.pv)||1,Number(m.pv)||1,true,{tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[],ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',ownerUserId:window.usuarioAtualId||''});
   const tokenMonstro=document.getElementById(base); if(tokenMonstro) salvarTokenNoSupabase(tokenMonstro);
-  if(canalMesa) canalMesa.send({type:'broadcast',event:'vtt_mover_token',payload:{id:base,nome:m.nome,x:10,y:10,tamanho:55,imagem:'',hpAtual:Number(m.pv)||1,hpMax:Number(m.pv)||1,campanha_id:obterCampanhaIdAtual(),ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',ownerUserId:window.usuarioAtualId||'',tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[]}});
+  if(canalMesa) MAMUS_REALTIME.send('vtt_mover_token',{id:base,nome:m.nome,x:10,y:10,tamanho:55,imagem:'',hpAtual:Number(m.pv)||1,hpMax:Number(m.pv)||1,campanha_id:obterCampanhaIdAtual(),ownerNick:document.getElementById('user-nick-display')?.innerText||'Mestre',ownerUserId:window.usuarioAtualId||'',tipo:'bestiario',monstro:true,reino:m.reino,nivel:m.nivel,papel:m.papel,atributos:m.atributos||{},ataques:m.ataques||[],habilidades:m.habilidades||[],resistencias:m.resistencias||[],fraquezas:m.fraquezas||[],loot_sugerido:m.loot_sugerido||[]});
   mostrarPopup(`🐾 ${m.nome} foi colocado no mapa!`);
 }
 
@@ -1606,7 +1606,7 @@ async function excluirMercadoria(id){if(!ehMestreDaCampanhaAtual()||!confirm('Ap
 function abrirEditorEventoEconomico(){if(!ehMestreDaCampanhaAtual())return;const el=document.getElementById('economia-formulario');if(!el)return;el.style.display='block';el.innerHTML=`<div class="economia-editor"><h3>🌪️ Registrar acontecimento econômico</h3><div class="economia-form-grid"><label>Título<input id="econ-evento-titulo" maxlength="100" placeholder="Ex.: Guerra fecha a fronteira"></label><label>Tipo<select id="econ-evento-tipo"><option>Guerra</option><option>Fome</option><option>Escassez</option><option>Superprodução</option><option>Descoberta</option><option>Festival</option><option>Catástrofe</option><option>Bloqueio comercial</option><option>Nova rota</option><option>Política</option><option>Outro</option></select></label><label>Região<input id="econ-evento-regiao" maxlength="80" placeholder="Ex.: Frostheim"></label><label>Intensidade (1–5)<input id="econ-evento-intensidade" type="number" min="1" max="5" value="3"></label><label>Ícone<input id="econ-evento-icone" maxlength="4" value="🌪️"></label></div><label>O que aconteceu?<textarea id="econ-evento-desc" rows="4" maxlength="2000" placeholder="Descreva a causa e as consequências."></textarea></label><div class="economia-editor-acoes"><button type="button" class="btn-ficha-principal" onclick="salvarEventoEconomico()">📌 Registrar evento</button><button type="button" class="btn-secundario" onclick="fecharEditorEconomia()">Cancelar</button></div></div>`;el.scrollIntoView({behavior:'smooth',block:'nearest'});}
 async function salvarEventoEconomico(){if(!ehMestreDaCampanhaAtual()||!supabaseClient||!obterCampanhaIdAtual())return;const payload={campanha_id:obterCampanhaIdAtual(),titulo:normalizarTextoEconomia(document.getElementById('econ-evento-titulo')?.value),tipo:document.getElementById('econ-evento-tipo')?.value||'Outro',regiao:normalizarTextoEconomia(document.getElementById('econ-evento-regiao')?.value)||'Mundo',intensidade:Math.max(1,Math.min(5,Number(document.getElementById('econ-evento-intensidade')?.value)||3)),icone:normalizarTextoEconomia(document.getElementById('econ-evento-icone')?.value)||'🌪️',descricao:document.getElementById('econ-evento-desc')?.value.trim()||'',criado_por:window.usuarioAtualId};if(!payload.titulo||!payload.descricao)return mostrarPopup('❌ Preencha o título e a descrição.');const r=await supabaseClient.from('economia_eventos').insert(payload);if(r.error)return mostrarPopup('❌ '+r.error.message);fecharEditorEconomia();await carregarEconomiaAtual(true);transmitirEconomia('evento');}
 async function excluirEventoEconomico(id){if(!ehMestreDaCampanhaAtual()||!confirm('Apagar este evento do histórico?'))return;const r=await supabaseClient.from('economia_eventos').delete().eq('id',id).eq('campanha_id',obterCampanhaIdAtual());if(r.error)return mostrarPopup('❌ '+r.error.message);await carregarEconomiaAtual(true);}
-function transmitirEconomia(tipo){if(canalMesa)canalMesa.send({type:'broadcast',event:'economia_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),tipo,quando:Date.now()}});}
+function transmitirEconomia(tipo){if(canalMesa)MAMUS_REALTIME.send('economia_atualizada',{campanha_id:obterCampanhaIdAtual(),tipo,quando:Date.now()});}
 
 async function carregarJornaisAtual(force=false){
   const id=obterCampanhaIdAtual(); const vazio=document.getElementById('jornais-sem-campanha');
@@ -1625,7 +1625,7 @@ function abrirEditorJornal(id=null){if(!ehMestreDaCampanhaAtual())return;const x
 function fecharEditorJornal(){const el=document.getElementById('painel-editor-jornal');if(el){el.style.display='none';el.innerHTML='';}}
 async function salvarJornal(id=''){if(!ehMestreDaCampanhaAtual()||!supabaseClient||!obterCampanhaIdAtual())return;const payload={campanha_id:obterCampanhaIdAtual(),titulo:normalizarTextoEconomia(document.getElementById('jornal-titulo')?.value),categoria:document.getElementById('jornal-cat')?.value||'Mundo',regiao:normalizarTextoEconomia(document.getElementById('jornal-regiao-input')?.value)||'Mundo',importancia:Math.max(1,Math.min(5,Number(document.getElementById('jornal-importancia')?.value)||3)),manchete:document.getElementById('jornal-manchete')?.value.trim()||'',conteudo:document.getElementById('jornal-conteudo')?.value.trim()||'',publicado:true,publicado_em:new Date().toISOString(),criado_por:window.usuarioAtualId};if(!payload.titulo||!payload.conteudo)return mostrarPopup('❌ Preencha o título e a notícia.');const r=id?await supabaseClient.from('jornais_campanha').update(payload).eq('id',id).eq('campanha_id',obterCampanhaIdAtual()):await supabaseClient.from('jornais_campanha').insert(payload);if(r.error)return mostrarPopup('❌ '+r.error.message);fecharEditorJornal();await carregarJornaisAtual(true);transmitirJornal();mostrarPopup('📰 Notícia publicada para a campanha.');}
 async function excluirJornal(id){if(!ehMestreDaCampanhaAtual()||!confirm('Apagar esta notícia?'))return;const r=await supabaseClient.from('jornais_campanha').delete().eq('id',id).eq('campanha_id',obterCampanhaIdAtual());if(r.error)return mostrarPopup('❌ '+r.error.message);await carregarJornaisAtual(true);}
-function transmitirJornal(){if(canalMesa)canalMesa.send({type:'broadcast',event:'jornal_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),quando:Date.now()}});}
+function transmitirJornal(){if(canalMesa)MAMUS_REALTIME.send('jornal_atualizado',{campanha_id:obterCampanhaIdAtual(),quando:Date.now()});}
 function resetarDadosEconomiaJornalAoTrocarCampanha(){economiaCarregadaCampanha=null;jornaisCarregadosCampanha=null;economiaDados={mercados:[],itens:[],eventos:[]};jornaisDados=[];fecharEditorEconomia();fecharEditorJornal();}
 
 // --- CALENDÁRIO DAS BRASAS — ÉTER & BRASAS ---
@@ -1728,7 +1728,7 @@ async function salvarCalendarioAtual(){
 async function definirDiaCalendario(dia){ if(!ehMestreDaCampanhaAtual()||!sistemaEhEterBrasas())return; calendarioDados.dia=Math.max(1,Math.min(365,Number(dia)||1)); await salvarCalendarioAtual(); }
 async function alterarDiaCalendario(delta){ if(!ehMestreDaCampanhaAtual()||!sistemaEhEterBrasas())return; let d=calendarioDados.dia+Number(delta||0),a=calendarioDados.ano; if(d>365){d=1;a++;} if(d<1){d=365;a=Math.max(1,a-1);} calendarioDados={ano:a,dia:d}; await salvarCalendarioAtual(); }
 async function mudarAnoCalendario(delta){ if(!ehMestreDaCampanhaAtual()||!sistemaEhEterBrasas())return; calendarioDados.ano=Math.max(1,calendarioDados.ano+Number(delta||0)); await salvarCalendarioAtual(); }
-function transmitirCalendario(){if(canalMesa)canalMesa.send({type:'broadcast',event:'calendario_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),ano:calendarioDados.ano,dia_do_ano:calendarioDados.dia,quando:Date.now()}});}
+function transmitirCalendario(){if(canalMesa)MAMUS_REALTIME.send('calendario_atualizado',{campanha_id:obterCampanhaIdAtual(),ano:calendarioDados.ano,dia_do_ano:calendarioDados.dia,quando:Date.now()});}
 function resetarCalendarioAoTrocarCampanha(){calendarioCarregadoCampanha=null;calendarioDados={ano:1,dia:1};}
 
 
@@ -1861,7 +1861,7 @@ async function iniciarSessao(){
   atualizarStatusSessaoUI(); renderizarControleSessaoMestre(); atualizarEditorDiarioUI();
   if(MAMUS_STATE.ui.currentTab==='sessoes') carregarSessoesCampanha();
   mostrarPopup(`🎬 Sessão ${numero} iniciada! As rolagens e diários agora serão catalogados nela.`);
-  if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:data.id,status:'aberta',numero:data.numero,nome:data.nome}});
+  if(canalMesa) MAMUS_REALTIME.send('sessao_atualizada',{campanha_id:obterCampanhaIdAtual(),sessao_id:data.id,status:'aberta',numero:data.numero,nome:data.nome});
 }
 
 async function encerrarSessao(){
@@ -1875,7 +1875,7 @@ async function encerrarSessao(){
   MAMUS_STATE.session.current=final||data; centralAdicionarAtividade('📕', `Sessão ${MAMUS_STATE.session.current.numero} encerrada`, MAMUS_STATE.session.current.nome || ''); atualizarStatusSessaoUI(); atualizarEditorDiarioUI(); renderizarControleSessaoMestre();
   if(MAMUS_STATE.ui.currentTab==='sessoes') carregarSessoesCampanha();
   mostrarPopup(`📕 Sessão ${MAMUS_STATE.session.current.numero} encerrada. ${rolagens||0} rolagens e ${diarios||0} diários catalogados.`);
-  if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:MAMUS_STATE.session.current.id,status:'encerrada',numero:MAMUS_STATE.session.current.numero}});
+  if(canalMesa) MAMUS_REALTIME.send('sessao_atualizada',{campanha_id:obterCampanhaIdAtual(),sessao_id:MAMUS_STATE.session.current.id,status:'encerrada',numero:MAMUS_STATE.session.current.numero});
 }
 
 function renderizarControleSessaoMestre(){
@@ -2844,11 +2844,7 @@ function registrarRolagemHistorico(descricao, resultado, veioDoBroadcast = false
   }
 
   if (!veioDoBroadcast && canalMesa) {
-    canalMesa.send({
-      type: 'broadcast',
-      event: 'nova_rolagem',
-      payload: { descricao, resultado: textoRes, campanha_id: obterCampanhaIdAtual() }
-    });
+    MAMUS_REALTIME.send('nova_rolagem', { descricao, resultado: textoRes, campanha_id: obterCampanhaIdAtual() });
   }
 }
 
@@ -3157,7 +3153,7 @@ function mostrarImagemParaTodos(img) {
     pasta: img.pasta || img.categoria || 'Geral'
   };
   abrirImagemMestre(dados.url, dados.nome, dados.pasta, false);
-  canalMesa.send({ type: 'broadcast', event: 'galeria_mostrar_imagem', payload: dados });
+  MAMUS_REALTIME.send('galeria_mostrar_imagem', dados);
   tocarSom('success');
   mostrarPopup('📺 Imagem enviada para todos os jogadores.');
 }
@@ -3189,7 +3185,7 @@ function fecharImagemMestre(veioDoBroadcast = false) {
   document.body.classList.remove('imagem-mestre-aberta');
 
   if (!veioDoBroadcast && ehMestreDaCampanhaAtual() && canalMesa) {
-    canalMesa.send({ type: 'broadcast', event: 'galeria_fechar_imagem', payload: { campanha_id: obterCampanhaIdAtual() } });
+    MAMUS_REALTIME.send('galeria_fechar_imagem', { campanha_id: obterCampanhaIdAtual() });
   }
 }
 
@@ -3318,27 +3314,6 @@ function inicializarScrollTouchMobile() {
     arrastandoPagina = false;
     ignorar = elementoDeveManterGestosProprios(event.target);
   }, { passive: true });
-
-  document.addEventListener('touchmove', (event) => {
-    if (ignorar || event.touches.length !== 1) return;
-    const t = event.touches[0];
-    const dx = t.clientX - inicioX;
-    const dy = t.clientY - inicioY;
-
-    if (!arrastandoPagina) {
-      if (Math.abs(dy) < 8 || Math.abs(dy) < Math.abs(dx) * 1.05) return;
-      arrastandoPagina = true;
-    }
-
-    const deltaY = t.clientY - ultimoY;
-    if (!Number.isFinite(deltaY) || deltaY === 0) return;
-
-    // Fallback de rolagem para navegadores móveis que prendem o gesto no
-    // documento por causa de wrappers/fixed overlays. Não toca no VTT.
-    window.scrollBy(0, -deltaY);
-    ultimoY = t.clientY;
-    event.preventDefault();
-  }, { passive: false });
 
   document.addEventListener('touchend', () => {
     arrastandoPagina = false;
