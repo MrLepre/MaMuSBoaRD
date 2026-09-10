@@ -1,0 +1,553 @@
+  ],
+  semana: ['Aurora','Ferra','Trama','Rumo','Vela','Eco'],
+  festivais: {
+    37:['Fornalha Nova','juramentos, forjas, inícios'],
+    146:['Semeadura','bênção da terra, plantio'],
+    219:['Veio do Gelo','resistência, lendas'],
+    292:['Colheita & Brumas','máscaras, intriga'],
+    365:['Brasas Altas','contratos eternos, renovações']
+  }
+};
+let calendarioDados = { ano:1, dia:1 };
+let calendarioCarregadoCampanha = null;
+
+function sistemaEhEterBrasas(){ return Boolean(MAMUS_STATE.campaign.current && MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas'); }
+function diaNormalCalendario(dia){ return Number(dia) >= 1 && Number(dia) <= 365 && !CALENDARIO_BRASAS.festivais[Number(dia)]; }
+function obterInfoDiaCalendario(dia){
+  dia = Math.max(1, Math.min(365, Number(dia)||1));
+  const semana = CALENDARIO_BRASAS.semana[(dia-1)%6];
+  const festival = CALENDARIO_BRASAS.festivais[dia];
+  if(festival) return { dia, semana, festival:true, nome:festival[0], descricao:festival[1], mes:null, diaMes:null };
+  let restante = dia;
+  for(let i=0;i<CALENDARIO_BRASAS.meses.length;i++){
+    if(i===0){ if(restante<=36) return {dia,semana,festival:false,mes:i,diaMes:restante}; restante-=36; }
+    else {
+      // Dias Livres ocupam as posições oficiais definidas pelo manual.
+      const antesDoFestival = [146,219,292,365].includes(dia) ? 0 : 0;
+      const inicio = [38,74,110,147,183,220,256,293,329][i-1];
+      const fim = inicio+35;
+      if(dia>=inicio && dia<=fim) return {dia,semana,festival:false,mes:i,diaMes:dia-inicio+1};
+    }
+  }
+  return {dia,semana,festival:false,mes:9,diaMes:36};
+}
+function nomeDataCalendario(ano,dia){
+  const info=obterInfoDiaCalendario(dia);
+  if(info.festival) return {titulo:`Ano ${ano} • Dia Livre`, detalhe:`${info.nome} • ${info.descricao}`, info};
+  const mes=CALENDARIO_BRASAS.meses[info.mes];
+  return {titulo:`Ano ${ano} • ${mes[0]}, dia ${info.diaMes}`, detalhe:`${info.semana} • ${mes[1]}`, info};
+}
+function renderizarCalendario(){
+  const painel=document.getElementById('calendario-painel'), vazio=document.getElementById('calendario-sem-campanha');
+  if(!painel||!vazio)return;
+  if(!sistemaEhEterBrasas()){painel.style.display='none';vazio.style.display='block';return;}
+  painel.style.display='block';vazio.style.display='none';
+  const d=nomeDataCalendario(calendarioDados.ano,calendarioDados.dia);
+  const t=document.getElementById('calendario-data-titulo'), det=document.getElementById('calendario-data-detalhe');
+  if(t)t.textContent=d.titulo; if(det)det.textContent=d.detalhe;
+  const yt=document.getElementById('calendario-ano-titulo'); if(yt)yt.textContent=`Ano ${calendarioDados.ano}`;
+  const ctrl=document.getElementById('calendario-controles-mestre'); if(ctrl)ctrl.style.display=ehMestreDaCampanhaAtual()?'flex':'none';
+  const resumo=document.getElementById('calendario-resumo');
+  if(resumo){ resumo.innerHTML=`<div><span>Ano</span><strong>${calendarioDados.ano}</strong></div><div><span>Dia do ano</span><strong>${calendarioDados.dia}/365</strong></div><div><span>Semana</span><strong>${escaparHTML(d.info.semana)}</strong></div><div><span>Próximo marco</span><strong>${escaparHTML(proximoMarcoCalendario(calendarioDados.dia))}</strong></div>`; }
+  const legenda=document.getElementById('calendario-legenda');
+  if(legenda){ legenda.innerHTML=`<span>☀️ Aurora</span><span>⚒️ Ferra</span><span>🧵 Trama</span><span>🧭 Rumo</span><span>🕯️ Vela</span><span>🔔 Eco</span><span>🎉 Dia Livre</span>`; }
+  const anoEl=document.getElementById('calendario-ano'); if(!anoEl)return;
+  let html='';
+  const blocos=[
+    {mes:0,inicio:1},{mes:1,inicio:38},{mes:2,inicio:74},{mes:3,inicio:110},{festival:37},
+    {mes:4,inicio:147},{mes:5,inicio:183},{festival:146},{mes:6,inicio:220},{mes:7,inicio:256},{festival:219},
+    {mes:8,inicio:293},{mes:9,inicio:329},{festival:292},{festival:365}
+  ];
+  blocos.forEach(b=>{
+    if(b.festival){ const f=CALENDARIO_BRASAS.festivais[b.festival]; html+=`<article class="calendario-festival ${calendarioDados.dia===b.festival?'atual':''}"><span>🎉 DIA LIVRE</span><strong>${escaparHTML(f[0])}</strong><small>Dia ${b.festival} • ${escaparHTML(f[1])}</small></article>`; return; }
+    const m=CALENDARIO_BRASAS.meses[b.mes]; html+=`<article class="calendario-mes"><header><div><span>${String(b.mes+1).padStart(2,'0')}</span><strong>${escaparHTML(m[0])}</strong></div><small>${escaparHTML(m[1])}</small></header><div class="calendario-semana">${CALENDARIO_BRASAS.semana.map(x=>`<span>${escaparHTML(x)}</span>`).join('')}</div><div class="calendario-grade">`;
+    for(let i=0;i<36;i++){ const dia=b.inicio+i; const ativo=dia===calendarioDados.dia; const wk=CALENDARIO_BRASAS.semana[i%6]; html+=`<button type="button" class="calendario-dia ${ativo?'atual':''}" ${ehMestreDaCampanhaAtual()?`onclick="definirDiaCalendario(${dia})"`:''} title="${escaparHTML(wk)}">${i+1}</button>`; }
+    html+='</div></article>';
+  });
+  anoEl.innerHTML=html;
+}
+function proximoMarcoCalendario(dia){ const ds=Object.keys(CALENDARIO_BRASAS.festivais).map(Number).filter(x=>x>dia); if(ds.length){const x=Math.min(...ds);return `${CALENDARIO_BRASAS.festivais[x][0]} (dia ${x})`;} return 'Brasal do próximo ano (dia 37)'; }
+async function carregarCalendarioAtual(force=false){
+  if(!sistemaEhEterBrasas()){renderizarCalendario();return;}
+  const id=obterCampanhaIdAtual(); if(!id){renderizarCalendario();return;}
+  if(!force&&calendarioCarregadoCampanha===id){renderizarCalendario();return;}
+  calendarioCarregadoCampanha=id;
+  if(!supabaseClient){renderizarCalendario();return;}
+  const r=await supabaseClient.from('calendario_campanha').select('ano,dia_do_ano').eq('campanha_id',id).maybeSingle();
+  if(r.error){console.error('Calendário:',r.error);renderizarCalendario();return;}
+  if(r.data){calendarioDados={ano:Math.max(1,Number(r.data.ano)||1),dia:Math.max(1,Math.min(365,Number(r.data.dia_do_ano)||1))};}
+  else if(ehMestreDaCampanhaAtual()){ const ins=await supabaseClient.from('calendario_campanha').insert({campanha_id:id,ano:1,dia_do_ano:1,atualizado_por:window.usuarioAtualId}).select('ano,dia_do_ano').single(); if(!ins.error&&ins.data) calendarioDados={ano:1,dia:1}; }
+  renderizarCalendario();
+}
+async function salvarCalendarioAtual(){
+  if(!ehMestreDaCampanhaAtual()||!supabaseClient||!obterCampanhaIdAtual())return;
+  const id=obterCampanhaIdAtual();
+  const p={campanha_id:id,ano:calendarioDados.ano,dia_do_ano:calendarioDados.dia,atualizado_por:window.usuarioAtualId};
+  const r=await supabaseClient.from('calendario_campanha').update({ano:p.ano,dia_do_ano:p.dia,atualizado_por:p.atualizado_por}).eq('campanha_id',id);
+  if(r.error)return mostrarPopup('❌ Não foi possível atualizar o calendário: '+r.error.message);
+  transmitirCalendario(); renderizarCalendario();
+}
+async function definirDiaCalendario(dia){ if(!ehMestreDaCampanhaAtual()||!sistemaEhEterBrasas())return; calendarioDados.dia=Math.max(1,Math.min(365,Number(dia)||1)); await salvarCalendarioAtual(); }
+async function alterarDiaCalendario(delta){ if(!ehMestreDaCampanhaAtual()||!sistemaEhEterBrasas())return; let d=calendarioDados.dia+Number(delta||0),a=calendarioDados.ano; if(d>365){d=1;a++;} if(d<1){d=365;a=Math.max(1,a-1);} calendarioDados={ano:a,dia:d}; await salvarCalendarioAtual(); }
+async function mudarAnoCalendario(delta){ if(!ehMestreDaCampanhaAtual()||!sistemaEhEterBrasas())return; calendarioDados.ano=Math.max(1,calendarioDados.ano+Number(delta||0)); await salvarCalendarioAtual(); }
+function transmitirCalendario(){if(canalMesa)canalMesa.send({type:'broadcast',event:'calendario_atualizado',payload:{campanha_id:obterCampanhaIdAtual(),ano:calendarioDados.ano,dia_do_ano:calendarioDados.dia,quando:Date.now()}});}
+function resetarCalendarioAoTrocarCampanha(){calendarioCarregadoCampanha=null;calendarioDados={ano:1,dia:1};}
+
+
+// Economia e Jornais pertencem ao sistema Éter & Brasas e ao mundo da
+// campanha ativa. Eles NÃO são abas globais do VTT.
+function campanhaUsaEterBrasas() {
+  const cfg = MAMUS_STATE.system.current?.configuracao || {};
+  return !!MAMUS_STATE.campaign.current && (
+    cfg.tipo === 'eter_brasas' ||
+    /éter\s*&\s*brasas/i.test(MAMUS_STATE.system.current?.nome || '') ||
+    /eter\s*&\s*brasas/i.test(MAMUS_STATE.system.current?.nome || '')
+  );
+}
+
+function garantirAbasEconomiaJornaisVisiveis() {
+  const disponiveis = campanhaUsaEterBrasas();
+  ['economia','jornais','calendario'].forEach(nome => {
+    const btn = document.getElementById(`btn-aba-${nome}`);
+    if (!btn) return;
+    if (disponiveis) {
+      btn.style.setProperty('display', 'inline-flex', 'important');
+      btn.style.setProperty('visibility', 'visible', 'important');
+      btn.style.setProperty('opacity', '1', 'important');
+      btn.style.setProperty('pointer-events', 'auto', 'important');
+      btn.removeAttribute('aria-hidden');
+    } else {
+      btn.style.setProperty('display', 'none', 'important');
+      btn.style.setProperty('visibility', 'hidden', 'important');
+      btn.style.setProperty('opacity', '0', 'important');
+      btn.style.setProperty('pointer-events', 'none', 'important');
+      btn.setAttribute('aria-hidden', 'true');
+      btn.classList.remove('ativo');
+    }
+  });
+
+  const btnNoct = document.getElementById('btn-aba-noctavell');
+  const disponivelNoct = Boolean(MAMUS_STATE.campaign.current && MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell');
+  if (btnNoct) {
+    if (disponivelNoct) {
+      btnNoct.style.setProperty('display','inline-flex','important'); btnNoct.style.setProperty('visibility','visible','important'); btnNoct.style.setProperty('opacity','1','important'); btnNoct.style.setProperty('pointer-events','auto','important'); btnNoct.removeAttribute('aria-hidden');
+    } else {
+      btnNoct.style.setProperty('display','none','important'); btnNoct.style.setProperty('visibility','hidden','important'); btnNoct.style.setProperty('opacity','0','important'); btnNoct.style.setProperty('pointer-events','none','important'); btnNoct.setAttribute('aria-hidden','true'); btnNoct.classList.remove('ativo');
+    }
+  }
+  if (!disponiveis && (MAMUS_STATE.ui.currentTab === 'economia' || MAMUS_STATE.ui.currentTab === 'jornais' || MAMUS_STATE.ui.currentTab === 'calendario')) mudarAba('ficha');
+  if (!disponivelNoct && MAMUS_STATE.ui.currentTab === 'noctavell') mudarAba('ficha');
+}
+
+
+// --- CENTRAL NOCTAVELL ---
+const NOCTAVELL_FACES = {
+  1:['⚖️ Equilíbrio','Sucesso parcial com custo.'],2:['🔥 Ruptura','Sucesso forte, mas com tensão ou risco oculto.'],
+  3:['🌑 Silêncio','Falha; nada acontece ou o efeito se anula.'],4:['🔯 Eco','O Véu responde com efeito secundário inesperado.'],
+  5:['🔑 Verdade','Sucesso total com elegância.'],6:['👁️ Olho do Véu','Sucesso crítico + revelação ou conhecimento oculto.']
+};
+function sistemaEhNoctavell(){ return Boolean(MAMUS_STATE.campaign.current && MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell'); }
+function rolarDadoNoctavell(){
+  if(!sistemaEhNoctavell()) return mostrarPopup('🕯️ Selecione uma campanha Noctavell.');
+  const n=1+Math.floor(Math.random()*6), f=NOCTAVELL_FACES[n], el=document.getElementById('noctavell-resultado-dado');
+  if(el) el.innerHTML=`<b>${f[0]}</b><br><span class="texto-vazio">${f[1]}</span>`;
+  try{ supabaseClient?.channel?.('sala-rpg-geral')?.send({type:'broadcast',event:'noctavell_dado',payload:{campanha_id:obterCampanhaIdAtual(),resultado:n,rotulo:f[0]}}); }catch(e){}
+  return n;
+}
+function batidaNoctavell(nome){
+  if(!sistemaEhNoctavell()) return;
+  localStorage.setItem('noctavell_batida_'+obterCampanhaIdAtual(),nome);
+  mostrarPopup('🕯️ Batida atual: '+nome);
+}
+async function carregarTrabalhosNoctavell(){
+  const box=document.getElementById('noctavell-trabalhos-lista'); if(!box||!sistemaEhNoctavell()) return;
+  if(!supabaseClient){box.innerHTML='<p class="texto-vazio">Supabase indisponível.</p>';return;}
+  const {data,error}=await supabaseClient.from('noctavell_trabalhos').select('*').eq('campanha_id',obterCampanhaIdAtual()).order('criado_em',{ascending:false});
+  if(error){box.innerHTML='<p class="texto-vazio">Aplique o SQL Noctavell para ativar o quadro compartilhado.</p>';return;}
+  box.innerHTML=data?.length?data.map(t=>`<div class="item-galeria"><strong>Grau ${escaparHTML(t.grau)} · ${escaparHTML(t.titulo)}</strong><p>${escaparHTML(t.descricao||'')}</p><small>Recompensa: ${escaparHTML(t.recompensa||'—')} · Prazo: ${escaparHTML(t.prazo||'—')}</small><br><small>Status: ${escaparHTML(t.status)}</small></div>`).join(''):'<p class="texto-vazio">Nenhum trabalho disponível.</p>';
+}
+async function novoTrabalhoNoctavell(){
+  if(!ehMestreDaCampanhaAtual()||!sistemaEhNoctavell()) return mostrarPopup('👑 Apenas o Mestre pode criar trabalhos Noctavell.');
+  const titulo=prompt('Título do trabalho'); if(!titulo)return;
+  const grau=prompt('Grau I–V','I')||'I', descricao=prompt('Descrição')||'', recompensa=prompt('Recompensa')||'', penalidade=prompt('Penalidade por quebra/falha')||'', prazo=prompt('Prazo')||'';
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {error}=await supabaseClient.from('noctavell_trabalhos').insert({campanha_id:obterCampanhaIdAtual(),titulo,grau,descricao,recompensa,penalidade,prazo,criado_por:session?.user?.id});
+  if(error)return mostrarPopup('❌ Quadro Noctavell não configurado: '+error.message);
+  mostrarPopup('📜 Trabalho criado.'); carregarTrabalhosNoctavell();
+}
+
+// --- SESSÕES E DIÁRIO ---
+function sessaoEhEditavel(){
+  return Boolean(MAMUS_STATE.session.current?.status === 'aberta' && MAMUS_STATE.campaign.current?.status !== 'encerrada');
+}
+
+function nomeUsuarioAtual(){
+  return document.getElementById('user-nick-display')?.innerText?.trim() || 'Jogador';
+}
+
+function atualizarStatusSessaoUI(){
+  const aberta = MAMUS_STATE.session.current?.status === 'aberta';
+  const labelDiario = document.getElementById('status-diario-sessao');
+  const labelMestre = document.getElementById('status-sessao-mestre');
+  const labelSessao = document.getElementById('diario-sessao-label');
+  const statusTexto = aberta ? `🎬 Sessão ${MAMUS_STATE.session.current.numero} aberta` : (MAMUS_STATE.session.current ? `📕 Sessão ${MAMUS_STATE.session.current.numero} encerrada` : 'Sem sessão aberta');
+  if(labelDiario){ labelDiario.textContent=statusTexto; labelDiario.classList.toggle('status-sessao-aberta', aberta); labelDiario.classList.toggle('status-sessao-encerrada', !!MAMUS_STATE.session.current && !aberta); }
+  if(labelMestre){ labelMestre.textContent=statusTexto; labelMestre.classList.toggle('status-sessao-aberta', aberta); labelMestre.classList.toggle('status-sessao-encerrada', !!MAMUS_STATE.session.current && !aberta); }
+  if(labelSessao) labelSessao.textContent=MAMUS_STATE.session.current ? `Sessão ${MAMUS_STATE.session.current.numero} · ${MAMUS_STATE.session.current.status === 'aberta' ? 'em andamento' : 'encerrada'}` : 'Nenhuma sessão selecionada';
+}
+
+async function carregarSessaoAtual(){
+  if(!supabaseClient || !obterCampanhaIdAtual()) { MAMUS_STATE.session.current=null; atualizarStatusSessaoUI(); return null; }
+  const {data,error}=await supabaseClient.from('sessoes_campanha').select('*').eq('campanha_id',obterCampanhaIdAtual()).eq('status','aberta').order('numero',{ascending:false}).limit(1).maybeSingle();
+  for(const x of data||[]){
+    const target=box.querySelector(`[data-diario-id="${x.id}"]`); if(!target) continue;
+    for(const im of (Array.isArray(x.imagens)?x.imagens:[])){ const r=im.storage_path?await supabaseClient.storage.from('sessao-notas').createSignedUrl(im.storage_path,3600):{data:{signedUrl:im.url||''}}; if(r.data?.signedUrl){const el=document.createElement('img');el.src=r.data.signedUrl;el.alt=im.nome||'Imagem do diário';el.loading='lazy';target.appendChild(el);} }
+  }
+}
+
+async function abrirDetalhesSessao(sessaoId){
+  if(!ehMestreDaCampanhaAtual()||!supabaseClient) return;
+  const box=document.getElementById('painel-detalhes-sessao'); if(!box) return;
+  box.style.display='block'; box.innerHTML='<div class="estado-galeria">Carregando registros...</div>';
+  const {data:diarios,error:e1}=await supabaseClient.from('sessao_diarios').select('*,sessoes_campanha(numero,nome)').eq('sessao_id',sessaoId).order('atualizado_em',{ascending:false});
+  const {data:rolagens,error:e2}=await supabaseClient.from('sessao_rolagens').select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
+  if(e1||e2){box.innerHTML='<div class="estado-galeria">Não foi possível carregar os registros desta sessão.</div>';return;}
+  const sess=sessoesCampanha.find(x=>x.id===sessaoId)||MAMUS_STATE.session.current;
+  let html=`<div class="sessao-controle"><div><h3>📖 Sessão ${Number(sess?.numero)||'—'} · ${escaparHTML(sess?.nome||'')}</h3><p>${diarios?.length||0} diário(s) · ${rolagens?.length||0} rolagem(ns)</p></div><button type="button" class="btn-secundario" onclick="document.getElementById('painel-detalhes-sessao').style.display='none'">Fechar</button></div>`;
+  html+=`<details class="sessao-detalhe" open><summary>🎲 Rolagens da sessão (${rolagens?.length||0})</summary>`;
+  html+=rolagens?.length?rolagens.map(r=>`<div class="diario-registro"><div class="diario-registro-meta">${escaparHTML(r.nick||'Jogador')} · ${r.criado_em?new Date(r.criado_em).toLocaleString('pt-BR'):''}</div><strong>${escaparHTML(r.descricao||'Rolagem')}</strong><div class="diario-registro-conteudo">${escaparHTML(r.resultado||'')}</div></div>`).join(''):'<p class="estado-galeria">Nenhuma rolagem registrada.</p>';
+  html+='</details><details class="sessao-detalhe" open><summary>📔 Diários dos jogadores (${diarios?.length||0})</summary>';
+  html+=diarios?.length?diarios.map(d=>`<article class="diario-registro"><h4>📔 ${escaparHTML(d.titulo||'Registro')} — ${escaparHTML(d.autor_nick||'Jogador')}</h4><div class="diario-registro-meta">Salvo em ${d.atualizado_em?new Date(d.atualizado_em).toLocaleString('pt-BR'):''}</div><div class="diario-registro-conteudo">${escaparHTML(d.conteudo||'')}</div><div class="diario-registro-imagens" data-master-diario="${d.id}"></div></article>`).join(''):'<p class="estado-galeria">Nenhum diário salvo nesta sessão.</p>';
+  html+='</details>'; box.innerHTML=html;
+  for(const d of diarios||[]){ const target=box.querySelector(`[data-master-diario="${d.id}"]`); if(!target)continue; for(const im of (Array.isArray(d.imagens)?d.imagens:[])){const r=im.storage_path?await supabaseClient.storage.from('sessao-notas').createSignedUrl(im.storage_path,3600):{data:{signedUrl:im.url||''}};if(r.data?.signedUrl){const el=document.createElement('img');el.src=r.data.signedUrl;el.alt=im.nome||'Imagem do diário';el.loading='lazy';target.appendChild(el);}} }
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// --- BIBLIOTECA DE GUIAS DO RPG ---
+const GUIAS_RPG = {
+  legado: [
+    {titulo:'⚔️ Crônicas de Camelot — Manual completo', arquivo:'guias/oficiais/cronicas-de-camelot-manual-completo.pdf', tipo:'pdf'}
+  ],
+  elarion: [
+    {titulo:'💎 Elarion — PREMISSA — Sistema de Joias e Luvas — Manual completo', arquivo:'guias/oficiais/PREMISSA.pdf', tipo:'pdf'}
+  ],
+  world_trigger: [
+    {titulo:'📖 Guia do Agente — RPG de Trion — Manual completo', arquivo:'guias/oficiais/world-trigger-guia-do-agente-completo.pdf', tipo:'pdf'}
+  ],
+  eter_brasas: [
+    {titulo:'🔥 Éter & Brasas — Guia completo', arquivo:'guias/oficiais/eter-brasas-guia-jogador-2026.pdf', tipo:'pdf'}
+  ],
+  noctavell: [
+    {titulo:'🕯️ Noctavell — Manual completo', arquivo:'guias/oficiais/noctavell-manual-completo.pdf', tipo:'pdf'}
+  ],
+  olimpia_pangeia: [
+    {titulo:'🌌 Olímpia / Pangeia — Guia completo', arquivo:'guias/oficiais/olimpia-pangeia-guia-completo.pdf', tipo:'pdf'},
+    {titulo:'📄 Olímpia / Pangeia — Documento original', arquivo:'guias/oficiais/olimpia-pangeia-guia-completo.docx', tipo:'doc'}
+  ],
+  sobreviventes_fronteira: [
+    {titulo:'🌀 Sobreviventes da Fronteira — Manual completo', arquivo:'guias/oficiais/sobreviventes-da-fronteira-manual-completo.pdf', tipo:'pdf'}
+  ],
+  noites_em_tokyo: [
+    {titulo:'🌃 Noites em Tokyo — Guia completo', arquivo:'https://mrlepre.github.io/Noites-em-Tokyo/', tipo:'html', externo:true}
+  ]
+};
+function tipoSistemaParaGuias(){
+  const tipo=MAMUS_STATE.system.current?.configuracao?.tipo; if(tipo&&GUIAS_RPG[tipo])return tipo;
+  const nome=(MAMUS_STATE.system.current?.nome||'').toLowerCase();
+  if(/noites\s+em\s+tokyo/.test(nome))return'noites_em_tokyo'; if(/world\s*trigger|trion/.test(nome))return'world_trigger'; if(/éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome))return'eter_brasas'; if(/noctavell/.test(nome))return'noctavell'; if(/olímpia|olimpia|pangeia/.test(nome))return'olimpia_pangeia'; if(/sobreviventes\s+da\s+fronteira/.test(nome))return'sobreviventes_fronteira'; if(/elarion/.test(nome))return'elarion'; if(/camelot/.test(nome))return'legado'; return null;
+}
+function garantirAbaGuiasVisivel(){
+  const btn=document.getElementById('btn-aba-guias');
+  if(!btn)return;
+  // A aba pertence à campanha, não ao resultado momentâneo da resolução do sistema.
+  // Mantê-la visível enquanto houver campanha evita sumiços por corrida de carregamento,
+  // cache antigo ou sistema sem `configuracao.tipo` (o carregador faz fallback pelo nome).
+  const ok=Boolean(MAMUS_STATE.campaign.current);
+  btn.style.setProperty('display',ok?'flex':'none','important');
+  btn.style.setProperty('visibility',ok?'visible':'hidden','important');
+  btn.style.setProperty('opacity',ok?'1':'0','important');
+  btn.style.setProperty('pointer-events',ok?'auto':'none','important');
+  btn.setAttribute('aria-hidden',ok?'false':'true');
+  if(!ok)btn.classList.remove('ativo');
+  if(!ok&&MAMUS_STATE.ui.currentTab==='guias')mudarAba('ficha');
+  // Recalcula o grupo depois de alterar a visibilidade para não deixar o grupo MUNDO
+  // preso no estado `grupo-vazio` de antes da campanha ser selecionada.
+  requestAnimationFrame(()=>atualizarGruposNavegacao());
+}
+function carregarGuiasRPG(){const lista=document.getElementById('guias-lista'),sub=document.getElementById('guias-subtitulo');if(!lista)return;const guias=GUIAS_RPG[tipoSistemaParaGuias()]||[];if(sub)sub.innerHTML=guias.length?`Materiais disponíveis para <strong>${escaparHTML(MAMUS_STATE.system.current?.nome||'Sistema RPG')}</strong>.`:'Nenhum guia cadastrado para este sistema.';lista.innerHTML=guias.length?guias.map((g,i)=>`<article class="guia-card"><div class="guia-card-icone">${g.tipo==='pdf'?'📕':g.tipo==='txt'?'📄':'📖'}</div><div class="guia-card-corpo"><h3>${escaparHTML(g.titulo)}</h3><p>${g.tipo==='pdf'?'Manual original em PDF':g.tipo==='txt'?'Material de referência rápido':'Guia integrado para leitura na mesa'}</p><button type="button" class="btn-acao" data-guia-index="${i}">Ler guia</button></div></article>`).join(''):'<div class="estado-galeria">Nenhum guia cadastrado para este sistema.</div>';lista.querySelectorAll('[data-guia-index]').forEach(b=>b.addEventListener('click',()=>abrirLeitorGuia(guias[Number(b.dataset.guiaIndex)])));}
+function abrirLeitorGuia(g){if(!g)return;const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),titulo=document.getElementById('guia-leitor-titulo'),link=document.getElementById('guia-abrir-original');if(!leitor||!frame)return;frame.src=g.arquivo;if(titulo)titulo.textContent=g.titulo;if(link)link.href=g.arquivo;leitor.style.display='block';const lista=document.getElementById('guias-lista');if(lista)lista.style.display='none';leitor.scrollIntoView({behavior:'smooth',block:'start'});}
+function fecharLeitorGuia(){const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),lista=document.getElementById('guias-lista');if(frame)frame.src='about:blank';if(leitor)leitor.style.display='none';if(lista)lista.style.display='grid';}
+
+// --- NAVEGAÇÃO / SHELL DA APLICAÇÃO ---
+function aplicarEstadoSidebar(recolhida, persistir = true) {
+  const shell = document.getElementById('app-shell');
+  const sidebar = document.getElementById('sidebar-navegacao');
+  const botao = document.getElementById('btn-recolher-sidebar');
+  if (!shell || !sidebar || !botao) return;
+
+  const usarRecolhida = !!recolhida && window.innerWidth > 900;
+  shell.classList.toggle('sidebar-recolhida', usarRecolhida);
+  sidebar.classList.toggle('recolhida', usarRecolhida);
+
+  botao.setAttribute('aria-expanded', String(!usarRecolhida));
+  botao.setAttribute('aria-label', usarRecolhida ? 'Expandir menu lateral' : 'Recolher menu lateral');
+  botao.title = usarRecolhida ? 'Expandir menu lateral' : 'Recolher menu lateral';
+  botao.textContent = usarRecolhida ? '›' : '‹';
+
+  sidebar.querySelectorAll('.abas-navegacao button[data-nav-group-item]').forEach(btn => {
+    const label = btn.querySelector('span:nth-child(2)')?.textContent?.trim();
+    if (label) btn.title = usarRecolhida ? label : '';
+  });
+
+  if (persistir) {
+
+function atualizarGruposNavegacao() {
+  document.querySelectorAll('.nav-grupo').forEach(grupo => {
+    const botoes = [...grupo.querySelectorAll('button[data-nav-group-item]')];
+    if (!botoes.length) return;
+    const visivel = botoes.some(btn => {
+      const st = getComputedStyle(btn);
+      return st.display !== 'none' && st.visibility !== 'hidden' && btn.offsetParent !== null;
+    });
+    grupo.classList.toggle('grupo-vazio', !visivel);
+  });
+}
+
+function atualizarNavegacaoMobile() {
+  atualizarGruposNavegacao();
+}
+
+window.addEventListener('resize', prepararSidebarResponsiva);
+window.addEventListener('resize', () => garantirAbaGuiasVisivel());
+
+// --- CENTRAL DA CAMPANHA ---
+function escaparTextoCentral(valor) {
+  return escaparHTML(valor ?? '');
+}
+
+function centralFormatarData() {
+  if (!MAMUS_STATE.campaign.current) return { titulo: '—', detalhe: 'Selecione uma campanha' };
+  try {
+    if (typeof sistemaEhEterBrasas === 'function' && sistemaEhEterBrasas() && typeof nomeDataCalendario === 'function') {
+      const data = nomeDataCalendario(calendarioDados.ano, calendarioDados.dia);
+      return { titulo: data.titulo, detalhe: data.detalhe };
+    }
+  } catch (err) {}
+  return { titulo: `Ano ${centralAnoGenerico()}`, detalhe: MAMUS_STATE.system.current?.nome || 'Sistema ativo' };
+}
+
+function centralAnoGenerico() {
+  const possivel = Number(MAMUS_STATE.campaign.current?.ano_atual ?? MAMUS_STATE.campaign.current?.ano ?? 1);
+  return Number.isFinite(possivel) && possivel > 0 ? possivel : 1;
+}
+
+const CENTRAL_DASHBOARDS = {
+  legado: {
+    titulo: 'Crônicas de Camelot',
+    descricao: 'Mesa medieval, personagens, mapa e recursos da campanha.',
+    badge: '⚔️ Camelot',
+    widgets: [
+      {icon:'🛡️', titulo:'Minha Ficha', texto:'Personagem, atributos e evolução.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mesa Tática', texto:'Mapa, grid, tokens e HP.', aba:'mapa'},
+      {icon:'🎲', titulo:'Rolagens', texto:'Dados e histórico da mesa.', aba:'rolagens'}
+    ]
+  },
+  elarion: {
+    titulo: 'Elarion — Sistema de Joias e Luvas',
+    descricao: 'A Central destaca os elementos mais importantes de Elarion: Joias, Luvas e progressão.',
+    badge: '💎 Elarion',
+    widgets: [
+      {icon:'💎', titulo:'Joias', texto:'Consulte a ficha para acompanhar suas Joias e combinações.', aba:'ficha'},
+      {icon:'🧤', titulo:'Luvas', texto:'Acompanhe sua fase e evolução da Luva.', aba:'ficha'},
+      {icon:'📈', titulo:'Progressão', texto:'Evolução do personagem e melhorias.', aba:'ficha'},
+      {icon:'📖', titulo:'Bestiário', texto:'Criaturas disponíveis e criação de tokens.', aba:'bestiario'}
+    ]
+  },
+  eter_brasas: {
+    titulo: 'Éter & Brasas',
+    descricao: 'O painel do sistema reúne calendário, economia e notícias do mundo.',
+    badge: '🔥 Éter & Brasas',
+    widgets: [
+      {icon:'🗓️', titulo:'Calendário', texto:'Ano, dia atual e marcos do calendário.', aba:'calendario'},
+      {icon:'💰', titulo:'Economia', texto:'Mercados, mercadorias e eventos econômicos.', aba:'economia'},
+      {icon:'📰', titulo:'Jornais', texto:'Últimos acontecimentos publicados na campanha.', aba:'jornais'},
+      {icon:'📖', titulo:'Bestiário', texto:'Criaturas e criação de tokens.', aba:'bestiario'}
+    ]
+  },
+  noctavell: {
+    titulo: 'Noctavell',
+    descricao: 'O painel destaca Véu, Pactos e recursos sobrenaturais do personagem.',
+    badge: '🕯️ Noctavell',
+    widgets: [
+      {icon:'🕯️', titulo:'Véu', texto:'Acessar os módulos sobrenaturais da campanha.', aba:'noctavell'},
+      {icon:'👁️', titulo:'Entidades', texto:'Consultar as entidades e informações do Véu.', aba:'noctavell'},
+      {icon:'🧠', titulo:'Sanidade', texto:'Acompanhar a situação do personagem.', aba:'ficha'},
+      {icon:'🤝', titulo:'Pactos', texto:'Gerenciar informações do personagem.', aba:'noctavell'}
+    ]
+  },
+  olimpia_pangeia: {
+    titulo: 'Olímpia — Pangeia',
+    descricao: 'A Central prioriza personagem, progressão e exploração do mundo.',
+    badge: '🌌 Pangeia',
+    widgets: [
+      {icon:'⚔️', titulo:'Classe', texto:'Abrir ficha e acompanhar classe e estilo.', aba:'ficha'},
+      {icon:'💎', titulo:'Jóias', texto:'Abrir ficha para acompanhar as Joias.', aba:'ficha'},
+      {icon:'📈', titulo:'Progressão', texto:'Nível, XP e evolução do personagem.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mapa', texto:'Explorar a mesa e o mundo da campanha.', aba:'mapa'}
+    ]
+  },
+  sobreviventes_fronteira: {
+    titulo: 'Sobreviventes da Fronteira',
+    descricao: 'Painel focado em progressão, órbitas, Moldagem de Mana e sobrevivência.',
+    badge: '🌀 Sobreviventes',
+    widgets: [
+      {icon:'🧱', titulo:'Linhagem', texto:'Grau de Linhagem e progressão.', aba:'ficha'},
+      {icon:'🌌', titulo:'Órbitas', texto:'Acompanhar a construção do personagem.', aba:'ficha'},
+      {icon:'✨', titulo:'Moldagem de Mana', texto:'Consultar e evoluir técnicas.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mapa', texto:'Abrir a mesa tática.', aba:'mapa'}
+    ]
+  },
+  noites_em_tokyo: {
+    titulo: 'Noites em Tokyo',
+    descricao: 'A Central destaca RC, Kagune, Fome, CCG e progressão.',
+    badge: '🌃 Noites em Tokyo',
+    widgets: [
+      {icon:'🩸', titulo:'RC / Kakuja', texto:'Abrir ficha para acompanhar RC e evolução.', aba:'ficha'},
+      {icon:'👁️', titulo:'Kagune', texto:'Consultar a biologia e o combate.', aba:'ficha'},
+      {icon:'🍖', titulo:'Fome', texto:'Acompanhar Fome e recursos do personagem.', aba:'ficha'},
+      {icon:'🏢', titulo:'CCG', texto:'Arquétipos, Quinques e informações do sistema.', aba:'ficha'}
+    ]
+  },
+  world_trigger: {
+    titulo: 'World Trigger RPG',
+    descricao: 'Painel tático para agentes, Squads, Trion e leitura do campo.',
+    badge: '⚡ World Trigger',
+    widgets: [
+      {icon:'👥', titulo:'Squad', texto:'Seu Squad, composição e NPCs.', aba:'ficha'},
+      {icon:'📡', titulo:'Radar', texto:'Abrir a mesa para visualizar os sinais detectados.', aba:'mapa'},
+      {icon:'🛡️', titulo:'Triggers', texto:'Consultar seu equipamento e configurações.', aba:'ficha'},
+      {icon:'🗺️', titulo:'Mapa Tático', texto:'Campo de batalha, cobertura e FOV.', aba:'mapa'}
+    ]
+  }
+};
+
+function centralTipoSistema() {
+  const tipo = String(MAMUS_STATE.system.current?.configuracao?.tipo || '').toLowerCase();
+  if (CENTRAL_DASHBOARDS[tipo]) return tipo;
+  const nome = String(MAMUS_STATE.system.current?.nome || '').toLowerCase();
+  if (/world\s*trigger|trion/.test(nome)) return 'world_trigger';
+  if (/noites\s+em\s+tokyo/.test(nome)) return 'noites_em_tokyo';
+  if (/éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome)) return 'eter_brasas';
+  if (/noctavell/.test(nome)) return 'noctavell';
+  if (/olímpia|olimpia|pangeia/.test(nome)) return 'olimpia_pangeia';
+  if (/sobreviventes\s+da\s+fronteira/.test(nome)) return 'sobreviventes_fronteira';
+  if (/elarion/.test(nome)) return 'elarion';
+  if (/camelot/.test(nome)) return 'legado';
+  return 'generico';
+}
+
+function centralDashboardGenerico() {
+  const cfg = MAMUS_STATE.system.current?.configuracao || {};
+  const dados = Array.isArray(cfg.dados) ? cfg.dados : [];
+  const atributos = Array.isArray(cfg.atributos) ? cfg.atributos : [];
+  const recursos = Array.isArray(cfg.recursos) ? cfg.recursos : [];
+  const pericias = Array.isArray(cfg.pericias) ? cfg.pericias : [];
+  return {
+    titulo: MAMUS_STATE.system.current?.nome || 'Sistema RPG',
+    descricao: 'Painel gerado automaticamente a partir da configuração deste sistema.',
+    badge: '⚙️ Sistema',
+    widgets: [
+      {icon:'👤', titulo:'Personagem', texto:`${atributos.length || 0} atributos · ${recursos.length || 0} recursos`, aba:'ficha'},
+      {icon:'🎲', titulo:'Dados', texto:`${dados.length || 0} tipos de dado configurados`, aba:'rolagens'},
+      {icon:'📚', titulo:'Perícias', texto:`${pericias.length || 0} perícias cadastradas`, aba:'ficha'},
+      {icon:'🗺️', titulo:'Mesa', texto:'Mapa, tokens e sessão da campanha.', aba:'mapa'}
+    ]
+  };
+}
+
+function renderizarDashboardSistema() {
+  const card = document.getElementById('central-sistema-card');
+  const titulo = document.getElementById('central-sistema-titulo');
+  const descricao = document.getElementById('central-sistema-descricao');
+  const badge = document.getElementById('central-sistema-badge');
+  const widgets = document.getElementById('central-sistema-widgets');
+  if (!card || !widgets) return;
+
+  if (!MAMUS_STATE.campaign.current || !MAMUS_STATE.system.current) {
+    card.style.display = 'none';
+    widgets.innerHTML = '';
+    return;
+  }
+
+  const tipo = centralTipoSistema();
+  const dashboard = CENTRAL_DASHBOARDS[tipo] || centralDashboardGenerico();
+  card.style.display = 'block';
+  if (titulo) titulo.textContent = dashboard.titulo;
+  if (descricao) descricao.textContent = dashboard.descricao;
+  if (badge) badge.textContent = dashboard.badge;
+
+  widgets.innerHTML = dashboard.widgets.map(w => `
+    <button type="button" class="central-sistema-widget" onclick="mudarAba('${escaparHTML(w.aba)}')">
+      <span class="central-sistema-widget-icone">${w.icon}</span>
+      <span class="central-sistema-widget-corpo"><strong>${escaparTextoCentral(w.titulo)}</strong><small>${escaparTextoCentral(w.texto)}</small></span>
+      <span class="central-sistema-widget-seta">›</span>
+    </button>
+  `).join('');
+}
+
+function atualizarAcoesCentral() {
+  const temCampanha = Boolean(MAMUS_STATE.campaign.current);
+  ['central-btn-mapa','central-btn-rolagem'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = !temCampanha;
+    btn.title = temCampanha ? '' : 'Selecione uma campanha primeiro';
+  });
+  const botaoCalendario = document.querySelector('.central-lista-atalhos button[onclick*="calendario"]');
+  const botaoBestiario = document.querySelector('.central-lista-atalhos button[onclick*="bestiario"]');
+  if (botaoCalendario) {
+    const disponivel = typeof sistemaEhEterBrasas === 'function' && sistemaEhEterBrasas();
+    botaoCalendario.disabled = !disponivel;
+    botaoCalendario.style.opacity = disponivel ? '' : '.45';
+  }
+  if (botaoBestiario) {
+    const disponivel = Boolean(MAMUS_STATE.system.current && tipoSistemaComBestiario(MAMUS_STATE.system.current));
+    botaoBestiario.disabled = !disponivel;
+    botaoBestiario.style.opacity = disponivel ? '' : '.45';
+  }
+}
+
+function tipoSistemaComBestiario(sistema) {
+  const tipo = String(sistema?.configuracao?.tipo || '').toLowerCase();
+  const nome = String(sistema?.nome || '').toLowerCase();
+  return ['elarion','eter_brasas'].includes(tipo) || /elarion|éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome);
+}
+
+
+function centralLerValor(obj, caminhos) {
+  for (const caminho of caminhos) {
+    const partes = caminho.split('.');
+    let atual = obj;
+    for (const parte of partes) {
+      if (atual == null) { atual = undefined; break; }
+      atual = atual[parte];
+    }
+    if (atual !== undefined && atual !== null && String(atual).trim() !== '') return atual;
+  }
+  return null;
+}
+
+function centralEncontrarRecurso(dados) {
+  const atual = centralLerValor(dados, [
+    'vida_atual','pv_atual','hp_atual','vida.atual','pv.atual','hp.atual',
+    'combate.vida.atual','combate.pv.atual','combate.hp.atual','recursos.pv.atual'
+  ]);
+  const max = centralLerValor(dados, [
+    'vida_max','pv_max','hp_max','vida.max','pv.max','hp.max',
+    'combate.vida.max','combate.pv.max','combate.hp.max','recursos.pv.max'
+  ]);
+  if (atual === null && max === null) return null;
+  const a = Number(atual); const m = Number(max);
+  return { atual: Number.isFinite(a) ? a : atual, max: Number.isFinite(m) && m > 0 ? m : max };
+}
+
