@@ -21,16 +21,16 @@ let mapaModoImersivo = false;
 let audioContext = null;
 let ultimoTokenInteragido = null;
 let abasCarregadas = { mapa: false, galeria: false };
-let abaAtual = 'inicio';
+
 let centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
 let fichaUltimoSalvamento = null;
 let fichaStatusCentral = 'sem_ficha';
 let pastaGaleriaAtual = 'Todas';
 let dadosGaleriaAtual = [];
 let imagemMestreAberta = false;
-let campanhaAtual = null;
-let sistemaAtual = null;
-let campanhasDisponiveis = [];
+
+
+
 
 // MaMuSBoaRD possui dois níveis de autoridade:
 // 1) Mestre global (administrador da plataforma).
@@ -50,13 +50,13 @@ function ehMestreGlobal() {
 }
 
 function ehMestreDaCampanhaAtual() {
-  return ehMestreGlobal() || !!(window.usuarioAtualId && campanhaAtual?.mestre_id === window.usuarioAtualId);
+  return ehMestreGlobal() || !!(window.usuarioAtualId && MAMUS_STATE.campaign.current?.mestre_id === window.usuarioAtualId);
 }
 
 function usuarioEhMestreDaCampanha(campanhaId) {
   if (!window.usuarioAtualId || !campanhaId) return false;
   if (ehMestreGlobal()) return true;
-  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   return !!(campanha && campanha.mestre_id === window.usuarioAtualId);
 }
 
@@ -71,7 +71,7 @@ function atualizarInterfacePapelCampanha() {
   if (painelUploadMestre) painelUploadMestre.style.display = ehMestre ? 'block' : 'none';
   if (painelGaleriaMestre) painelGaleriaMestre.style.display = ehMestre ? 'block' : 'none';
 }
-let sessaoAtual = null;
+
 let diarioAtual = null;
 let diarioImagens = [];
 let sessoesCampanha = [];
@@ -98,7 +98,7 @@ let worldTriggerEstado = {
 };
 
 function obterConfiguracaoSistemaAtualWT() {
-  const bruto = sistemaAtual?.configuracao;
+  const bruto = MAMUS_STATE.system.current?.configuracao;
   if (!bruto) return null;
   if (typeof bruto === 'object') return bruto;
   if (typeof bruto === 'string') {
@@ -109,7 +109,7 @@ function obterConfiguracaoSistemaAtualWT() {
 
 function worldTriggerAtivo() {
   const cfg = obterConfiguracaoSistemaAtualWT();
-  const nome = String(sistemaAtual?.nome || '').trim().toLowerCase();
+  const nome = String(MAMUS_STATE.system.current?.nome || '').trim().toLowerCase();
 
   // Compatibilidade com sistemas salvos antes da implantação do campo
   // configuracao.tipo. O nome do sistema continua sendo uma identificação
@@ -898,7 +898,7 @@ try {
 }
 
 function obterAbaAtualRealtime() {
-  return abaAtual;
+  return MAMUS_STATE.ui.currentTab;
 }
 
 function aplicarMapaTaticoRecebidoRealtime(mapaTatico) {
@@ -947,7 +947,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   atualizarVisibilidadeAcoesRapidas();
   atualizarGruposNavegacao();
   renderizarCentralCampanha();
-  setInterval(() => { if (abaAtual === 'inicio' && campanhaAtual) renderizarAtividadesCentral(); }, 60000);
+  setInterval(() => { if (MAMUS_STATE.ui.currentTab === 'inicio' && MAMUS_STATE.campaign.current) renderizarAtividadesCentral(); }, 60000);
 
   if (!supabaseClient && window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -979,11 +979,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Se a aba restaurada precisar de dados remotos, carregue somente agora
       // que o Supabase está pronto.
-      if (abaAtual === 'mapa' && !abasCarregadas.mapa) {
+      if (MAMUS_STATE.ui.currentTab === 'mapa' && !abasCarregadas.mapa) {
         abasCarregadas.mapa = true;
         carregarMapaAtual();
       }
-      if (abaAtual === 'galeria' && !abasCarregadas.galeria) {
+      if (MAMUS_STATE.ui.currentTab === 'galeria' && !abasCarregadas.galeria) {
         abasCarregadas.galeria = true;
         carregarGaleria();
       }
@@ -1125,16 +1125,16 @@ async function fazerLogout() {
   fichaStatusCentral = 'sem_ficha';
   limparEstadoPersistenciaTokens();
   document.getElementById('vtt-tokens-camada')?.replaceChildren();
-  campanhaAtual = null;
-  sistemaAtual = null;
+  MAMUS_STATE.campaign.current = null;
+  MAMUS_STATE.system.current = null;
   atualizarInterfacePapelCampanha();
   aplicarTemaMesa();
   atualizarVisibilidadeAcoesRapidas();
   centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
   renderizarCentralCampanha();
   garantirAbasEconomiaJornaisVisiveis();
-  campanhasDisponiveis = [];
-  sessaoAtual = null; diarioAtual = null; diarioImagens = []; sessoesCampanha = [];
+  MAMUS_STATE.campaign.available = [];
+  MAMUS_STATE.session.current = null; diarioAtual = null; diarioImagens = []; sessoesCampanha = [];
   atualizarContextoCampanha();
   renderizarListaCampanhas();
   const containerFicha = document.getElementById('container-ficha-carregada');
@@ -1300,7 +1300,7 @@ function acaoRapida(tipo) {
   if (tipo === 'nota') {
     mudarAba('diario');
     focarElementoDepoisDoAba('diario-conteudo');
-    mostrarPopup(sessaoAtual ? '📔 Diário da sessão aberto.' : '🕯️ O diário ficará pronto quando o Mestre iniciar uma sessão.');
+    mostrarPopup(MAMUS_STATE.session.current ? '📔 Diário da sessão aberto.' : '🕯️ O diário ficará pronto quando o Mestre iniciar uma sessão.');
     return;
   }
 
@@ -1349,8 +1349,8 @@ document.addEventListener('pointerdown', (event) => {
 function atualizarVisibilidadeAcoesRapidas() {
   const container = document.getElementById('acoes-rapidas');
   if (!container) return;
-  container.style.display = campanhaAtual ? 'flex' : 'none';
-  if (!campanhaAtual) fecharAcoesRapidas();
+  container.style.display = MAMUS_STATE.campaign.current ? 'flex' : 'none';
+  if (!MAMUS_STATE.campaign.current) fecharAcoesRapidas();
 }
 
 function hexParaRgb(valor) {
@@ -1361,7 +1361,7 @@ function hexParaRgb(valor) {
 }
 
 function obterTemaSistemaParaMesa() {
-  const cfg = sistemaAtual?.configuracao || {};
+  const cfg = MAMUS_STATE.system.current?.configuracao || {};
   const tipo = String(cfg.tipo || '').toLowerCase();
   const temasPorTipo = {
     elarion: { corPrimaria:'#c89b3c', corSecundaria:'#9d6cff', corFundo:'#09080b', corPainel:'#17121b', corPainel2:'#0e0b12' },
@@ -1391,8 +1391,8 @@ function aplicarTemaMesa() {
   const body = document.body;
   if (!root || !body) return;
 
-  const tema = campanhaAtual ? obterTemaSistemaParaMesa() : null;
-  if (!campanhaAtual || !tema) {
+  const tema = MAMUS_STATE.campaign.current ? obterTemaSistemaParaMesa() : null;
+  if (!MAMUS_STATE.campaign.current || !tema) {
     body.classList.remove('tema-sistema');
     body.classList.add('tema-base');
     body.removeAttribute('data-sistema-tipo');
@@ -1416,7 +1416,7 @@ function aplicarTemaMesa() {
   const primaria = valida(tema.corPrimaria) ? tema.corPrimaria : '#c5a059';
   const secundaria = valida(tema.corSecundaria) ? tema.corSecundaria : primaria;
   const fundo = valida(tema.corFundo) ? tema.corFundo : '#090a0f';
-  const tipo = String(sistemaAtual?.configuracao?.tipo || '').toLowerCase();
+  const tipo = String(MAMUS_STATE.system.current?.configuracao?.tipo || '').toLowerCase();
   const painel = valida(tema.corPainel) ? tema.corPainel : '#151821';
   const painel2 = valida(tema.corPainel2) ? tema.corPainel2 : painel;
   const rgb = hexParaRgb(primaria);
@@ -1445,7 +1445,7 @@ function atualizarMetaThemeColor(cor) {
 function atualizarContextoCampanha() {
   const avisoEncerrada = document.getElementById('aviso-campanha-encerrada');
   if (avisoEncerrada) {
-    if (campanhaAtual?.status === 'encerrada') {
+    if (MAMUS_STATE.campaign.current?.status === 'encerrada') {
       avisoEncerrada.style.display = 'block';
       avisoEncerrada.innerHTML = `<strong>🔒 Campanha encerrada</strong><br>Esta mesa está em modo de consulta. Os dados foram preservados e não devem ser alterados.`;
     } else {
@@ -1461,7 +1461,7 @@ function atualizarContextoCampanha() {
 
   renderizarDashboardSistema();
 
-  if (!campanhaAtual) {
+  if (!MAMUS_STATE.campaign.current) {
     contexto.style.display = 'none';
     nome.textContent = 'Nenhuma campanha';
     sistema.textContent = 'Sistema: —';
@@ -1470,18 +1470,18 @@ function atualizarContextoCampanha() {
   }
 
   contexto.style.display = 'flex';
-  nome.textContent = campanhaAtual.nome || 'Campanha';
-  sistema.textContent = `Sistema: ${sistemaAtual?.nome || 'Não definido'}`;
+  nome.textContent = MAMUS_STATE.campaign.current.nome || 'Campanha';
+  sistema.textContent = `Sistema: ${MAMUS_STATE.system.current?.nome || 'Não definido'}`;
   if (papel) papel.textContent = `Papel: ${ehMestreDaCampanhaAtual() ? 'Mestre' : 'Jogador'}`;
 }
 
 function obterCampanhaIdAtual() {
-  return campanhaAtual?.id || null;
+  return MAMUS_STATE.campaign.current?.id || null;
 }
 
 function salvarCampanhaLocalmente() {
   try {
-    if (campanhaAtual?.id) localStorage.setItem('cronicas_camelot_campanha', campanhaAtual.id);
+    if (MAMUS_STATE.campaign.current?.id) localStorage.setItem('cronicas_camelot_campanha', MAMUS_STATE.campaign.current.id);
     else localStorage.removeItem('cronicas_camelot_campanha');
   } catch (err) {}
 }
@@ -1518,14 +1518,14 @@ async function carregarCampanhasDoUsuario(userId) {
     .eq('user_id', userId);
   if (membrosError) console.warn('Vínculos de campanha indisponíveis:', membrosError);
 
-  campanhasDisponiveis = data || [];
+  MAMUS_STATE.campaign.available = data || [];
   window.pedidosCampanhaUsuario = pedidos || [];
   window.campanhasMembroIds = new Set((meusMembros || []).map(m => m.campanha_id));
 
   // Não entra automaticamente na primeira campanha. O jogador precisa
   // escolher uma campanha ou solicitar acesso.
-  campanhaAtual = null;
-  sistemaAtual = null;
+  MAMUS_STATE.campaign.current = null;
+  MAMUS_STATE.system.current = null;
   atualizarContextoCampanha();
   atualizarVisibilidadeAcoesRapidas();
   renderizarListaCampanhas();
@@ -1572,7 +1572,7 @@ async function resolverPedidoCampanha(pedidoId, aceitar) {
 
 async function usuarioEhMembroDaCampanha(campanhaId) {
   if (!supabaseClient || !campanhaId || !window.usuarioAtualId) return false;
-  const campanhaConhecida = campanhasDisponiveis.find(c => c.id === campanhaId);
+  const campanhaConhecida = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   if (ehMestreGlobal() || campanhaConhecida?.mestre_id === window.usuarioAtualId) return true;
   const { data, error } = await supabaseClient.rpc('eh_membro_da_campanha', { p_campanha: campanhaId });
   if (error) { console.warn('Não foi possível verificar membro da campanha:', error); return false; }
@@ -1607,7 +1607,7 @@ async function solicitarEntradaCampanha(campanhaId) {
 }
 
 async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
-  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   if (!campanha) return;
 
   const membro = ehMestreGlobal() || await usuarioEhMembroDaCampanha(campanhaId);
@@ -1615,28 +1615,28 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
     return solicitarEntradaCampanha(campanhaId);
   }
 
-  campanhaAtual = campanha;
+  MAMUS_STATE.campaign.current = campanha;
   atualizarVisibilidadeAcoesRapidas();
 
   // O relacionamento campanhas -> sistemas pode estar nulo/órfão em bancos
   // que foram migrados antes da criação do sistema legado de Camelot.
   // Resolva o sistema novamente pelo ID antes de abrir qualquer ficha.
-  sistemaAtual = campanha.sistemas || null; inicializarBestiarioElarion();
+  MAMUS_STATE.system.current = campanha.sistemas || null; inicializarBestiarioElarion();
   carregarEstadoWorldTrigger();
-  if (!sistemaAtual && campanha.sistema_id && supabaseClient) {
+  if (!MAMUS_STATE.system.current && campanha.sistema_id && supabaseClient) {
     const { data: sistemaPorId } = await supabaseClient
       .from('sistemas')
       .select('id,nome,descricao,configuracao')
       .eq('id', campanha.sistema_id)
       .maybeSingle();
-    sistemaAtual = sistemaPorId || null;
+    MAMUS_STATE.system.current = sistemaPorId || null;
   }
 
   // Compatibilidade: a campanha original de Crônicas de Camelot usa a ficha
   // legada. Se o vínculo do sistema estiver quebrado, ainda abrimos a ficha
   // correta em vez de mandar o jogador para ficha-generica com sistema vazio.
-  if (!sistemaAtual && /crônicas? de camelot/i.test(campanha.nome || '')) {
-    sistemaAtual = {
+  if (!MAMUS_STATE.system.current && /crônicas? de camelot/i.test(campanha.nome || '')) {
+    MAMUS_STATE.system.current = {
       id: campanha.sistema_id || 'legacy-camelot',
       nome: 'Crônicas de Camelot',
       descricao: 'Sistema original de Crônicas de Camelot.',
@@ -1652,7 +1652,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   salvarCampanhaLocalmente();
   atualizarContextoCampanha();
-  centralResumoCache = { campanhaId: campanhaAtual.id, atualizadoEm: 0, dados: null };
+  centralResumoCache = { campanhaId: MAMUS_STATE.campaign.current.id, atualizadoEm: 0, dados: null };
   renderizarCentralCampanha();
   atualizarGruposNavegacao();
   renderizarListaCampanhas();
@@ -1665,7 +1665,7 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   abasCarregadas = { mapa: false, galeria: false };
   dadosGaleriaAtual = [];
   pastaGaleriaAtual = 'Todas';
-  sessaoAtual = null;
+  MAMUS_STATE.session.current = null;
   diarioAtual = null;
   diarioImagens = [];
   sessoesCampanha = [];
@@ -1679,14 +1679,14 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session?.user) carregarFichaDoUsuario(session.user.id);
-  if (abaAtual === 'economia') carregarEconomiaAtual(true);
-  if (abaAtual === 'jornais') carregarJornaisAtual(true);
+  if (MAMUS_STATE.ui.currentTab === 'economia') carregarEconomiaAtual(true);
+  if (MAMUS_STATE.ui.currentTab === 'jornais') carregarJornaisAtual(true);
 
-  if (abaAtual === 'mapa') { abasCarregadas.mapa = true; carregarMapaAtual(); }
-  if (abaAtual === 'galeria') { abasCarregadas.galeria = true; carregarGaleria(true); }
-  if (abaAtual === 'diario') carregarDiarioAtual();
-  if (abaAtual === 'sessoes' && ehMestreDaCampanhaAtual()) carregarSessoesCampanha();
-  if (abaAtual === 'inicio') carregarResumoCentralCampanha(true);
+  if (MAMUS_STATE.ui.currentTab === 'mapa') { abasCarregadas.mapa = true; carregarMapaAtual(); }
+  if (MAMUS_STATE.ui.currentTab === 'galeria') { abasCarregadas.galeria = true; carregarGaleria(true); }
+  if (MAMUS_STATE.ui.currentTab === 'diario') carregarDiarioAtual();
+  if (MAMUS_STATE.ui.currentTab === 'sessoes' && ehMestreDaCampanhaAtual()) carregarSessoesCampanha();
+  if (MAMUS_STATE.ui.currentTab === 'inicio') carregarResumoCentralCampanha(true);
 
   atualizarInterfacePapelCampanha();
   if (ehMestreDaCampanhaAtual()) carregarPedidosComoMestre();
@@ -1696,23 +1696,23 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
 function renderizarListaCampanhas() {
   const lista = document.getElementById('lista-campanhas');
   if (!lista) return;
-  if (!campanhasDisponiveis.length) {
+  if (!MAMUS_STATE.campaign.available.length) {
     lista.innerHTML = '<div class="estado-galeria">Nenhuma campanha disponível.</div>';
     return;
   }
 
   lista.innerHTML = '';
-  campanhasDisponiveis.forEach(campanha => {
+  MAMUS_STATE.campaign.available.forEach(campanha => {
     const card = document.createElement('article');
-    card.className = 'card-campanha' + (campanhaAtual?.id === campanha.id ? ' ativa' : '');
+    card.className = 'card-campanha' + (MAMUS_STATE.campaign.current?.id === campanha.id ? ' ativa' : '');
     const sistema = campanha.sistemas?.nome || 'Sistema não definido';
     const encerrada = campanha.status === 'encerrada';
     const pedido = obterPedidoCampanha(campanha.id);
     const souMestre = ehMestreGlobal() || campanha.mestre_id === window.usuarioAtualId;
-    const membroConhecido = campanhaAtual?.id === campanha.id || souMestre || (window.campanhasMembroIds instanceof Set && window.campanhasMembroIds.has(campanha.id));
+    const membroConhecido = MAMUS_STATE.campaign.current?.id === campanha.id || souMestre || (window.campanhasMembroIds instanceof Set && window.campanhasMembroIds.has(campanha.id));
     let acao = 'solicitarEntradaCampanha';
     let textoBotao = '📨 Solicitar entrada';
-    if (campanhaAtual?.id === campanha.id) { acao = 'selecionarCampanha'; textoBotao = encerrada ? '✓ Visualizando encerrada' : '✓ Campanha ativa'; }
+    if (MAMUS_STATE.campaign.current?.id === campanha.id) { acao = 'selecionarCampanha'; textoBotao = encerrada ? '✓ Visualizando encerrada' : '✓ Campanha ativa'; }
     else if (pedido) { acao = null; textoBotao = '⏳ Pedido pendente'; }
     else if (membroConhecido) { acao = 'selecionarCampanha'; textoBotao = encerrada ? 'Visualizar campanha encerrada' : 'Entrar nesta campanha'; }
     card.innerHTML = `
@@ -1758,7 +1758,7 @@ async function prepararFormularioCampanha(campanha=null) {
     if(error){ select.innerHTML='<option value="">Erro ao carregar sistemas</option>'; console.error(error); }
     else {
       select.innerHTML=(data||[]).map(s=>`<option value="${s.id}">${escaparHTML(s.nome)}${s.configuracao?.tipo==='legado'?' — legado':''}</option>`).join('');
-      const preferido=campanha?.sistema_id || sistemaAtual?.id || (data||[]).find(s=>s.configuracao?.tipo==='legado')?.id || data?.[0]?.id;
+      const preferido=campanha?.sistema_id || MAMUS_STATE.system.current?.id || (data||[]).find(s=>s.configuracao?.tipo==='legado')?.id || data?.[0]?.id;
       if(preferido) select.value=preferido;
     }
   }
@@ -1767,7 +1767,7 @@ async function prepararFormularioCampanha(campanha=null) {
 async function abrirEditarCampanha(campanhaId, evento) {
   if (evento) { evento.preventDefault(); evento.stopPropagation(); }
   if (!usuarioEhMestreDaCampanha(campanhaId)) return;
-  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   if (!campanha) return mostrarPopup('❌ Campanha não encontrada.');
   await prepararFormularioCampanha(campanha);
   document.getElementById('painel-nova-campanha')?.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -1787,11 +1787,11 @@ async function salvarEdicaoCampanha(campanhaId) {
     .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
     .single();
   if (error) return mostrarPopup('❌ Não foi possível salvar a campanha: ' + error.message);
-  const idx = campanhasDisponiveis.findIndex(c => c.id === campanhaId);
-  if (idx >= 0) campanhasDisponiveis[idx] = data;
-  if (campanhaAtual?.id === campanhaId) {
-    campanhaAtual = data;
-    sistemaAtual = data.sistemas || null;
+  const idx = MAMUS_STATE.campaign.available.findIndex(c => c.id === campanhaId);
+  if (idx >= 0) MAMUS_STATE.campaign.available[idx] = data;
+  if (MAMUS_STATE.campaign.current?.id === campanhaId) {
+    MAMUS_STATE.campaign.current = data;
+    MAMUS_STATE.system.current = data.sistemas || null;
     aplicarTemaMesa();
     atualizarContextoCampanha();
     garantirAbasEconomiaJornaisVisiveis();
@@ -1805,7 +1805,7 @@ async function salvarEdicaoCampanha(campanhaId) {
 async function encerrarCampanha(campanhaId, evento) {
   if (evento) { evento.preventDefault(); evento.stopPropagation(); }
   if (!usuarioEhMestreDaCampanha(campanhaId) || !supabaseClient || !campanhaId) return;
-  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   if (!campanha) return mostrarPopup('❌ Campanha não encontrada.');
   if (campanha.status === 'encerrada') return mostrarPopup('🔒 Esta campanha já está encerrada.');
   const ok = confirm(`Encerrar a campanha "${String(campanha.nome || '').replace(/"/g, '\\"')}"?\n\nEla NÃO será apagada. Personagens, mapas, imagens e registros serão preservados, mas a campanha ficará bloqueada para alterações.`);
@@ -1816,10 +1816,10 @@ async function encerrarCampanha(campanhaId, evento) {
     .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
     .single();
   if (error) return mostrarPopup('❌ Não foi possível encerrar a campanha: ' + error.message);
-  const idx = campanhasDisponiveis.findIndex(c => c.id === campanhaId);
-  if (idx >= 0) campanhasDisponiveis[idx] = data;
-  if (campanhaAtual?.id === campanhaId) {
-    campanhaAtual = data;
+  const idx = MAMUS_STATE.campaign.available.findIndex(c => c.id === campanhaId);
+  if (idx >= 0) MAMUS_STATE.campaign.available[idx] = data;
+  if (MAMUS_STATE.campaign.current?.id === campanhaId) {
+    MAMUS_STATE.campaign.current = data;
     atualizarContextoCampanha();
     atualizarVisibilidadeAcoesRapidas();
   }
@@ -1830,7 +1830,7 @@ async function encerrarCampanha(campanhaId, evento) {
 async function apagarCampanha(campanhaId, evento) {
   if (evento) { evento.preventDefault(); evento.stopPropagation(); }
   if (!usuarioEhMestreDaCampanha(campanhaId) || !supabaseClient || !campanhaId) return;
-  const campanha = campanhasDisponiveis.find(c => c.id === campanhaId);
+  const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   if (!campanha) return mostrarPopup('❌ Campanha não encontrada.');
   const aviso = campanha.status === 'encerrada'
     ? `APAGAR PERMANENTEMENTE a campanha "${campanha.nome}"?\n\nTodos os personagens, mapas, imagens, pedidos e demais dados vinculados serão removidos. Esta ação não pode ser desfeita.`
@@ -1870,9 +1870,9 @@ async function apagarCampanha(campanhaId, evento) {
   const { error } = await supabaseClient.from('campanhas').delete().eq('id', campanhaId);
   if (error) return mostrarPopup('❌ Não foi possível apagar a campanha: ' + error.message);
 
-  if (campanhaAtual?.id === campanhaId) {
-    campanhaAtual = null;
-    sistemaAtual = null;
+  if (MAMUS_STATE.campaign.current?.id === campanhaId) {
+    MAMUS_STATE.campaign.current = null;
+    MAMUS_STATE.system.current = null;
     salvarCampanhaLocalmente();
     atualizarContextoCampanha();
     atualizarVisibilidadeAcoesRapidas();
@@ -1880,7 +1880,7 @@ async function apagarCampanha(campanhaId, evento) {
     dadosFichaAtual = null;
     abasCarregadas = { mapa:false, galeria:false };
   }
-  campanhasDisponiveis = campanhasDisponiveis.filter(c => c.id !== campanhaId);
+  MAMUS_STATE.campaign.available = MAMUS_STATE.campaign.available.filter(c => c.id !== campanhaId);
   renderizarListaCampanhas();
   mostrarPopup(`🗑️ Campanha "${campanha.nome}" apagada permanentemente.`);
 }
@@ -1921,7 +1921,7 @@ async function criarNovaCampanha() {
   const { error: membroError } = await supabaseClient.from('campanha_membros').insert({ campanha_id: data.id, user_id: session.user.id, papel: 'mestre' });
   if (membroError) console.warn('Campanha criada, mas vínculo do Mestre falhou:', membroError.message);
 
-  campanhasDisponiveis.push(data);
+  MAMUS_STATE.campaign.available.push(data);
   await selecionarCampanha(data.id);
   fecharNovaCampanha();
   if (nomeInput) nomeInput.value = '';
@@ -2461,7 +2461,7 @@ function abrirFichaGenericaNoIframe(iframe, src, sistema, dados = null, modo = '
 
 async function abrirFichaDoSistema(id){
   const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
-  sistemaAtual=data;
+  MAMUS_STATE.system.current=data;
   const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
   if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noites_em_tokyo') abrirFichaGenericaNoIframe(iframe, 'ficha-noites-em-tokyo.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
   const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
@@ -2473,21 +2473,21 @@ async function abrirFichaDoSistema(id){
 let bestiarioElarion = [];
 let bestiarioInicializado = false;
 function bestiarioEhElarionAtivo(){
-  const tipo=sistemaAtual?.configuracao?.tipo;
+  const tipo=MAMUS_STATE.system.current?.configuracao?.tipo;
   return tipo==='elarion'||tipo==='eter_brasas';
 }
 function bestiarioArquivoAtivo(){
-  const tipo=sistemaAtual?.configuracao?.tipo;
+  const tipo=MAMUS_STATE.system.current?.configuracao?.tipo;
   if(tipo==='eter_brasas') return 'bestiario-eter-brasas.json';
   if(tipo==='elarion') return 'bestiario-elarion.json';
-  return sistemaAtual?.configuracao?.bestiario_arquivo || 'bestiario-elarion.json';
+  return MAMUS_STATE.system.current?.configuracao?.bestiario_arquivo || 'bestiario-elarion.json';
 }
 async function inicializarBestiarioElarion(){
   const btn=document.getElementById('btn-aba-bestiario');
   if(!btn) return;
   const ativo=bestiarioEhElarionAtivo();
   btn.style.display = usuarioAutenticado() && ativo ? '' : 'none';
-  const eb=sistemaAtual?.configuracao?.tipo==='eter_brasas';
+  const eb=MAMUS_STATE.system.current?.configuracao?.tipo==='eter_brasas';
   if(eb) bestiarioInicializado=false;
   if(!bestiarioEhElarionAtivo() || !usuarioAutenticado()) return;
   if(bestiarioInicializado) return;
@@ -2496,7 +2496,7 @@ async function inicializarBestiarioElarion(){
     if(!r.ok) throw new Error('HTTP '+r.status);
     bestiarioElarion=await r.json();
     bestiarioInicializado=true;
-    const eb=sistemaAtual?.configuracao?.tipo==='eter_brasas';
+    const eb=MAMUS_STATE.system.current?.configuracao?.tipo==='eter_brasas';
     const ey=document.getElementById('bestiario-eyebrow'), tt=document.getElementById('bestiario-titulo-aba'), stx=document.getElementById('bestiario-subtexto-aba');
     if(ey)ey.textContent=eb?'🔥 Éter & Brasas':'💎 Elarion';
     if(tt)tt.textContent=eb?'📖 Bestiário — Éter & Brasas':'📖 Bestiário — Elarion';
@@ -2555,7 +2555,7 @@ let economiaCarregadaCampanha = null;
 let jornaisCarregadosCampanha = null;
 
 function sistemaEterBrasasAtivo() {
-  return sistemaAtual?.configuracao?.tipo === 'eter_brasas' || /éter\s*&\s*brasas/i.test(sistemaAtual?.nome || '');
+  return MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' || /éter\s*&\s*brasas/i.test(MAMUS_STATE.system.current?.nome || '');
 }
 function moedaEterPorCodigo(codigo) {
   const lista = [
@@ -2672,7 +2672,7 @@ const CALENDARIO_BRASAS = {
 let calendarioDados = { ano:1, dia:1 };
 let calendarioCarregadoCampanha = null;
 
-function sistemaEhEterBrasas(){ return Boolean(campanhaAtual && sistemaAtual?.configuracao?.tipo === 'eter_brasas'); }
+function sistemaEhEterBrasas(){ return Boolean(MAMUS_STATE.campaign.current && MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas'); }
 function diaNormalCalendario(dia){ return Number(dia) >= 1 && Number(dia) <= 365 && !CALENDARIO_BRASAS.festivais[Number(dia)]; }
 function obterInfoDiaCalendario(dia){
   dia = Math.max(1, Math.min(365, Number(dia)||1));
@@ -2758,11 +2758,11 @@ function resetarCalendarioAoTrocarCampanha(){calendarioCarregadoCampanha=null;ca
 // Economia e Jornais pertencem ao sistema Éter & Brasas e ao mundo da
 // campanha ativa. Eles NÃO são abas globais do VTT.
 function campanhaUsaEterBrasas() {
-  const cfg = sistemaAtual?.configuracao || {};
-  return !!campanhaAtual && (
+  const cfg = MAMUS_STATE.system.current?.configuracao || {};
+  return !!MAMUS_STATE.campaign.current && (
     cfg.tipo === 'eter_brasas' ||
-    /éter\s*&\s*brasas/i.test(sistemaAtual?.nome || '') ||
-    /eter\s*&\s*brasas/i.test(sistemaAtual?.nome || '')
+    /éter\s*&\s*brasas/i.test(MAMUS_STATE.system.current?.nome || '') ||
+    /eter\s*&\s*brasas/i.test(MAMUS_STATE.system.current?.nome || '')
   );
 }
 
@@ -2788,7 +2788,7 @@ function garantirAbasEconomiaJornaisVisiveis() {
   });
 
   const btnNoct = document.getElementById('btn-aba-noctavell');
-  const disponivelNoct = Boolean(campanhaAtual && sistemaAtual?.configuracao?.tipo === 'noctavell');
+  const disponivelNoct = Boolean(MAMUS_STATE.campaign.current && MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell');
   if (btnNoct) {
     if (disponivelNoct) {
       btnNoct.style.setProperty('display','inline-flex','important'); btnNoct.style.setProperty('visibility','visible','important'); btnNoct.style.setProperty('opacity','1','important'); btnNoct.style.setProperty('pointer-events','auto','important'); btnNoct.removeAttribute('aria-hidden');
@@ -2796,8 +2796,8 @@ function garantirAbasEconomiaJornaisVisiveis() {
       btnNoct.style.setProperty('display','none','important'); btnNoct.style.setProperty('visibility','hidden','important'); btnNoct.style.setProperty('opacity','0','important'); btnNoct.style.setProperty('pointer-events','none','important'); btnNoct.setAttribute('aria-hidden','true'); btnNoct.classList.remove('ativo');
     }
   }
-  if (!disponiveis && (abaAtual === 'economia' || abaAtual === 'jornais' || abaAtual === 'calendario')) mudarAba('ficha');
-  if (!disponivelNoct && abaAtual === 'noctavell') mudarAba('ficha');
+  if (!disponiveis && (MAMUS_STATE.ui.currentTab === 'economia' || MAMUS_STATE.ui.currentTab === 'jornais' || MAMUS_STATE.ui.currentTab === 'calendario')) mudarAba('ficha');
+  if (!disponivelNoct && MAMUS_STATE.ui.currentTab === 'noctavell') mudarAba('ficha');
 }
 
 
@@ -2807,7 +2807,7 @@ const NOCTAVELL_FACES = {
   3:['🌑 Silêncio','Falha; nada acontece ou o efeito se anula.'],4:['🔯 Eco','O Véu responde com efeito secundário inesperado.'],
   5:['🔑 Verdade','Sucesso total com elegância.'],6:['👁️ Olho do Véu','Sucesso crítico + revelação ou conhecimento oculto.']
 };
-function sistemaEhNoctavell(){ return Boolean(campanhaAtual && sistemaAtual?.configuracao?.tipo === 'noctavell'); }
+function sistemaEhNoctavell(){ return Boolean(MAMUS_STATE.campaign.current && MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell'); }
 function rolarDadoNoctavell(){
   if(!sistemaEhNoctavell()) return mostrarPopup('🕯️ Selecione uma campanha Noctavell.');
   const n=1+Math.floor(Math.random()*6), f=NOCTAVELL_FACES[n], el=document.getElementById('noctavell-resultado-dado');
@@ -2839,7 +2839,7 @@ async function novoTrabalhoNoctavell(){
 
 // --- SESSÕES E DIÁRIO ---
 function sessaoEhEditavel(){
-  return Boolean(sessaoAtual?.status === 'aberta' && campanhaAtual?.status !== 'encerrada');
+  return Boolean(MAMUS_STATE.session.current?.status === 'aberta' && MAMUS_STATE.campaign.current?.status !== 'encerrada');
 }
 
 function nomeUsuarioAtual(){
@@ -2847,32 +2847,32 @@ function nomeUsuarioAtual(){
 }
 
 function atualizarStatusSessaoUI(){
-  const aberta = sessaoAtual?.status === 'aberta';
+  const aberta = MAMUS_STATE.session.current?.status === 'aberta';
   const labelDiario = document.getElementById('status-diario-sessao');
   const labelMestre = document.getElementById('status-sessao-mestre');
   const labelSessao = document.getElementById('diario-sessao-label');
-  const statusTexto = aberta ? `🎬 Sessão ${sessaoAtual.numero} aberta` : (sessaoAtual ? `📕 Sessão ${sessaoAtual.numero} encerrada` : 'Sem sessão aberta');
-  if(labelDiario){ labelDiario.textContent=statusTexto; labelDiario.classList.toggle('status-sessao-aberta', aberta); labelDiario.classList.toggle('status-sessao-encerrada', !!sessaoAtual && !aberta); }
-  if(labelMestre){ labelMestre.textContent=statusTexto; labelMestre.classList.toggle('status-sessao-aberta', aberta); labelMestre.classList.toggle('status-sessao-encerrada', !!sessaoAtual && !aberta); }
-  if(labelSessao) labelSessao.textContent=sessaoAtual ? `Sessão ${sessaoAtual.numero} · ${sessaoAtual.status === 'aberta' ? 'em andamento' : 'encerrada'}` : 'Nenhuma sessão selecionada';
+  const statusTexto = aberta ? `🎬 Sessão ${MAMUS_STATE.session.current.numero} aberta` : (MAMUS_STATE.session.current ? `📕 Sessão ${MAMUS_STATE.session.current.numero} encerrada` : 'Sem sessão aberta');
+  if(labelDiario){ labelDiario.textContent=statusTexto; labelDiario.classList.toggle('status-sessao-aberta', aberta); labelDiario.classList.toggle('status-sessao-encerrada', !!MAMUS_STATE.session.current && !aberta); }
+  if(labelMestre){ labelMestre.textContent=statusTexto; labelMestre.classList.toggle('status-sessao-aberta', aberta); labelMestre.classList.toggle('status-sessao-encerrada', !!MAMUS_STATE.session.current && !aberta); }
+  if(labelSessao) labelSessao.textContent=MAMUS_STATE.session.current ? `Sessão ${MAMUS_STATE.session.current.numero} · ${MAMUS_STATE.session.current.status === 'aberta' ? 'em andamento' : 'encerrada'}` : 'Nenhuma sessão selecionada';
 }
 
 async function carregarSessaoAtual(){
-  if(!supabaseClient || !obterCampanhaIdAtual()) { sessaoAtual=null; atualizarStatusSessaoUI(); return null; }
+  if(!supabaseClient || !obterCampanhaIdAtual()) { MAMUS_STATE.session.current=null; atualizarStatusSessaoUI(); return null; }
   const {data,error}=await supabaseClient.from('sessoes_campanha').select('*').eq('campanha_id',obterCampanhaIdAtual()).eq('status','aberta').order('numero',{ascending:false}).limit(1).maybeSingle();
-  if(error){ console.warn('Sessões não configuradas:',error); sessaoAtual=null; atualizarStatusSessaoUI(); return null; }
-  sessaoAtual=data||null;
+  if(error){ console.warn('Sessões não configuradas:',error); MAMUS_STATE.session.current=null; atualizarStatusSessaoUI(); return null; }
+  MAMUS_STATE.session.current=data||null;
   atualizarStatusSessaoUI();
   renderizarControleSessaoMestre();
   atualizarEditorDiarioUI();
-  return sessaoAtual;
+  return MAMUS_STATE.session.current;
 }
 
 async function iniciarSessao(){
   if(!ehMestreDaCampanhaAtual() || !supabaseClient || !obterCampanhaIdAtual()) return mostrarPopup('❌ Apenas o Mestre pode iniciar uma sessão em uma campanha ativa.');
-  if(campanhaAtual?.status==='encerrada') return mostrarPopup('🔒 Esta campanha está encerrada.');
+  if(MAMUS_STATE.campaign.current?.status==='encerrada') return mostrarPopup('🔒 Esta campanha está encerrada.');
   await carregarSessaoAtual();
-  if(sessaoAtual) return mostrarPopup(`🎬 A Sessão ${sessaoAtual.numero} já está aberta.`);
+  if(MAMUS_STATE.session.current) return mostrarPopup(`🎬 A Sessão ${MAMUS_STATE.session.current.numero} já está aberta.`);
   const nome=prompt('🎬 Nome opcional da sessão:', `Sessão ${(sessoesCampanha.length||0)+1}`);
   if(nome===null) return;
   const {data:ultima}=await supabaseClient.from('sessoes_campanha').select('numero').eq('campanha_id',obterCampanhaIdAtual()).order('numero',{ascending:false}).limit(1).maybeSingle();
@@ -2880,34 +2880,34 @@ async function iniciarSessao(){
   const {data:{session}}=await supabaseClient.auth.getSession();
   const {data,error}=await supabaseClient.from('sessoes_campanha').insert({campanha_id:obterCampanhaIdAtual(),numero,nome:nome.trim().slice(0,120)||`Sessão ${numero}`,status:'aberta',iniciada_em:new Date().toISOString(),iniciada_por:session?.user?.id}).select('*').single();
   if(error) return mostrarPopup('❌ Não foi possível iniciar a sessão: '+error.message);
-  sessaoAtual=data; centralAdicionarAtividade('🎬', `Sessão ${numero} iniciada`, data.nome || ''); tocarSom('success'); vibrarPadrao([30,40,30]);
+  MAMUS_STATE.session.current=data; centralAdicionarAtividade('🎬', `Sessão ${numero} iniciada`, data.nome || ''); tocarSom('success'); vibrarPadrao([30,40,30]);
   atualizarStatusSessaoUI(); renderizarControleSessaoMestre(); atualizarEditorDiarioUI();
-  if(abaAtual==='sessoes') carregarSessoesCampanha();
+  if(MAMUS_STATE.ui.currentTab==='sessoes') carregarSessoesCampanha();
   mostrarPopup(`🎬 Sessão ${numero} iniciada! As rolagens e diários agora serão catalogados nela.`);
   if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:data.id,status:'aberta',numero:data.numero,nome:data.nome}});
 }
 
 async function encerrarSessao(){
-  if(!ehMestreDaCampanhaAtual() || !supabaseClient || !sessaoAtual?.id) return;
-  if(!confirm(`Encerrar a Sessão ${sessaoAtual.numero}?\n\nAs rolagens e diários já salvos permanecerão no histórico.`)) return;
-  const {data,error}=await supabaseClient.from('sessoes_campanha').update({status:'encerrada',encerrada_em:new Date().toISOString()}).eq('id',sessaoAtual.id).eq('campanha_id',obterCampanhaIdAtual()).select('*').single();
+  if(!ehMestreDaCampanhaAtual() || !supabaseClient || !MAMUS_STATE.session.current?.id) return;
+  if(!confirm(`Encerrar a Sessão ${MAMUS_STATE.session.current.numero}?\n\nAs rolagens e diários já salvos permanecerão no histórico.`)) return;
+  const {data,error}=await supabaseClient.from('sessoes_campanha').update({status:'encerrada',encerrada_em:new Date().toISOString()}).eq('id',MAMUS_STATE.session.current.id).eq('campanha_id',obterCampanhaIdAtual()).select('*').single();
   if(error) return mostrarPopup('❌ Não foi possível encerrar a sessão: '+error.message);
   const {count:rolagens}=await supabaseClient.from('sessao_rolagens').select('id',{count:'exact',head:true}).eq('sessao_id',data.id);
   const {count:diarios}=await supabaseClient.from('sessao_diarios').select('id',{count:'exact',head:true}).eq('sessao_id',data.id);
   const {data:final}=await supabaseClient.from('sessoes_campanha').update({total_rolagens:rolagens||0,total_diarios:diarios||0}).eq('id',data.id).select('*').single();
-  sessaoAtual=final||data; centralAdicionarAtividade('📕', `Sessão ${sessaoAtual.numero} encerrada`, sessaoAtual.nome || ''); atualizarStatusSessaoUI(); atualizarEditorDiarioUI(); renderizarControleSessaoMestre();
-  if(abaAtual==='sessoes') carregarSessoesCampanha();
-  mostrarPopup(`📕 Sessão ${sessaoAtual.numero} encerrada. ${rolagens||0} rolagens e ${diarios||0} diários catalogados.`);
-  if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:sessaoAtual.id,status:'encerrada',numero:sessaoAtual.numero}});
+  MAMUS_STATE.session.current=final||data; centralAdicionarAtividade('📕', `Sessão ${MAMUS_STATE.session.current.numero} encerrada`, MAMUS_STATE.session.current.nome || ''); atualizarStatusSessaoUI(); atualizarEditorDiarioUI(); renderizarControleSessaoMestre();
+  if(MAMUS_STATE.ui.currentTab==='sessoes') carregarSessoesCampanha();
+  mostrarPopup(`📕 Sessão ${MAMUS_STATE.session.current.numero} encerrada. ${rolagens||0} rolagens e ${diarios||0} diários catalogados.`);
+  if(canalMesa) canalMesa.send({type:'broadcast',event:'sessao_atualizada',payload:{campanha_id:obterCampanhaIdAtual(),sessao_id:MAMUS_STATE.session.current.id,status:'encerrada',numero:MAMUS_STATE.session.current.numero}});
 }
 
 function renderizarControleSessaoMestre(){
   const box=document.getElementById('painel-controle-sessao'); if(!box) return;
   if(!ehMestreDaCampanhaAtual()){box.style.display='none';return;}
   box.style.display='block';
-  if(!campanhaAtual){box.innerHTML='<p>Selecione uma campanha.</p>';return;}
-  if(campanhaAtual.status==='encerrada') { box.innerHTML='<div class="sessao-controle"><div><h3>🔒 Campanha encerrada</h3><p>Não é possível iniciar novas sessões.</p></div></div>'; return; }
-  if(sessaoAtual?.status==='aberta') box.innerHTML=`<div class="sessao-controle"><div><h3>🎬 Sessão ${sessaoAtual.numero} em andamento</h3><p>${escaparHTML(sessaoAtual.nome||'Sessão')} · iniciada em ${new Date(sessaoAtual.iniciada_em).toLocaleString('pt-BR')}</p></div><button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar Sessão</button></div>`;
+  if(!MAMUS_STATE.campaign.current){box.innerHTML='<p>Selecione uma campanha.</p>';return;}
+  if(MAMUS_STATE.campaign.current.status==='encerrada') { box.innerHTML='<div class="sessao-controle"><div><h3>🔒 Campanha encerrada</h3><p>Não é possível iniciar novas sessões.</p></div></div>'; return; }
+  if(MAMUS_STATE.session.current?.status==='aberta') box.innerHTML=`<div class="sessao-controle"><div><h3>🎬 Sessão ${MAMUS_STATE.session.current.numero} em andamento</h3><p>${escaparHTML(MAMUS_STATE.session.current.nome||'Sessão')} · iniciada em ${new Date(MAMUS_STATE.session.current.iniciada_em).toLocaleString('pt-BR')}</p></div><button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar Sessão</button></div>`;
   else box.innerHTML='<div class="sessao-controle"><div><h3>🕯️ A mesa está pronta</h3><p>Inicie uma sessão para começar a registrar automaticamente rolagens e diários.</p></div><button type="button" class="btn-ficha-principal" onclick="iniciarSessao()">🎬 Iniciar Sessão</button></div>';
 }
 
@@ -2919,12 +2919,12 @@ async function carregarSessoesCampanha(){
   if(error){lista.innerHTML='<div class="estado-galeria">Execute o SQL das sessões no Supabase para ativar este módulo.</div>';return;}
   sessoesCampanha=data||[];
   renderizarControleSessaoMestre(); atualizarStatusSessaoUI();
-  lista.innerHTML=sessoesCampanha.length?sessoesCampanha.map(x=>`<article class="card-campanha"><div class="card-campanha-conteudo"><span class="card-campanha-icone">${x.status==='aberta'?'🎬':'📕'}</span><div><h3>Sessão ${Number(x.numero)||0} ${x.status==='aberta'?'<span class="status-campanha">🟢 Aberta</span>':'<span class="status-campanha encerrada">📕 Encerrada</span>'}</h3><p>${escaparHTML(x.nome||`Sessão ${x.numero}`)}</p><span class="card-campanha-meta">Início: ${x.iniciada_em?new Date(x.iniciada_em).toLocaleString('pt-BR'):'—'} · ${x.encerrada_em?'Fim: '+new Date(x.encerrada_em).toLocaleString('pt-BR'):'Em andamento'}</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-selecionar-campanha" onclick="abrirDetalhesSessao('${x.id}')">📖 Ver registros</button>${x.status==='aberta'&&sessaoAtual?.id===x.id?'<button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar</button>':''}</div></article>`).join(''):'<div class="estado-galeria">Nenhuma sessão registrada nesta campanha.</div>';
+  lista.innerHTML=sessoesCampanha.length?sessoesCampanha.map(x=>`<article class="card-campanha"><div class="card-campanha-conteudo"><span class="card-campanha-icone">${x.status==='aberta'?'🎬':'📕'}</span><div><h3>Sessão ${Number(x.numero)||0} ${x.status==='aberta'?'<span class="status-campanha">🟢 Aberta</span>':'<span class="status-campanha encerrada">📕 Encerrada</span>'}</h3><p>${escaparHTML(x.nome||`Sessão ${x.numero}`)}</p><span class="card-campanha-meta">Início: ${x.iniciada_em?new Date(x.iniciada_em).toLocaleString('pt-BR'):'—'} · ${x.encerrada_em?'Fim: '+new Date(x.encerrada_em).toLocaleString('pt-BR'):'Em andamento'}</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-selecionar-campanha" onclick="abrirDetalhesSessao('${x.id}')">📖 Ver registros</button>${x.status==='aberta'&&MAMUS_STATE.session.current?.id===x.id?'<button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar</button>':''}</div></article>`).join(''):'<div class="estado-galeria">Nenhuma sessão registrada nesta campanha.</div>';
 }
 
 async function registrarRolagemNaSessao(descricao,resultado){
-  if(!supabaseClient || !sessaoAtual?.id || sessaoAtual.status!=='aberta') return;
-  const {error}=await supabaseClient.from('sessao_rolagens').insert({sessao_id:sessaoAtual.id,campanha_id:obterCampanhaIdAtual(),user_id:window.usuarioAtualId,nick:nomeUsuarioAtual(),descricao:String(descricao||'').slice(0,500),resultado:String(resultado??'').slice(0,1000)});
+  if(!supabaseClient || !MAMUS_STATE.session.current?.id || MAMUS_STATE.session.current.status!=='aberta') return;
+  const {error}=await supabaseClient.from('sessao_rolagens').insert({sessao_id:MAMUS_STATE.session.current.id,campanha_id:obterCampanhaIdAtual(),user_id:window.usuarioAtualId,nick:nomeUsuarioAtual(),descricao:String(descricao||'').slice(0,500),resultado:String(resultado??'').slice(0,1000)});
   if(error) console.warn('Não foi possível catalogar a rolagem:',error);
 }
 
@@ -2932,17 +2932,17 @@ function atualizarEditorDiarioUI(){
   const sem=document.getElementById('diario-sem-sessao'), editor=document.getElementById('painel-diario-editor');
   if(!sem||!editor) return;
   const editavel=sessaoEhEditavel();
-  sem.style.display=sessaoAtual?'none':'block';
-  editor.style.display=sessaoAtual?'block':'none';
+  sem.style.display=MAMUS_STATE.session.current?'none':'block';
+  editor.style.display=MAMUS_STATE.session.current?'block':'none';
   ['diario-titulo','diario-conteudo','diario-arquivos'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!editavel;});
   const btn=editor.querySelector('.btn-ficha-principal'); if(btn) btn.disabled=!editavel;
 }
 
 async function carregarDiarioAtual(){
   if(!supabaseClient || !obterCampanhaIdAtual()) return atualizarEditorDiarioUI();
-  if(!sessaoAtual) await carregarSessaoAtual();
-  if(!sessaoAtual){ atualizarEditorDiarioUI(); carregarHistoricoDiarioPessoal(); return; }
-  const {data,error}=await supabaseClient.from('sessao_diarios').select('*').eq('sessao_id',sessaoAtual.id).eq('user_id',window.usuarioAtualId).maybeSingle();
+  if(!MAMUS_STATE.session.current) await carregarSessaoAtual();
+  if(!MAMUS_STATE.session.current){ atualizarEditorDiarioUI(); carregarHistoricoDiarioPessoal(); return; }
+  const {data,error}=await supabaseClient.from('sessao_diarios').select('*').eq('sessao_id',MAMUS_STATE.session.current.id).eq('user_id',window.usuarioAtualId).maybeSingle();
   if(error){ console.warn('Diário indisponível:',error); mostrarPopup('❌ Execute o SQL das sessões para ativar o diário.'); return; }
   diarioAtual=data||null; diarioImagens=Array.isArray(data?.imagens)?data.imagens:[];
   const titulo=document.getElementById('diario-titulo'), conteudo=document.getElementById('diario-conteudo');
@@ -2956,7 +2956,7 @@ async function salvarDiarioAtual(mostrarFeedback=true){
   const titulo=document.getElementById('diario-titulo')?.value.trim()||'Registro da sessão';
   const conteudo=document.getElementById('diario-conteudo')?.value||'';
   const {data:{session}}=await supabaseClient.auth.getSession();
-  const payload={sessao_id:sessaoAtual.id,campanha_id:obterCampanhaIdAtual(),user_id:session?.user?.id,autor_nick:nomeUsuarioAtual(),titulo:titulo.slice(0,120),conteudo:conteudo.slice(0,30000),imagens:diarioImagens,atualizado_em:new Date().toISOString()};
+  const payload={sessao_id:MAMUS_STATE.session.current.id,campanha_id:obterCampanhaIdAtual(),user_id:session?.user?.id,autor_nick:nomeUsuarioAtual(),titulo:titulo.slice(0,120),conteudo:conteudo.slice(0,30000),imagens:diarioImagens,atualizado_em:new Date().toISOString()};
   const {data,error}=await supabaseClient.from('sessao_diarios').upsert(payload,{onConflict:'sessao_id,user_id'}).select('*').single();
   if(error) return mostrarPopup('❌ Não foi possível salvar o diário: '+error.message);
   diarioAtual=data;
@@ -2973,7 +2973,7 @@ async function adicionarImagensDiario(event){
     if(!file.type.startsWith('image/')) continue;
     if(file.size>8*1024*1024){ mostrarPopup(`⚠️ ${file.name} ignorada: máximo de 8 MB.`); continue; }
     const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
-    const path=`${obterCampanhaIdAtual()}/${sessaoAtual.id}/${window.usuarioAtualId}/${crypto.randomUUID?.()||Date.now()+Math.random().toString(16).slice(2)}.${ext}`;
+    const path=`${obterCampanhaIdAtual()}/${MAMUS_STATE.session.current.id}/${window.usuarioAtualId}/${crypto.randomUUID?.()||Date.now()+Math.random().toString(16).slice(2)}.${ext}`;
     const {error}=await supabaseClient.storage.from('sessao-notas').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
     if(error){console.warn(error);mostrarPopup('❌ Falha ao enviar '+file.name);continue;}
     diarioImagens.push({storage_path:path,nome:file.name.slice(0,160),tipo:file.type,tamanho:file.size});
@@ -3022,7 +3022,7 @@ async function abrirDetalhesSessao(sessaoId){
   const {data:diarios,error:e1}=await supabaseClient.from('sessao_diarios').select('*,sessoes_campanha(numero,nome)').eq('sessao_id',sessaoId).order('atualizado_em',{ascending:false});
   const {data:rolagens,error:e2}=await supabaseClient.from('sessao_rolagens').select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
   if(e1||e2){box.innerHTML='<div class="estado-galeria">Não foi possível carregar os registros desta sessão.</div>';return;}
-  const sess=sessoesCampanha.find(x=>x.id===sessaoId)||sessaoAtual;
+  const sess=sessoesCampanha.find(x=>x.id===sessaoId)||MAMUS_STATE.session.current;
   let html=`<div class="sessao-controle"><div><h3>📖 Sessão ${Number(sess?.numero)||'—'} · ${escaparHTML(sess?.nome||'')}</h3><p>${diarios?.length||0} diário(s) · ${rolagens?.length||0} rolagem(ns)</p></div><button type="button" class="btn-secundario" onclick="document.getElementById('painel-detalhes-sessao').style.display='none'">Fechar</button></div>`;
   html+=`<details class="sessao-detalhe" open><summary>🎲 Rolagens da sessão (${rolagens?.length||0})</summary>`;
   html+=rolagens?.length?rolagens.map(r=>`<div class="diario-registro"><div class="diario-registro-meta">${escaparHTML(r.nick||'Jogador')} · ${r.criado_em?new Date(r.criado_em).toLocaleString('pt-BR'):''}</div><strong>${escaparHTML(r.descricao||'Rolagem')}</strong><div class="diario-registro-conteudo">${escaparHTML(r.resultado||'')}</div></div>`).join(''):'<p class="estado-galeria">Nenhuma rolagem registrada.</p>';
@@ -3062,8 +3062,8 @@ const GUIAS_RPG = {
   ]
 };
 function tipoSistemaParaGuias(){
-  const tipo=sistemaAtual?.configuracao?.tipo; if(tipo&&GUIAS_RPG[tipo])return tipo;
-  const nome=(sistemaAtual?.nome||'').toLowerCase();
+  const tipo=MAMUS_STATE.system.current?.configuracao?.tipo; if(tipo&&GUIAS_RPG[tipo])return tipo;
+  const nome=(MAMUS_STATE.system.current?.nome||'').toLowerCase();
   if(/noites\s+em\s+tokyo/.test(nome))return'noites_em_tokyo'; if(/world\s*trigger|trion/.test(nome))return'world_trigger'; if(/éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome))return'eter_brasas'; if(/noctavell/.test(nome))return'noctavell'; if(/olímpia|olimpia|pangeia/.test(nome))return'olimpia_pangeia'; if(/sobreviventes\s+da\s+fronteira/.test(nome))return'sobreviventes_fronteira'; if(/elarion/.test(nome))return'elarion'; if(/camelot/.test(nome))return'legado'; return null;
 }
 function garantirAbaGuiasVisivel(){
@@ -3072,19 +3072,19 @@ function garantirAbaGuiasVisivel(){
   // A aba pertence à campanha, não ao resultado momentâneo da resolução do sistema.
   // Mantê-la visível enquanto houver campanha evita sumiços por corrida de carregamento,
   // cache antigo ou sistema sem `configuracao.tipo` (o carregador faz fallback pelo nome).
-  const ok=Boolean(campanhaAtual);
+  const ok=Boolean(MAMUS_STATE.campaign.current);
   btn.style.setProperty('display',ok?'flex':'none','important');
   btn.style.setProperty('visibility',ok?'visible':'hidden','important');
   btn.style.setProperty('opacity',ok?'1':'0','important');
   btn.style.setProperty('pointer-events',ok?'auto':'none','important');
   btn.setAttribute('aria-hidden',ok?'false':'true');
   if(!ok)btn.classList.remove('ativo');
-  if(!ok&&abaAtual==='guias')mudarAba('ficha');
+  if(!ok&&MAMUS_STATE.ui.currentTab==='guias')mudarAba('ficha');
   // Recalcula o grupo depois de alterar a visibilidade para não deixar o grupo MUNDO
   // preso no estado `grupo-vazio` de antes da campanha ser selecionada.
   requestAnimationFrame(()=>atualizarGruposNavegacao());
 }
-function carregarGuiasRPG(){const lista=document.getElementById('guias-lista'),sub=document.getElementById('guias-subtitulo');if(!lista)return;const guias=GUIAS_RPG[tipoSistemaParaGuias()]||[];if(sub)sub.innerHTML=guias.length?`Materiais disponíveis para <strong>${escaparHTML(sistemaAtual?.nome||'Sistema RPG')}</strong>.`:'Nenhum guia cadastrado para este sistema.';lista.innerHTML=guias.length?guias.map((g,i)=>`<article class="guia-card"><div class="guia-card-icone">${g.tipo==='pdf'?'📕':g.tipo==='txt'?'📄':'📖'}</div><div class="guia-card-corpo"><h3>${escaparHTML(g.titulo)}</h3><p>${g.tipo==='pdf'?'Manual original em PDF':g.tipo==='txt'?'Material de referência rápido':'Guia integrado para leitura na mesa'}</p><button type="button" class="btn-acao" data-guia-index="${i}">Ler guia</button></div></article>`).join(''):'<div class="estado-galeria">Nenhum guia cadastrado para este sistema.</div>';lista.querySelectorAll('[data-guia-index]').forEach(b=>b.addEventListener('click',()=>abrirLeitorGuia(guias[Number(b.dataset.guiaIndex)])));}
+function carregarGuiasRPG(){const lista=document.getElementById('guias-lista'),sub=document.getElementById('guias-subtitulo');if(!lista)return;const guias=GUIAS_RPG[tipoSistemaParaGuias()]||[];if(sub)sub.innerHTML=guias.length?`Materiais disponíveis para <strong>${escaparHTML(MAMUS_STATE.system.current?.nome||'Sistema RPG')}</strong>.`:'Nenhum guia cadastrado para este sistema.';lista.innerHTML=guias.length?guias.map((g,i)=>`<article class="guia-card"><div class="guia-card-icone">${g.tipo==='pdf'?'📕':g.tipo==='txt'?'📄':'📖'}</div><div class="guia-card-corpo"><h3>${escaparHTML(g.titulo)}</h3><p>${g.tipo==='pdf'?'Manual original em PDF':g.tipo==='txt'?'Material de referência rápido':'Guia integrado para leitura na mesa'}</p><button type="button" class="btn-acao" data-guia-index="${i}">Ler guia</button></div></article>`).join(''):'<div class="estado-galeria">Nenhum guia cadastrado para este sistema.</div>';lista.querySelectorAll('[data-guia-index]').forEach(b=>b.addEventListener('click',()=>abrirLeitorGuia(guias[Number(b.dataset.guiaIndex)])));}
 function abrirLeitorGuia(g){if(!g)return;const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),titulo=document.getElementById('guia-leitor-titulo'),link=document.getElementById('guia-abrir-original');if(!leitor||!frame)return;frame.src=g.arquivo;if(titulo)titulo.textContent=g.titulo;if(link)link.href=g.arquivo;leitor.style.display='block';const lista=document.getElementById('guias-lista');if(lista)lista.style.display='none';leitor.scrollIntoView({behavior:'smooth',block:'start'});}
 function fecharLeitorGuia(){const leitor=document.getElementById('guia-leitor'),frame=document.getElementById('guia-iframe'),lista=document.getElementById('guias-lista');if(frame)frame.src='about:blank';if(leitor)leitor.style.display='none';if(lista)lista.style.display='grid';}
 
@@ -3185,18 +3185,18 @@ function escaparTextoCentral(valor) {
 }
 
 function centralFormatarData() {
-  if (!campanhaAtual) return { titulo: '—', detalhe: 'Selecione uma campanha' };
+  if (!MAMUS_STATE.campaign.current) return { titulo: '—', detalhe: 'Selecione uma campanha' };
   try {
     if (typeof sistemaEhEterBrasas === 'function' && sistemaEhEterBrasas() && typeof nomeDataCalendario === 'function') {
       const data = nomeDataCalendario(calendarioDados.ano, calendarioDados.dia);
       return { titulo: data.titulo, detalhe: data.detalhe };
     }
   } catch (err) {}
-  return { titulo: `Ano ${centralAnoGenerico()}`, detalhe: sistemaAtual?.nome || 'Sistema ativo' };
+  return { titulo: `Ano ${centralAnoGenerico()}`, detalhe: MAMUS_STATE.system.current?.nome || 'Sistema ativo' };
 }
 
 function centralAnoGenerico() {
-  const possivel = Number(campanhaAtual?.ano_atual ?? campanhaAtual?.ano ?? 1);
+  const possivel = Number(MAMUS_STATE.campaign.current?.ano_atual ?? MAMUS_STATE.campaign.current?.ano ?? 1);
   return Number.isFinite(possivel) && possivel > 0 ? possivel : 1;
 }
 
@@ -3291,9 +3291,9 @@ const CENTRAL_DASHBOARDS = {
 };
 
 function centralTipoSistema() {
-  const tipo = String(sistemaAtual?.configuracao?.tipo || '').toLowerCase();
+  const tipo = String(MAMUS_STATE.system.current?.configuracao?.tipo || '').toLowerCase();
   if (CENTRAL_DASHBOARDS[tipo]) return tipo;
-  const nome = String(sistemaAtual?.nome || '').toLowerCase();
+  const nome = String(MAMUS_STATE.system.current?.nome || '').toLowerCase();
   if (/world\s*trigger|trion/.test(nome)) return 'world_trigger';
   if (/noites\s+em\s+tokyo/.test(nome)) return 'noites_em_tokyo';
   if (/éter\s*&\s*brasas|eter\s*&\s*brasas/.test(nome)) return 'eter_brasas';
@@ -3306,13 +3306,13 @@ function centralTipoSistema() {
 }
 
 function centralDashboardGenerico() {
-  const cfg = sistemaAtual?.configuracao || {};
+  const cfg = MAMUS_STATE.system.current?.configuracao || {};
   const dados = Array.isArray(cfg.dados) ? cfg.dados : [];
   const atributos = Array.isArray(cfg.atributos) ? cfg.atributos : [];
   const recursos = Array.isArray(cfg.recursos) ? cfg.recursos : [];
   const pericias = Array.isArray(cfg.pericias) ? cfg.pericias : [];
   return {
-    titulo: sistemaAtual?.nome || 'Sistema RPG',
+    titulo: MAMUS_STATE.system.current?.nome || 'Sistema RPG',
     descricao: 'Painel gerado automaticamente a partir da configuração deste sistema.',
     badge: '⚙️ Sistema',
     widgets: [
@@ -3332,7 +3332,7 @@ function renderizarDashboardSistema() {
   const widgets = document.getElementById('central-sistema-widgets');
   if (!card || !widgets) return;
 
-  if (!campanhaAtual || !sistemaAtual) {
+  if (!MAMUS_STATE.campaign.current || !MAMUS_STATE.system.current) {
     card.style.display = 'none';
     widgets.innerHTML = '';
     return;
@@ -3355,7 +3355,7 @@ function renderizarDashboardSistema() {
 }
 
 function atualizarAcoesCentral() {
-  const temCampanha = Boolean(campanhaAtual);
+  const temCampanha = Boolean(MAMUS_STATE.campaign.current);
   ['central-btn-mapa','central-btn-rolagem'].forEach(id => {
     const btn = document.getElementById(id);
     if (!btn) return;
@@ -3370,7 +3370,7 @@ function atualizarAcoesCentral() {
     botaoCalendario.style.opacity = disponivel ? '' : '.45';
   }
   if (botaoBestiario) {
-    const disponivel = Boolean(sistemaAtual && tipoSistemaComBestiario(sistemaAtual));
+    const disponivel = Boolean(MAMUS_STATE.system.current && tipoSistemaComBestiario(MAMUS_STATE.system.current));
     botaoBestiario.disabled = !disponivel;
     botaoBestiario.style.opacity = disponivel ? '' : '.45';
   }
@@ -3461,9 +3461,9 @@ function centralRenderizarPersonagem() {
   status.className = `central-save-status ${salvar.classe}`;
   status.textContent = salvar.texto;
 
-  if (!campanhaAtual || !dadosFichaAtual) {
+  if (!MAMUS_STATE.campaign.current || !dadosFichaAtual) {
     titulo.textContent = 'Nenhum personagem carregado';
-    conteudo.innerHTML = `<div class="central-personagem-vazio"><span>👤</span><div><strong>${campanhaAtual ? 'Você ainda não possui uma ficha nesta campanha.' : 'Nenhuma campanha selecionada.'}</strong><p>${campanhaAtual ? 'Importe uma ficha existente ou crie seu personagem diretamente pela mesa.' : 'Escolha uma campanha para carregar o personagem correspondente.'}</p></div></div><div class="central-personagem-acoes">${campanhaAtual ? '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'ficha\')">👤 Abrir Minha Ficha</button>' : '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'campanhas\')">🏰 Escolher Campanha</button>'}</div>`;
+    conteudo.innerHTML = `<div class="central-personagem-vazio"><span>👤</span><div><strong>${MAMUS_STATE.campaign.current ? 'Você ainda não possui uma ficha nesta campanha.' : 'Nenhuma campanha selecionada.'}</strong><p>${MAMUS_STATE.campaign.current ? 'Importe uma ficha existente ou crie seu personagem diretamente pela mesa.' : 'Escolha uma campanha para carregar o personagem correspondente.'}</p></div></div><div class="central-personagem-acoes">${MAMUS_STATE.campaign.current ? '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'ficha\')">👤 Abrir Minha Ficha</button>' : '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'campanhas\')">🏰 Escolher Campanha</button>'}</div>`;
   } else {
     const nome = centralLerValor(dadosFichaAtual,['nome','personagem_nome','identidade.nome']) || 'Personagem';
     const nivel = centralEncontrarNivel(dadosFichaAtual);
@@ -3474,7 +3474,7 @@ function centralRenderizarPersonagem() {
     const xpTexto = xp ? `${escaparTextoCentral(xp.atual ?? '0')}${xp.proximo != null ? ` / ${escaparTextoCentral(xp.proximo)}` : ''}` : 'Não informado';
     titulo.textContent = nome;
     conteudo.innerHTML = `
-      <div class="central-personagem-identidade"><div class="central-personagem-avatar">${nome.charAt(0).toUpperCase()}</div><div><strong>${escaparTextoCentral(nome)}</strong><small>${nivel != null ? `Nível ${escaparTextoCentral(nivel)}` : 'Personagem da campanha'}${sistemaAtual?.nome ? ` • ${escaparTextoCentral(sistemaAtual.nome)}` : ''}</small></div></div>
+      <div class="central-personagem-identidade"><div class="central-personagem-avatar">${nome.charAt(0).toUpperCase()}</div><div><strong>${escaparTextoCentral(nome)}</strong><small>${nivel != null ? `Nível ${escaparTextoCentral(nivel)}` : 'Personagem da campanha'}${MAMUS_STATE.system.current?.nome ? ` • ${escaparTextoCentral(MAMUS_STATE.system.current.nome)}` : ''}</small></div></div>
       <div class="central-personagem-metricas">
         <div class="central-personagem-metrica"><small>XP</small><strong>${xpTexto}</strong></div>
         ${recurso ? `<div class="central-personagem-metrica central-personagem-recurso"><small>PV / VIDA</small><strong>${escaparTextoCentral(recurso.atual)}${recurso.max != null ? ` / ${escaparTextoCentral(recurso.max)}` : ''}</strong>${pct != null ? `<div class="central-barra"><span style="width:${pct}%"></span></div>` : ''}</div>` : ''}
@@ -3484,10 +3484,10 @@ function centralRenderizarPersonagem() {
   }
 
   if (mestreCard) {
-    mestreCard.style.display = ehMestreDaCampanhaAtual() && campanhaAtual ? 'block' : 'none';
-    if (ehMestreDaCampanhaAtual() && campanhaAtual) {
+    mestreCard.style.display = ehMestreDaCampanhaAtual() && MAMUS_STATE.campaign.current ? 'block' : 'none';
+    if (ehMestreDaCampanhaAtual() && MAMUS_STATE.campaign.current) {
       if (mestreJogadores) mestreJogadores.textContent = centralResumoCache.dados?.totalFichas != null ? String(centralResumoCache.dados.totalFichas) : '—';
-      if (mestreSessao) mestreSessao.textContent = sessaoAtual ? `#${sessaoAtual.numero}` : '—';
+      if (mestreSessao) mestreSessao.textContent = MAMUS_STATE.session.current ? `#${MAMUS_STATE.session.current.numero}` : '—';
       if (mestreMapa) mestreMapa.textContent = centralResumoCache.dados?.temMapa ? 'Pronto' : '—';
     }
   }
@@ -3500,7 +3500,7 @@ function centralAtividadeStorageKey() {
 
 function carregarAtividadesCentral() {
   centralAtividades = [];
-  if (!campanhaAtual) return;
+  if (!MAMUS_STATE.campaign.current) return;
   try {
     const salvo = JSON.parse(localStorage.getItem(centralAtividadeStorageKey()) || '[]');
     if (Array.isArray(salvo)) centralAtividades = salvo.slice(0, centralAtividadesMaximas);
@@ -3508,12 +3508,12 @@ function carregarAtividadesCentral() {
 }
 
 function salvarAtividadesCentral() {
-  if (!campanhaAtual) return;
+  if (!MAMUS_STATE.campaign.current) return;
   try { localStorage.setItem(centralAtividadeStorageKey(), JSON.stringify(centralAtividades.slice(0, centralAtividadesMaximas))); } catch (err) {}
 }
 
 function centralAdicionarAtividade(icone, texto, meta = '') {
-  if (!campanhaAtual || !texto) return;
+  if (!MAMUS_STATE.campaign.current || !texto) return;
   const item = { id: `${Date.now()}_${Math.random().toString(16).slice(2)}`, icone: icone || '•', texto: String(texto).slice(0, 240), meta: String(meta || '').slice(0, 80), quando: new Date().toISOString() };
   centralAtividades.unshift(item);
   centralAtividades = centralAtividades.slice(0, centralAtividadesMaximas);
@@ -3536,7 +3536,7 @@ function centralTempoRelativo(iso) {
 function renderizarAtividadesCentral() {
   const box = document.getElementById('central-atividade');
   if (!box) return;
-  if (!campanhaAtual) {
+  if (!MAMUS_STATE.campaign.current) {
     box.innerHTML = '<p class="texto-vazio">Selecione uma campanha para acompanhar a atividade da mesa.</p>';
     return;
   }
@@ -3569,31 +3569,31 @@ function renderizarCentralSessao() {
   if (!titulo || !status || !descricao || !meta || !acoes) return;
   meta.innerHTML = '';
   acoes.innerHTML = '';
-  if (!campanhaAtual) {
+  if (!MAMUS_STATE.campaign.current) {
     titulo.textContent = 'Selecione uma campanha';
     status.className = 'central-session-badge central-session-badge-vazia';
     status.textContent = 'SEM CAMPANHA';
     descricao.textContent = 'Escolha uma campanha para consultar a sessão atual.';
     return;
   }
-  if (!sessaoAtual) {
+  if (!MAMUS_STATE.session.current) {
     titulo.textContent = 'Nenhuma sessão iniciada';
     status.className = 'central-session-badge central-session-badge-vazia';
     status.textContent = 'AGUARDANDO';
     descricao.textContent = ehMestreDaCampanhaAtual() ? 'A mesa está pronta. Inicie uma sessão quando todos estiverem preparados.' : 'O Mestre ainda não iniciou uma sessão nesta campanha.';
-    if (ehMestreDaCampanhaAtual() && campanhaAtual.status !== 'encerrada') acoes.innerHTML = '<button type="button" class="btn-ficha-principal" onclick="iniciarSessao()">🎬 Iniciar Sessão</button>';
+    if (ehMestreDaCampanhaAtual() && MAMUS_STATE.campaign.current.status !== 'encerrada') acoes.innerHTML = '<button type="button" class="btn-ficha-principal" onclick="iniciarSessao()">🎬 Iniciar Sessão</button>';
     else acoes.innerHTML = '<button type="button" class="btn-secundario" onclick="mudarAba(\'sessoes\')">🎬 Ver Sessões</button>';
     return;
   }
-  const aberta = sessaoAtual.status === 'aberta';
-  titulo.textContent = `Sessão ${sessaoAtual.numero}${sessaoAtual.nome ? ` · ${sessaoAtual.nome}` : ''}`;
+  const aberta = MAMUS_STATE.session.current.status === 'aberta';
+  titulo.textContent = `Sessão ${MAMUS_STATE.session.current.numero}${MAMUS_STATE.session.current.nome ? ` · ${MAMUS_STATE.session.current.nome}` : ''}`;
   status.className = `central-session-badge ${aberta ? 'central-session-badge-aberta' : 'central-session-badge-encerrada'}`;
   status.textContent = aberta ? '● AO VIVO' : 'ENCERRADA';
   descricao.textContent = aberta ? 'As rolagens e os diários estão sendo catalogados nesta sessão.' : 'Esta foi a última sessão selecionada para a campanha.';
-  if (sessaoAtual.iniciada_em) meta.innerHTML += `<span>Início: ${escaparHTML(new Date(sessaoAtual.iniciada_em).toLocaleString('pt-BR'))}</span>`;
-  if (sessaoAtual.encerrada_em) meta.innerHTML += `<span>Fim: ${escaparHTML(new Date(sessaoAtual.encerrada_em).toLocaleString('pt-BR'))}</span>`;
-  if (sessaoAtual.total_rolagens != null) meta.innerHTML += `<span>🎲 ${escaparHTML(sessaoAtual.total_rolagens)} rolagens</span>`;
-  if (sessaoAtual.total_diarios != null) meta.innerHTML += `<span>📔 ${escaparHTML(sessaoAtual.total_diarios)} diários</span>`;
+  if (MAMUS_STATE.session.current.iniciada_em) meta.innerHTML += `<span>Início: ${escaparHTML(new Date(MAMUS_STATE.session.current.iniciada_em).toLocaleString('pt-BR'))}</span>`;
+  if (MAMUS_STATE.session.current.encerrada_em) meta.innerHTML += `<span>Fim: ${escaparHTML(new Date(MAMUS_STATE.session.current.encerrada_em).toLocaleString('pt-BR'))}</span>`;
+  if (MAMUS_STATE.session.current.total_rolagens != null) meta.innerHTML += `<span>🎲 ${escaparHTML(MAMUS_STATE.session.current.total_rolagens)} rolagens</span>`;
+  if (MAMUS_STATE.session.current.total_diarios != null) meta.innerHTML += `<span>📔 ${escaparHTML(MAMUS_STATE.session.current.total_diarios)} diários</span>`;
   acoes.innerHTML = `<button type="button" class="btn-secundario" onclick="mudarAba('sessoes')">📖 Ver Sessão</button>${aberta && ehMestreDaCampanhaAtual() ? '<button type="button" class="btn-encerrar-campanha" onclick="encerrarSessao()">📕 Encerrar</button>' : ''}`;
 }
 
@@ -3611,7 +3611,7 @@ function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
   const noticia = document.getElementById('central-ultima-noticia');
   const contexto = document.getElementById('contexto-campanha');
 
-  if (!campanhaAtual) {
+  if (!MAMUS_STATE.campaign.current) {
     if (titulo) titulo.textContent = 'Bem-vindo ao MaMuSBoaRD';
     if (subtitulo) subtitulo.textContent = 'Selecione uma campanha para abrir sua mesa virtual.';
     if (semCampanha) semCampanha.style.display = 'flex';
@@ -3629,15 +3629,15 @@ function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
     return;
   }
 
-  if (titulo) titulo.textContent = campanhaAtual.nome || 'Campanha';
-  if (subtitulo) subtitulo.textContent = sistemaAtual?.nome ? `Sistema: ${sistemaAtual.nome} • Sua central de comando para esta mesa.` : 'Sua central de comando para esta mesa.';
+  if (titulo) titulo.textContent = MAMUS_STATE.campaign.current.nome || 'Campanha';
+  if (subtitulo) subtitulo.textContent = MAMUS_STATE.system.current?.nome ? `Sistema: ${MAMUS_STATE.system.current.nome} • Sua central de comando para esta mesa.` : 'Sua central de comando para esta mesa.';
   if (semCampanha) semCampanha.style.display = 'none';
 
   const data = centralFormatarData();
   if (dataKpi) dataKpi.textContent = data.titulo;
   if (dataDetalhe) dataDetalhe.textContent = data.detalhe;
 
-  const sessao = sessaoAtual;
+  const sessao = MAMUS_STATE.session.current;
   if (sessaoKpi) sessaoKpi.textContent = sessao ? `#${sessao.numero}` : 'Nenhuma';
   if (sessaoDetalhe) sessaoDetalhe.textContent = sessao ? `${sessao.nome || `Sessão ${sessao.numero}`} • ${sessao.status === 'aberta' ? 'em andamento' : 'encerrada'}` : 'Nenhuma sessão ativa';
 
@@ -3659,7 +3659,7 @@ function renderizarCentralCampanha(dados = centralResumoCache.dados || {}) {
 }
 
 async function carregarResumoCentralCampanha(force = false) {
-  if (!campanhaAtual || !supabaseClient) {
+  if (!MAMUS_STATE.campaign.current || !supabaseClient) {
     renderizarCentralCampanha();
     return;
   }
@@ -3681,7 +3681,7 @@ async function carregarResumoCentralCampanha(force = false) {
     if (!fichasRes.error) dados.totalFichas = fichasRes.count ?? 0;
     if (!mapaRes.error && mapaRes.data?.url_mapa) { dados.temMapa = true; dados.nomeMapa = 'Mapa publicado'; }
     if (!jornalRes.error) dados.ultimaNoticia = jornalRes.data || null;
-    if (!sessaoAtual && !sessaoRes.error && sessaoRes.data) sessaoAtual = sessaoRes.data;
+    if (!MAMUS_STATE.session.current && !sessaoRes.error && sessaoRes.data) MAMUS_STATE.session.current = sessaoRes.data;
     if (sessaoRes.data && centralAtividades.length === 0) {
       const s = sessaoRes.data;
       centralAtividades.push({id:`sessao_${s.numero}`,icone:s.status==='aberta'?'🎬':'📕',texto:`Sessão ${s.numero} ${s.status==='aberta'?'foi iniciada':'foi encerrada'}`,meta:s.nome||'',quando:s.encerrada_em||s.iniciada_em||new Date().toISOString()});
@@ -3741,7 +3741,7 @@ function mudarAba(nomeAba, evento) {
     fecharMenuMobileMais();
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }
-  abaAtual = nomeAba;
+  MAMUS_STATE.ui.currentTab = nomeAba;
   atualizarNavegacaoMobile();
   try { localStorage.setItem('cronicas_camelot_aba', nomeAba); } catch (err) {}
 
@@ -3929,7 +3929,7 @@ function renderizarFichaNaTela(dados) {
   const nome = dados?.nome || dados?.personagem_nome || 'Sem Nome';
   const nivel = dados?.nivel || 1;
   const xp = dados?.xp_atual ?? 0;
-  const sistemaTipo = sistemaAtual?.configuracao?.tipo;
+  const sistemaTipo = MAMUS_STATE.system.current?.configuracao?.tipo;
   const resumoContexto = sistemaTipo === 'sobreviventes_fronteira'
     ? `<p><strong>Classe:</strong> ${escaparHTML(dados?.classe || '-')} &nbsp;|&nbsp; <strong>Raça:</strong> ${escaparHTML(dados?.raca || '-')} &nbsp;|&nbsp; <strong>Grau:</strong> ${escaparHTML(dados?.grau_linhagem || 1)}</p>`
     : sistemaTipo === 'olimpia_pangeia'
@@ -3949,23 +3949,23 @@ function renderizarFichaNaTela(dados) {
 }
 
 function ehFichaLegadaAtual() {
-  return sistemaAtual?.configuracao?.tipo === 'legado' || sistemaAtual?.configuracao?.ficha === 'ficha-editor.html';
+  return MAMUS_STATE.system.current?.configuracao?.tipo === 'legado' || MAMUS_STATE.system.current?.configuracao?.ficha === 'ficha-editor.html';
 }
 
 function abrirCriadorFicha() {
   const modal = document.getElementById('modal-criador-ficha');
   const iframe = document.getElementById('iframe-criador-ficha');
   if (!modal || !iframe) return;
-  if (!campanhaAtual) return mostrarPopup('❌ Selecione uma campanha antes de criar a ficha.');
-  if (!sistemaAtual) return mostrarPopup('❌ Esta campanha está sem um sistema RPG vinculado.');
+  if (!MAMUS_STATE.campaign.current) return mostrarPopup('❌ Selecione uma campanha antes de criar a ficha.');
+  if (!MAMUS_STATE.system.current) return mostrarPopup('❌ Esta campanha está sem um sistema RPG vinculado.');
   if (ehFichaLegadaAtual()) {
     iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html')))));
-    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, null, 'criacao');
+    const arquivo = MAMUS_STATE.system.current?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html')))));
+    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(MAMUS_STATE.system.current.id) + '&t=' + Date.now(), MAMUS_STATE.system.current, null, 'criacao');
   }
   const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
-  if (titulo) titulo.textContent = `⚔️ Criar Nova Ficha — ${sistemaAtual?.nome || 'Sistema RPG'}`;
+  if (titulo) titulo.textContent = `⚔️ Criar Nova Ficha — ${MAMUS_STATE.system.current?.nome || 'Sistema RPG'}`;
   modal.style.display = 'flex';
 }
 
@@ -3980,8 +3980,8 @@ function abrirEditorFichaAtual() {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
-    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dadosFichaAtual, 'edicao');
+    const arquivo = MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
+    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(MAMUS_STATE.system.current.id) + '&t=' + Date.now(), MAMUS_STATE.system.current, dadosFichaAtual, 'edicao');
   }
   modal.style.display = 'flex';
 }
@@ -3999,8 +3999,8 @@ function abrirEditorFicha(dados, userId = null) {
       iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
     }, { once: true });
   } else {
-    const arquivo = sistemaAtual?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (sistemaAtual?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (sistemaAtual?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (sistemaAtual?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (sistemaAtual?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
-    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(sistemaAtual.id) + '&t=' + Date.now(), sistemaAtual, dados, 'edicao');
+    const arquivo = MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
+    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(MAMUS_STATE.system.current.id) + '&t=' + Date.now(), MAMUS_STATE.system.current, dados, 'edicao');
   }
   modal.style.display = 'flex';
 }
@@ -4015,13 +4015,13 @@ function fecharCriadorFicha() {
 function abrirFichaCompletaNoIframe(dados) {
   const conteudoModal = document.getElementById('modal-conteudo-ficha');
   if (!conteudoModal) return;
-  const tipo = sistemaAtual?.configuracao?.tipo;
+  const tipo = MAMUS_STATE.system.current?.configuracao?.tipo;
   const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-editor.html')))));
-  const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(sistemaAtual?.id||'')}&t=${Date.now()}`;
+  const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(MAMUS_STATE.system.current?.id||'')}&t=${Date.now()}`;
   conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="${src}"></iframe>`;
   const iframe = document.getElementById('iframe-ficha-visualizacao');
   iframe.addEventListener('load', () => {
-    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-sistema', sistema: sistemaAtual }, window.location.origin);
+    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-sistema', sistema: MAMUS_STATE.system.current }, window.location.origin);
     iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dados, modo: 'visualizacao' }, window.location.origin);
   }, { once: true });
 }
@@ -5160,7 +5160,7 @@ async function fazerUploadImagem() {
 
   const campanhaId = obterCampanhaIdAtual();
   if (!campanhaId) return mostrarPopup('❌ Selecione uma campanha antes de enviar imagens.');
-  if (campanhaAtual?.status === 'encerrada') return mostrarPopup('🔒 Esta campanha está encerrada.');
+  if (MAMUS_STATE.campaign.current?.status === 'encerrada') return mostrarPopup('🔒 Esta campanha está encerrada.');
 
   const input = document.getElementById('arquivo-imagem');
   const nomeInput = document.getElementById('nome-imagem');
@@ -5580,7 +5580,7 @@ const MOBILE_NAV_ITEMS = [
 
 function atualizarNavegacaoMobile() {
   document.querySelectorAll('.mobile-nav-item[data-mobile-aba]').forEach(btn => {
-    btn.classList.toggle('ativo', btn.dataset.mobileAba === abaAtual);
+    btn.classList.toggle('ativo', btn.dataset.mobileAba === MAMUS_STATE.ui.currentTab);
   });
   renderizarMenuMobileMais();
 }
