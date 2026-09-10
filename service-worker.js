@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mamusboard-shell-v14';
+const CACHE_NAME = 'mamusboard-shell-v15';
 const SHELL = ['./','./index.html','./style.css','./app.js','./manifest.json','./js/core/state.js','./js/core/bootstrap.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
