@@ -5,7 +5,7 @@
 const SUPABASE_URL = 'https://rolrbrtpqbchyxmjmvzr.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_mJmJfELKk4O1HCTzoKxDdw_EWaiv4j1';
 
-let supabaseClient = null;
+let supabaseClient = window.MAMUS_SUPABASE || null;
 let dadosFichaAtual = null;
 let fichaEditandoUserId = null;
 let canalMesa = null;
@@ -922,9 +922,8 @@ function atualizarStatusConexao(estado, texto) {
 
 // Inicialização segura
 try {
-  if (window.supabase) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  }
+  supabaseClient = window.MAMUS_SUPABASE || window.MAMUS_SUPABASE_BOOT?.inicializar?.() || null;
+  if (supabaseClient) window.MAMUS_SUPABASE = supabaseClient;
 } catch (err) {
   console.error('Erro ao inicializar Supabase:', err);
 }
@@ -981,12 +980,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderizarCentralCampanha();
   setInterval(() => { if (MAMUS_STATE.ui.currentTab === 'inicio' && MAMUS_STATE.campaign.current) renderizarAtividadesCentral(); }, 60000);
 
-  if (!supabaseClient && window.supabase) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.MAMUS_SUPABASE = supabaseClient;
-  } else if (supabaseClient) {
-    window.MAMUS_SUPABASE = supabaseClient;
+  if (!supabaseClient) {
+    supabaseClient = window.MAMUS_SUPABASE || window.MAMUS_SUPABASE_BOOT?.inicializar?.() || null;
   }
+  if (supabaseClient) window.MAMUS_SUPABASE = supabaseClient;
 
   atualizarStatusConexao(supabaseClient ? 'online' : 'offline', supabaseClient ? 'Conectando à Távola...' : 'Modo local — Supabase indisponível.');
   garantirAbasEconomiaJornaisVisiveis();

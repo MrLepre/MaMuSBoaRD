@@ -11,3 +11,10 @@ Em desktop, a navegação lateral podia ultrapassar a altura disponível da side
 - `overscroll-behavior-y: contain` evita que o gesto de rolagem da sidebar "escape" para a página.
 - Comportamento mobile existente foi preservado.
 - Service worker atualizado para `v17`.
+
+
+## Hotfix — Supabase bootstrap
+- Criado `js/core/supabase.js` para inicializar o cliente antes de Auth/Campanhas.
+- `app.js` reutiliza a mesma instância global.
+- Cache atualizado para v18.
+- Corrige o alerta “Supabase não inicializado” causado pela dependência da inicialização tardia do `app.js`.
