@@ -2739,3 +2739,48 @@ body.tema-base .logo-marca-imagem .logo-layer-red,
 body.tema-base .logo-marca-imagem .logo-layer-gold {
   display:none !important;
 }
+
+/* ==========================================================
+   PATCH v17 — SCROLL DA NAVEGAÇÃO LATERAL DESKTOP
+   A sidebar é um flex-column fixo. Sem min-height:0, o bloco de
+   navegação pode exceder a altura disponível e ser cortado pelo
+   overflow:hidden da sidebar, impedindo a rolagem das opções.
+   ========================================================== */
+.sidebar-navegacao {
+  min-height: 0 !important;
+}
+
+.sidebar-navegacao .abas-navegacao {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--cam-gold-rgb), .38) transparent;
+}
+
+.sidebar-navegacao .abas-navegacao::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.sidebar-navegacao .abas-navegacao::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-navegacao .abas-navegacao::-webkit-scrollbar-thumb {
+  background: rgba(var(--cam-gold-rgb), .34);
+  border-radius: 999px;
+}
+
+.sidebar-navegacao .abas-navegacao::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--cam-gold-rgb), .58);
+}
+
+@media (max-width: 900px) {
+  .sidebar-navegacao .abas-navegacao {
+    overflow: visible !important;
+  }
+}
