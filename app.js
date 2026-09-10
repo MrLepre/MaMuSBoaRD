@@ -6,8 +6,6 @@ const SUPABASE_URL = 'https://rolrbrtpqbchyxmjmvzr.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_mJmJfELKk4O1HCTzoKxDdw_EWaiv4j1';
 
 let supabaseClient = window.MAMUS_SUPABASE || null;
-let dadosFichaAtual = null;
-let fichaEditandoUserId = null;
 let canalMesa = null;
 let gridAtivo = false;
 let vttZoom = 100;
@@ -23,8 +21,6 @@ let ultimoTokenInteragido = null;
 let abasCarregadas = { mapa: false, galeria: false };
 
 let centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
-let fichaUltimoSalvamento = null;
-let fichaStatusCentral = 'sem_ficha';
 let pastaGaleriaAtual = 'Todas';
 let dadosGaleriaAtual = [];
 let imagemMestreAberta = false;
@@ -68,9 +64,9 @@ window.MAMUS_AUTH_HOOKS = {
     carregarFichaDoUsuario(user.id);
   },
   onUserSignedOut: async () => {
-    dadosFichaAtual = null;
-    fichaUltimoSalvamento = null;
-    fichaStatusCentral = 'sem_ficha';
+    MAMUS_STATE.character.current = null;
+    MAMUS_STATE.character.lastSavedAt = null;
+    MAMUS_STATE.character.saveStatus = 'sem_ficha';
     limparEstadoPersistenciaTokens();
     document.getElementById('vtt-tokens-camada')?.replaceChildren();
     MAMUS_STATE.campaign.current = null;
@@ -610,7 +606,7 @@ function sincronizarSquadNPCsEstadoWT(dados){
 }
 function obterSquadNPCsWorldTrigger(){
   if((worldTriggerEstado.squadNpcs||[]).length===3) return worldTriggerEstado.squadNpcs;
-  if(Array.isArray(dadosFichaAtual?.wt_squad_npcs) && dadosFichaAtual.wt_squad_npcs.length===3) return sincronizarSquadNPCsEstadoWT(dadosFichaAtual);
+  if(Array.isArray(MAMUS_STATE.character.current?.wt_squad_npcs) && MAMUS_STATE.character.current.wt_squad_npcs.length===3) return sincronizarSquadNPCsEstadoWT(MAMUS_STATE.character.current);
   return [];
 }
 function normalizarTriggersFichaWT(dados){
@@ -622,10 +618,10 @@ function normalizarTriggersFichaWT(dados){
 }
 async function carregarTriggersDaFichaWorldTrigger(){
   if(!worldTriggerAtivo() || !supabaseClient) return [];
-  const atuais=normalizarTriggersFichaWT(dadosFichaAtual);
+  const atuais=normalizarTriggersFichaWT(MAMUS_STATE.character.current);
   if(atuais.length){
     worldTriggerEstado.triggersAtivos=atuais;
-    sincronizarSquadNPCsEstadoWT(dadosFichaAtual);
+    sincronizarSquadNPCsEstadoWT(MAMUS_STATE.character.current);
     salvarEstadoWorldTrigger();
     return atuais;
   }
@@ -636,7 +632,7 @@ async function carregarTriggersDaFichaWorldTrigger(){
     const {data:ficha,error}=await supabaseClient.from('fichas').select('dados_ficha').eq('user_id',uid).eq('campanha_id',obterCampanhaIdAtual()).maybeSingle();
     if(error || !ficha?.dados_ficha) return [];
     const triggers=normalizarTriggersFichaWT(ficha.dados_ficha);
-    if(triggers.length) dadosFichaAtual=ficha.dados_ficha;
+    if(triggers.length) MAMUS_STATE.character.current=ficha.dados_ficha;
     worldTriggerEstado.triggersAtivos=triggers;
     sincronizarSquadNPCsEstadoWT(ficha.dados_ficha);
     salvarEstadoWorldTrigger();
@@ -734,7 +730,7 @@ function obterPosicaoFormacaoNPCWT(indice, baseX, baseY){
 }
 function sincronizarTokensSquadWorldTrigger(baseX=10,baseY=10,tamanho=45){
   if(!worldTriggerAtivo()) return;
-  const fichaNpcs=Array.isArray(dadosFichaAtual?.wt_squad_npcs)?dadosFichaAtual.wt_squad_npcs:[];
+  const fichaNpcs=Array.isArray(MAMUS_STATE.character.current?.wt_squad_npcs)?MAMUS_STATE.character.current.wt_squad_npcs:[];
   if(fichaNpcs.length!==3) return;
   const npcs=obterSquadNPCsWorldTrigger(); if(npcs.length!==3)return;
   const nick=obterMeuNickWT(); const base=normalizarIdTokenWT(nick);
@@ -964,6 +960,18 @@ function aplicarCalendarioRecebidoRealtime(ano, diaDoAno) {
 window.aplicarZoomRecebidoRealtime = aplicarZoomRecebidoRealtime;
 window.aplicarCalendarioRecebidoRealtime = aplicarCalendarioRecebidoRealtime;
 
+// Ponte explícita entre o domínio de fichas e o estado tático World Trigger.
+// `worldTriggerEstado` é estado legado lexical do shell e não deve ser exposto
+// diretamente ao módulo de personagens.
+window.MAMUS_WT_HOOKS = {
+  onFichaUpdated(dados) {
+    if (!worldTriggerAtivo()) return;
+    worldTriggerEstado.triggersAtivos = normalizarTriggersFichaWT(dados);
+    sincronizarSquadNPCsEstadoWT(dados);
+    salvarEstadoWorldTrigger();
+  }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
   restaurarEstadoSidebar();
   inicializarInteracoesMobile();
@@ -1075,30 +1083,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-window.addEventListener('message', async (event) => {
-  if (event.origin !== window.location.origin) return;
-  if (!event.data || event.data.type !== 'cronicas-camelot-ficha-pronta') return;
-  if (!event.data.dados) return;
 
-  const foiEdicao = event.data.modo === 'edicao';
-  dadosFichaAtual = event.data.dados;
-  if (worldTriggerAtivo()) { worldTriggerEstado.triggersAtivos = normalizarTriggersFichaWT(dadosFichaAtual); sincronizarSquadNPCsEstadoWT(dadosFichaAtual); salvarEstadoWorldTrigger(); }
-  if (foiEdicao && event.data.userId) {
-    fichaEditandoUserId = event.data.userId;
-  }
-  fichaStatusCentral = foiEdicao ? 'salvando' : 'salvando';
-  renderizarFichaNaTela(dadosFichaAtual);
-  renderizarCentralCampanha();
-  fecharCriadorFicha();
-
-  const nome = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Personagem';
-  mostrarPopup(foiEdicao ? `💾 Ficha de ${nome} atualizada!` : `⚔️ Ficha de ${nome} criada na mesa!`);
-
-  if (supabaseClient) {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) await salvarFichaNoSupabase(fichaEditandoUserId);
-  }
-});
 
 
 
@@ -1477,9 +1462,9 @@ async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   renderizarListaCampanhas();
 
   // Limpa estados carregados de recursos da campanha anterior.
-  dadosFichaAtual = null;
-  fichaUltimoSalvamento = null;
-  fichaStatusCentral = 'sem_ficha';
+  MAMUS_STATE.character.current = null;
+  MAMUS_STATE.character.lastSavedAt = null;
+  MAMUS_STATE.character.saveStatus = 'sem_ficha';
   limparEstadoPersistenciaTokens();
   abasCarregadas = { mapa: false, galeria: false };
   dadosGaleriaAtual = [];
@@ -1696,7 +1681,7 @@ async function apagarCampanha(campanhaId, evento) {
     atualizarContextoCampanha();
     atualizarVisibilidadeAcoesRapidas();
     fecharAcoesRapidas();
-    dadosFichaAtual = null;
+    MAMUS_STATE.character.current = null;
     abasCarregadas = { mapa:false, galeria:false };
   }
   MAMUS_STATE.campaign.available = MAMUS_STATE.campaign.available.filter(c => c.id !== campanhaId);
@@ -3203,10 +3188,10 @@ function centralEncontrarXP(dados) {
 }
 
 function centralFormatarSalvamento() {
-  if (fichaStatusCentral === 'nao_salva') return { classe:'central-save-status-alerta', texto:'● Alterações não salvas' };
-  if (fichaStatusCentral === 'salvando') return { classe:'central-save-status-salvando', texto:'⟳ Salvando ficha...' };
-  if (!fichaUltimoSalvamento) return { classe:'central-save-status-vazio', texto:'Sem ficha' };
-  const data = new Date(fichaUltimoSalvamento);
+  if (MAMUS_STATE.character.saveStatus === 'nao_salva') return { classe:'central-save-status-alerta', texto:'● Alterações não salvas' };
+  if (MAMUS_STATE.character.saveStatus === 'salvando') return { classe:'central-save-status-salvando', texto:'⟳ Salvando ficha...' };
+  if (!MAMUS_STATE.character.lastSavedAt) return { classe:'central-save-status-vazio', texto:'Sem ficha' };
+  const data = new Date(MAMUS_STATE.character.lastSavedAt);
   if (Number.isNaN(data.getTime())) return { classe:'central-save-status-ok', texto:'✓ Salva na nuvem' };
   return { classe:'central-save-status-ok', texto:`✓ Salva às ${data.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}` };
 }
@@ -3225,15 +3210,15 @@ function centralRenderizarPersonagem() {
   status.className = `central-save-status ${salvar.classe}`;
   status.textContent = salvar.texto;
 
-  if (!MAMUS_STATE.campaign.current || !dadosFichaAtual) {
+  if (!MAMUS_STATE.campaign.current || !MAMUS_STATE.character.current) {
     titulo.textContent = 'Nenhum personagem carregado';
     conteudo.innerHTML = `<div class="central-personagem-vazio"><span>👤</span><div><strong>${MAMUS_STATE.campaign.current ? 'Você ainda não possui uma ficha nesta campanha.' : 'Nenhuma campanha selecionada.'}</strong><p>${MAMUS_STATE.campaign.current ? 'Importe uma ficha existente ou crie seu personagem diretamente pela mesa.' : 'Escolha uma campanha para carregar o personagem correspondente.'}</p></div></div><div class="central-personagem-acoes">${MAMUS_STATE.campaign.current ? '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'ficha\')">👤 Abrir Minha Ficha</button>' : '<button type="button" class="btn-ficha-principal" onclick="mudarAba(\'campanhas\')">🏰 Escolher Campanha</button>'}</div>`;
   } else {
-    const nome = centralLerValor(dadosFichaAtual,['nome','personagem_nome','identidade.nome']) || 'Personagem';
-    const nivel = centralEncontrarNivel(dadosFichaAtual);
-    const xp = centralEncontrarXP(dadosFichaAtual);
-    const recurso = centralEncontrarRecurso(dadosFichaAtual);
-    const secundario = centralEncontrarRecursoSecundario(dadosFichaAtual);
+    const nome = centralLerValor(MAMUS_STATE.character.current,['nome','personagem_nome','identidade.nome']) || 'Personagem';
+    const nivel = centralEncontrarNivel(MAMUS_STATE.character.current);
+    const xp = centralEncontrarXP(MAMUS_STATE.character.current);
+    const recurso = centralEncontrarRecurso(MAMUS_STATE.character.current);
+    const secundario = centralEncontrarRecursoSecundario(MAMUS_STATE.character.current);
     const pct = recurso?.max && Number(recurso.max) > 0 ? Math.max(0,Math.min(100,(Number(recurso.atual)||0)/Number(recurso.max)*100)) : null;
     const xpTexto = xp ? `${escaparTextoCentral(xp.atual ?? '0')}${xp.proximo != null ? ` / ${escaparTextoCentral(xp.proximo)}` : ''}` : 'Não informado';
     titulo.textContent = nome;
@@ -3532,376 +3517,6 @@ function mudarAba(nomeAba, evento) {
   if (nomeAba === 'sistemas' && supabaseClient) {
     globalThis.MAMUS_SYSTEMS?.load?.();
   }
-}
-
-// --- FICHA DO PERSONAGEM ---
-function importarArquivoJSON(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      dadosFichaAtual = JSON.parse(e.target.result);
-      fichaUltimoSalvamento = null;
-      fichaStatusCentral = 'nao_salva';
-      renderizarFichaNaTela(dadosFichaAtual);
-      renderizarCentralCampanha();
-      mostrarPopup('📄 Ficha JSON lida com sucesso! Clique em "Salvar na Nuvem".');
-    } catch (err) {
-      alert('Arquivo JSON inválido.');
-    }
-  };
-  reader.readAsText(file);
-}
-
-async function salvarFichaNoSupabase(userIdDestino = null) {
-  if (!supabaseClient) return alert('Supabase não conectado.');
-
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session) return alert('Você precisa estar logado para salvar sua ficha!');
-  if (!dadosFichaAtual) return alert('Nenhuma ficha carregada para salvar.');
-
-  const campanhaId = obterCampanhaIdAtual();
-  if (!campanhaId) return alert('Selecione uma campanha antes de salvar a ficha.');
-
-  const nomeChar = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Personagem';
-  const idDestino = userIdDestino || session.user.id;
-  const ehEdicaoMestre = Boolean(ehMestreDaCampanhaAtual() && userIdDestino && userIdDestino !== session.user.id);
-  const agora = new Date().toISOString();
-
-  /*
-   * IMPORTANTE:
-   * Não usamos mais upsert com onConflict aqui.
-   * O banco possui histórico de versões antigas da tabela `fichas` e algumas
-   * instalações podem ainda ter constraints UNIQUE legadas em `user_id`.
-   * O fluxo explícito SELECT -> UPDATE/INSERT é mais tolerante a esse cenário
-   * e evita que o PostgREST dependa de uma constraint específica para resolver
-   * o conflito.
-   */
-  const consultaExistente = await supabaseClient
-    .from('fichas')
-    .select('id')
-    .eq('user_id', idDestino)
-    .eq('campanha_id', campanhaId)
-    .maybeSingle();
-
-  if (consultaExistente.error) {
-    console.error('Erro ao localizar ficha antes de salvar:', consultaExistente.error);
-    mostrarPopup('❌ Não foi possível localizar sua ficha: ' + consultaExistente.error.message);
-    return;
-  }
-
-  let resultado;
-
-  if (consultaExistente.data?.id) {
-    // Ficha desta campanha já existe: atualizamos exatamente aquela linha.
-    resultado = await supabaseClient
-      .from('fichas')
-      .update({
-        nome_personagem: nomeChar,
-        dados_ficha: dadosFichaAtual,
-        updated_at: agora
-      })
-      .eq('id', consultaExistente.data.id)
-      .eq('campanha_id', campanhaId)
-      .select('id')
-      .single();
-  } else {
-    // Primeira ficha deste jogador nesta campanha.
-    resultado = await supabaseClient
-      .from('fichas')
-      .insert({
-        user_id: idDestino,
-        nome_personagem: nomeChar,
-        dados_ficha: dadosFichaAtual,
-        updated_at: agora,
-        campanha_id: campanhaId
-      })
-      .select('id')
-      .single();
-
-    /*
-     * Se uma instalação antiga ainda possuir UNIQUE(user_id), o INSERT acima
-     * continuará sendo bloqueado pelo banco. Nesse caso mostramos uma mensagem
-     * específica em vez de um erro genérico/"duplicate key".
-     */
-    if (resultado.error && /duplicate key|unique constraint|violates unique/i.test(resultado.error.message || '')) {
-      console.error('Constraint UNIQUE legada detectada em fichas:', resultado.error);
-      mostrarPopup('❌ O Supabase ainda possui uma regra UNIQUE antiga em fichas. Execute o SQL de correção de fichas no projeto e tente novamente.');
-      return;
-    }
-  }
-
-  if (resultado.error) {
-    console.error('Erro ao salvar ficha:', resultado.error);
-    mostrarPopup('❌ Erro ao salvar: ' + resultado.error.message);
-    return;
-  }
-
-  fichaUltimoSalvamento = agora;
-  fichaStatusCentral = 'salva';
-  centralAdicionarAtividade('👤', `${nomeChar} atualizou a ficha`, ehEdicaoMestre ? 'Mestre' : 'Meu personagem');
-  renderizarCentralCampanha();
-  mostrarPopup(
-    ehEdicaoMestre
-      ? '👑 Ficha do jogador atualizada pelo Mestre!'
-      : '💾 Ficha salva na nuvem com sucesso!'
-  );
-}
-
-async function carregarFichaDoUsuario(userId) {
-  if (!supabaseClient) return;
-  const { data, error } = await supabaseClient
-    .from('fichas')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('campanha_id', obterCampanhaIdAtual())
-    .maybeSingle();
-
-  if (error) {
-    console.warn('Aviso ao carregar ficha:', error.message);
-    return;
-  }
-
-  if (data && data.dados_ficha) {
-    dadosFichaAtual = data.dados_ficha;
-    fichaUltimoSalvamento = data.updated_at || null;
-    fichaStatusCentral = 'salva';
-    renderizarFichaNaTela(dadosFichaAtual);
-    renderizarCentralCampanha();
-    if (worldTriggerAtivo()) { worldTriggerEstado.triggersAtivos = normalizarTriggersFichaWT(dadosFichaAtual); sincronizarSquadNPCsEstadoWT(dadosFichaAtual); salvarEstadoWorldTrigger(); renderizarPainelWTSeNecessario(); }
-  }
-}
-
-function escaparHTML(valor) {
-  return String(valor ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-function renderizarFichaNaTela(dados) {
-  const container = document.getElementById('container-ficha-carregada');
-  if (!container) return;
-  const nome = dados?.nome || dados?.personagem_nome || 'Sem Nome';
-  const nivel = dados?.nivel || 1;
-  const xp = dados?.xp_atual ?? 0;
-  const sistemaTipo = MAMUS_STATE.system.current?.configuracao?.tipo;
-  const resumoContexto = sistemaTipo === 'sobreviventes_fronteira'
-    ? `<p><strong>Classe:</strong> ${escaparHTML(dados?.classe || '-')} &nbsp;|&nbsp; <strong>Raça:</strong> ${escaparHTML(dados?.raca || '-')} &nbsp;|&nbsp; <strong>Grau:</strong> ${escaparHTML(dados?.grau_linhagem || 1)}</p>`
-    : sistemaTipo === 'olimpia_pangeia'
-    ? `<p><strong>Classe:</strong> ${escaparHTML(dados?.classe || '-')} &nbsp;|&nbsp; <strong>Raça:</strong> ${escaparHTML(dados?.raca || '-')} &nbsp;|&nbsp; <strong>Reino:</strong> ${escaparHTML(dados?.reino || '-')}</p>`
-    : `<p><strong>Tipo Humano:</strong> ${escaparHTML(dados?.tipo_humano || dados?.raca || '-')} &nbsp;|&nbsp; <strong>Antecedente:</strong> ${escaparHTML(dados?.antecedente || '-')}</p>`;
-  container.innerHTML = `
-    <div style="background:linear-gradient(135deg,#10141f,#161b2c);padding:1rem;border-radius:6px;border:1px solid #d4af37;">
-      <h3 style="color:#f3d075;font-family:Cinzel,serif;">${escaparHTML(nome)}</h3>
-      <p><strong>Nível:</strong> ${escaparHTML(nivel)} &nbsp;|&nbsp; <strong>XP:</strong> ${escaparHTML(xp)}</p>
-      ${resumoContexto}
-      <p style="color:#a8a8b3;">Ficha carregada. Abra a ficha completa para visualizar todos os campos e detalhes.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-        <button onclick="abrirFichaAtualCompleta()">📖 Abrir Ficha Completa</button>
-        <button onclick="abrirEditorFichaAtual()" style="background:#315d36;color:#dfffe3;border:1px solid #7fd88b;">✏️ Editar Ficha</button>
-      </div>
-    </div>`;
-}
-
-function ehFichaLegadaAtual() {
-  return MAMUS_STATE.system.current?.configuracao?.tipo === 'legado' || MAMUS_STATE.system.current?.configuracao?.ficha === 'ficha-editor.html';
-}
-
-function abrirCriadorFicha() {
-  const modal = document.getElementById('modal-criador-ficha');
-  const iframe = document.getElementById('iframe-criador-ficha');
-  if (!modal || !iframe) return;
-  if (!MAMUS_STATE.campaign.current) return mostrarPopup('❌ Selecione uma campanha antes de criar a ficha.');
-  if (!MAMUS_STATE.system.current) return mostrarPopup('❌ Esta campanha está sem um sistema RPG vinculado.');
-  if (ehFichaLegadaAtual()) {
-    iframe.src = 'ficha-editor.html?modo=criacao&t=' + Date.now();
-  } else {
-    const arquivo = MAMUS_STATE.system.current?.configuracao?.tipo === 'elarion' ? 'ficha-elarion.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html')))));
-    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=criacao&sistema=' + encodeURIComponent(MAMUS_STATE.system.current.id) + '&t=' + Date.now(), MAMUS_STATE.system.current, null, 'criacao');
-  }
-  const titulo = document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2');
-  if (titulo) titulo.textContent = `⚔️ Criar Nova Ficha — ${MAMUS_STATE.system.current?.nome || 'Sistema RPG'}`;
-  modal.style.display = 'flex';
-}
-
-function abrirEditorFichaAtual() {
-  if (!dadosFichaAtual) return mostrarPopup('❌ Nenhuma ficha carregada para editar.');
-  const modal = document.getElementById('modal-criador-ficha');
-  const iframe = document.getElementById('iframe-criador-ficha');
-  if (!modal || !iframe) return;
-  if (ehFichaLegadaAtual()) {
-    iframe.src = 'ficha-editor.html?modo=edicao&t=' + Date.now();
-    iframe.addEventListener('load', function carregarEdicaoLegadaUmaVez() {
-      iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dadosFichaAtual, modo: 'edicao', userId: null }, window.location.origin);
-    }, { once: true });
-  } else {
-    const arquivo = MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
-    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(MAMUS_STATE.system.current.id) + '&t=' + Date.now(), MAMUS_STATE.system.current, dadosFichaAtual, 'edicao');
-  }
-  modal.style.display = 'flex';
-}
-
-function abrirEditorFicha(dados, userId = null) {
-  if (!dados) return mostrarPopup('❌ Dados da ficha não encontrados.');
-  const modal = document.getElementById('modal-criador-ficha');
-  const iframe = document.getElementById('iframe-criador-ficha');
-  if (!modal || !iframe) return;
-
-  fichaEditandoUserId = userId;
-  if (ehFichaLegadaAtual()) {
-    iframe.src = 'ficha-editor.html?modo=edicao&t=' + Date.now();
-    iframe.addEventListener('load', function carregarEdicaoUmaVez() {
-      iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo: 'edicao', userId }, window.location.origin);
-    }, { once: true });
-  } else {
-    const arquivo = MAMUS_STATE.system.current?.configuracao?.tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noctavell' ? 'ficha-noctavell.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (MAMUS_STATE.system.current?.configuracao?.tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-generica.html'))));
-    abrirFichaGenericaNoIframe(iframe, arquivo + '?modo=edicao&sistema=' + encodeURIComponent(MAMUS_STATE.system.current.id) + '&t=' + Date.now(), MAMUS_STATE.system.current, dados, 'edicao');
-  }
-  modal.style.display = 'flex';
-}
-
-function fecharCriadorFicha() {
-  const modal = document.getElementById('modal-criador-ficha');
-  const iframe = document.getElementById('iframe-criador-ficha');
-  if (modal) modal.style.display = 'none';
-  if (iframe) iframe.src = 'about:blank';
-}
-
-function abrirFichaCompletaNoIframe(dados) {
-  const conteudoModal = document.getElementById('modal-conteudo-ficha');
-  if (!conteudoModal) return;
-  const tipo = MAMUS_STATE.system.current?.configuracao?.tipo;
-  const arquivo = tipo === 'elarion' ? 'ficha-elarion.html' : (tipo === 'eter_brasas' ? 'ficha-eter-brasas.html' : (tipo === 'noctavell' ? 'ficha-noctavell.html' : (tipo === 'olimpia_pangeia' ? 'ficha-olimpia.html' : (tipo === 'sobreviventes_fronteira' ? 'ficha-sobreviventes.html' : (tipo === 'noites_em_tokyo' ? 'ficha-noites-em-tokyo.html' : 'ficha-editor.html')))));
-  const src = arquivo === 'ficha-editor.html' ? `${arquivo}?modo=visualizacao&t=${Date.now()}` : `${arquivo}?modo=visualizacao&sistema=${encodeURIComponent(MAMUS_STATE.system.current?.id||'')}&t=${Date.now()}`;
-  conteudoModal.innerHTML = `<iframe id="iframe-ficha-visualizacao" title="Ficha completa do personagem" src="${src}"></iframe>`;
-  const iframe = document.getElementById('iframe-ficha-visualizacao');
-  iframe.addEventListener('load', () => {
-    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-sistema', sistema: MAMUS_STATE.system.current }, window.location.origin);
-    iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados: dados, modo: 'visualizacao' }, window.location.origin);
-  }, { once: true });
-}
-
-function abrirFichaAtualCompleta() {
-  if (!dadosFichaAtual) return mostrarPopup('❌ Nenhuma ficha carregada.');
-  const tituloElem = document.getElementById('modal-titulo-personagem');
-  if (tituloElem) tituloElem.innerText = dadosFichaAtual.nome || dadosFichaAtual.personagem_nome || 'Ficha do Cavaleiro';
-  abrirFichaCompletaNoIframe(dadosFichaAtual);
-  const modal = document.getElementById('modal-ficha-grupo');
-  if (modal) modal.style.display = 'flex';
-}
-
-
-// --- FICHAS DO GRUPO ---
-async function carregarFichasDoGrupo() {
-  if (!supabaseClient) return;
-  const lista = document.getElementById('lista-fichas-grupo');
-  if (!lista) return;
-  lista.innerHTML = '<p style="color: #a8a8b3;">Carregando fichas dos cavaleiros...</p>';
-
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  const meuUserId = session?.user?.id || null;
-
-  const { data, error } = await supabaseClient
-    .from('fichas')
-    .select('*')
-    .eq('campanha_id', obterCampanhaIdAtual());
-
-  if (error || !data || data.length === 0) {
-    lista.innerHTML = '<p style="color: #a8a8b3;">Nenhuma ficha encontrada no grupo.</p>';
-    return;
-  }
-
-  lista.innerHTML = '';
-  
-  data.forEach((item) => {
-    const card = document.createElement('div');
-    card.style.cssText = 'background: #202024; padding: 1rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #29292e; margin-bottom: 8px;';
-    
-    const infoDiv = document.createElement('div');
-    const nomeCavaleiro = item.nome_personagem || 'Cavaleiro Desconhecido';
-    infoDiv.innerHTML = `<strong style="color: #fff; font-size: 1.1rem;">${escaparHTML(nomeCavaleiro)}</strong>`;
-    
-    const acoesDiv = document.createElement('div');
-    acoesDiv.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;';
-
-    const botaoVer = document.createElement('button');
-    botaoVer.innerText = 'Ver Ficha';
-    botaoVer.style.cssText = 'background: #8257e5; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold;';
-    botaoVer.onclick = () => {
-      abrirFichaGrupo(item.dados_ficha);
-    };
-    acoesDiv.appendChild(botaoVer);
-
-    if ((meuUserId && item.user_id === meuUserId) || ehMestreDaCampanhaAtual()) {
-      const botaoEditar = document.createElement('button');
-      botaoEditar.innerText = ehMestreDaCampanhaAtual() && item.user_id !== meuUserId ? '👑 Editar como Mestre' : '✏️ Editar';
-      botaoEditar.style.cssText = 'background: #315d36; color: #dfffe3; border: 1px solid #7fd88b; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: bold;';
-      botaoEditar.onclick = () => {
-        abrirEditorFicha(item.dados_ficha, item.user_id);
-      };
-      acoesDiv.appendChild(botaoEditar);
-    }
-
-    if (ehMestreDaCampanhaAtual()) {
-      const botaoExcluir = document.createElement('button');
-      botaoExcluir.innerText = '🗑️ Apagar';
-      botaoExcluir.style.cssText = 'background:#4a2020; color:#ffd7d7; border:1px solid #9b4b4b; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer; font-weight:bold;';
-      botaoExcluir.onclick = () => excluirFichaDoGrupo(item.id, nomeCavaleiro);
-      acoesDiv.appendChild(botaoExcluir);
-    }
-
-    card.appendChild(infoDiv);
-    card.appendChild(acoesDiv);
-    lista.appendChild(card);
-  });
-}
-
-async function excluirFichaDoGrupo(fichaId, nomePersonagem = 'esta ficha') {
-  if (!ehMestreDaCampanhaAtual() || !supabaseClient) return mostrarPopup('❌ Apenas o Mestre pode apagar fichas.');
-  if (!fichaId) return mostrarPopup('❌ ID da ficha não encontrado.');
-  const campanhaId = obterCampanhaIdAtual();
-  if (!campanhaId) return mostrarPopup('❌ Selecione uma campanha antes de apagar a ficha.');
-  if (!confirm(`Apagar a ficha de "${String(nomePersonagem).replace(/"/g, '\"')}" desta campanha?\n\nOs dados da ficha serão removidos da nuvem.`)) return;
-
-  const { error } = await supabaseClient
-    .from('fichas')
-    .delete()
-    .eq('id', fichaId)
-    .eq('campanha_id', campanhaId);
-
-  if (error) {
-    console.error('Erro ao apagar ficha:', error);
-    return mostrarPopup('❌ Não foi possível apagar a ficha: ' + error.message);
-  }
-
-  if (dadosFichaAtual && (dadosFichaAtual.nome === nomePersonagem || dadosFichaAtual.personagem_nome === nomePersonagem)) {
-    dadosFichaAtual = null;
-    const container = document.getElementById('container-ficha-carregada');
-    if (container) container.innerHTML = '<p class="texto-vazio">A ficha foi removida pelo Mestre.</p>';
-  }
-
-  tocarSom('success');
-  mostrarPopup('🗑️ Ficha apagada da campanha.');
-  await carregarFichasDoGrupo();
-  if (typeof carregarFichaDoUsuario === 'function') {
-    const session = (await supabaseClient.auth.getSession()).data.session;
-    if (session?.user?.id) await carregarFichaDoUsuario(session.user.id);
-  }
-}
-
-function abrirFichaGrupo(dados) {
-  if (!dados) return mostrarPopup('❌ Dados da ficha não encontrados.');
-  const tituloElem = document.getElementById('modal-titulo-personagem');
-  if (tituloElem) tituloElem.innerText = dados.nome || dados.personagem_nome || 'Ficha do Cavaleiro';
-  abrirFichaCompletaNoIframe(dados);
-  const modalGrupo = document.getElementById('modal-ficha-grupo');
-  if (modalGrupo) modalGrupo.style.display = 'flex';
-}
-
-
-function fecharModalFichaGrupo() {
-  const modalGrupo = document.getElementById('modal-ficha-grupo');
-  if (modalGrupo) modalGrupo.style.display = 'none';
 }
 
 // --- MAPA E MINI-VTT (OTIMIZADO PARA MOBILE) ---
@@ -5543,17 +5158,6 @@ window.abrirEditarCampanha = abrirEditarCampanha;
 window.salvarEdicaoCampanha = salvarEdicaoCampanha;
 window.fecharNovaCampanha = fecharNovaCampanha;
 window.criarNovaCampanha = criarNovaCampanha;
-window.importarArquivoJSON = importarArquivoJSON;
-window.abrirCriadorFicha = abrirCriadorFicha;
-window.fecharCriadorFicha = fecharCriadorFicha;
-window.abrirFichaAtualCompleta = abrirFichaAtualCompleta;
-window.abrirEditorFichaAtual = abrirEditorFichaAtual;
-window.abrirEditorFicha = abrirEditorFicha;
-window.salvarFichaNoSupabase = salvarFichaNoSupabase;
-window.carregarFichasDoGrupo = carregarFichasDoGrupo;
-window.excluirFichaDoGrupo = excluirFichaDoGrupo;
-window.abrirFichaGrupo = abrirFichaGrupo;
-window.fecharModalFichaGrupo = fecharModalFichaGrupo;
 window.fazerUploadMapa = fazerUploadMapa;
 window.alternarGridVTT = alternarGridVTT;
 window.alterarZoomMaster = alterarZoomMaster;
