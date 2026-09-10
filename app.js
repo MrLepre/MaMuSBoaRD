@@ -40,6 +40,7 @@ let imagemMestreAberta = false;
 // Mestre somente nas campanhas em que for o responsável.
 const MASTER_GLOBAL_USER_ID = '74205e44-2c46-42ff-8ad7-4bf1881fc6af';
 const MASTER_GLOBAL_EMAIL = 'mrlepre@rpg.local';
+window.MASTER_GLOBAL_EMAIL = MASTER_GLOBAL_EMAIL;
 
 function usuarioAutenticado() {
   return !!window.usuarioAtualId;
@@ -59,6 +60,37 @@ function usuarioEhMestreDaCampanha(campanhaId) {
   const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
   return !!(campanha && campanha.mestre_id === window.usuarioAtualId);
 }
+
+window.MAMUS_AUTH_HOOKS = {
+  onUserSignedIn: async (user) => {
+    atualizarInterfaceAuth(user);
+    await carregarCampanhasDoUsuario(user.id);
+    carregarFichaDoUsuario(user.id);
+  },
+  onUserSignedOut: async () => {
+    dadosFichaAtual = null;
+    fichaUltimoSalvamento = null;
+    fichaStatusCentral = 'sem_ficha';
+    limparEstadoPersistenciaTokens();
+    document.getElementById('vtt-tokens-camada')?.replaceChildren();
+    MAMUS_STATE.campaign.current = null;
+    MAMUS_STATE.system.current = null;
+    atualizarInterfaceAuth(null);
+    atualizarInterfacePapelCampanha();
+    aplicarTemaMesa();
+    atualizarVisibilidadeAcoesRapidas();
+    centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
+    renderizarCentralCampanha();
+    garantirAbasEconomiaJornaisVisiveis();
+    MAMUS_STATE.campaign.available = [];
+    MAMUS_STATE.session.current = null; diarioAtual = null; diarioImagens = []; sessoesCampanha = [];
+    atualizarContextoCampanha();
+    renderizarListaCampanhas();
+    const containerFicha = document.getElementById('container-ficha-carregada');
+    if (containerFicha) containerFicha.innerHTML = '<p style=\"color: #a8a8b3;\">Faça login para visualizar sua ficha.</p>';
+    mostrarPopup('Desconectado.');
+  }
+};
 
 function atualizarInterfacePapelCampanha() {
   const ehMestre = ehMestreDaCampanhaAtual();
@@ -951,6 +983,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (!supabaseClient && window.supabase) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.MAMUS_SUPABASE = supabaseClient;
+  } else if (supabaseClient) {
+    window.MAMUS_SUPABASE = supabaseClient;
   }
 
   atualizarStatusConexao(supabaseClient ? 'online' : 'offline', supabaseClient ? 'Conectando à Távola...' : 'Modo local — Supabase indisponível.');
@@ -966,6 +1001,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (supabaseClient) {
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
+      MAMUS_STATE.auth.session = session || null;
+      MAMUS_STATE.auth.user = session?.user || null;
       atualizarInterfaceAuth(session?.user || null);
       garantirAbasEconomiaJornaisVisiveis();
 
@@ -1066,123 +1103,16 @@ window.addEventListener('message', async (event) => {
   }
 });
 
-function nickParaEmail(nick) {
-  const nickTratado = nick.trim().toLowerCase().replace(/\s+/g, '');
-  return `${nickTratado}@rpg.local`;
-}
+
 
 // --- AUTENTICAÇÃO ---
-async function fazerCadastro() {
-  if (!supabaseClient) return alert('Supabase não inicializado.');
-  const nick = document.getElementById('auth-nick')?.value;
-  const password = document.getElementById('auth-senha')?.value;
+async 
 
-  if (!nick || !password) return alert('Informe Nick e senha!');
+async 
 
-  const emailFake = nickParaEmail(nick);
-  const { error } = await supabaseClient.auth.signUp({
-    email: emailFake,
-    password: password,
-    options: { data: { display_name: nick } }
-  });
+async 
 
-  if (error) {
-    mostrarPopup('❌ Erro no cadastro: ' + error.message);
-  } else {
-    mostrarPopup('✅ Conta criada com sucesso! Clique em Entrar.');
-  }
-}
 
-async function fazerLogin() {
-  if (!supabaseClient) return alert('Supabase não inicializado.');
-  const nick = document.getElementById('auth-nick')?.value;
-  const password = document.getElementById('auth-senha')?.value;
-
-  if (!nick || !password) return alert('Informe Nick e senha!');
-
-  const emailFake = nickParaEmail(nick);
-  let authResult = await supabaseClient.auth.signInWithPassword({
-    email: emailFake,
-    password: password
-  });
-
-  if (authResult.error) {
-    mostrarPopup('❌ Nick ou senha incorretos.');
-  } else {
-    mostrarPopup('✅ Login realizado!');
-    atualizarInterfaceAuth(authResult.data.user);
-    await carregarCampanhasDoUsuario(authResult.data.user.id);
-    carregarFichaDoUsuario(authResult.data.user.id);
-  }
-}
-
-async function fazerLogout() {
-  if (!supabaseClient) return;
-  await supabaseClient.auth.signOut();
-  atualizarInterfaceAuth(null);
-  dadosFichaAtual = null;
-  fichaUltimoSalvamento = null;
-  fichaStatusCentral = 'sem_ficha';
-  limparEstadoPersistenciaTokens();
-  document.getElementById('vtt-tokens-camada')?.replaceChildren();
-  MAMUS_STATE.campaign.current = null;
-  MAMUS_STATE.system.current = null;
-  atualizarInterfacePapelCampanha();
-  aplicarTemaMesa();
-  atualizarVisibilidadeAcoesRapidas();
-  centralResumoCache = { campanhaId: null, atualizadoEm: 0, dados: null };
-  renderizarCentralCampanha();
-  garantirAbasEconomiaJornaisVisiveis();
-  MAMUS_STATE.campaign.available = [];
-  MAMUS_STATE.session.current = null; diarioAtual = null; diarioImagens = []; sessoesCampanha = [];
-  atualizarContextoCampanha();
-  renderizarListaCampanhas();
-  const containerFicha = document.getElementById('container-ficha-carregada');
-  if (containerFicha) {
-    containerFicha.innerHTML = '<p style="color: #a8a8b3;">Faça login para visualizar sua ficha.</p>';
-  }
-  mostrarPopup('Desconectado.');
-}
-
-function atualizarInterfaceAuth(user) {
-  window.usuarioAtualId = user?.id || null;
-  const formLogin = document.getElementById('form-login');
-  const statusUsuario = document.getElementById('status-usuario');
-  const painelMapaMestre = document.getElementById('painel-mapa-mestre');
-  const painelUploadMestre = document.getElementById('painel-upload-mestre');
-  const painelGaleriaMestre = document.getElementById('painel-galeria-mestre');
-
-  if (user) {
-    if (formLogin) formLogin.style.display = 'none';
-    if (statusUsuario) statusUsuario.style.display = 'flex';
-    
-    const nickExibicao = user.user_metadata?.display_name || user.email.split('@')[0];
-    const nickDisplay = document.getElementById('user-nick-display');
-    if (nickDisplay) nickDisplay.innerText = nickExibicao;
-    const badgeMaster = document.getElementById('badge-master-global');
-    if (badgeMaster) {
-      badgeMaster.style.display = ehMestreGlobal() ? 'inline-flex' : 'none';
-      badgeMaster.title = ehMestreGlobal() ? `Master global · ${MASTER_GLOBAL_EMAIL}` : '';
-    }
-
-    const btnAbaSistemas = document.getElementById('btn-aba-sistemas');
-    const btnNovoSistema = document.getElementById('btn-novo-sistema');
-    if (btnAbaSistemas) btnAbaSistemas.style.display = 'inline-flex';
-    if (btnNovoSistema) btnNovoSistema.style.display = 'inline-flex';
-    atualizarInterfacePapelCampanha();
-    atualizarGruposNavegacao();
-  } else {
-    const btnAbaSistemas = document.getElementById('btn-aba-sistemas');
-    const btnNovoSistema = document.getElementById('btn-novo-sistema');
-    if (btnAbaSistemas) btnAbaSistemas.style.display = 'none';
-    if (btnNovoSistema) btnNovoSistema.style.display = 'none';
-    atualizarGruposNavegacao();
-    if (formLogin) formLogin.style.display = 'flex';
-    if (statusUsuario) statusUsuario.style.display = 'none';
-    if (painelMapaMestre) painelMapaMestre.style.display = 'none';
-    if (painelUploadMestre) painelUploadMestre.style.display = 'none';
-  }
-}
 
 // --- CENTRAL DE AÇÕES RÁPIDAS ---
 function alternarAcoesRapidas(event) {
@@ -1486,125 +1416,17 @@ function salvarCampanhaLocalmente() {
   } catch (err) {}
 }
 
-async function carregarCampanhasDoUsuario(userId) {
-  if (!supabaseClient || !userId) return;
-  const lista = document.getElementById('lista-campanhas');
-  if (lista) lista.innerHTML = '<div class="estado-galeria">Carregando campanhas disponíveis...</div>';
+async 
 
-  // A campanha agora pode ser descoberta por qualquer usuário autenticado,
-  // mas isso NÃO concede acesso aos dados da mesa. O acesso continua sendo
-  // controlado por campanha_membros + RLS.
-  const { data, error } = await supabaseClient
-    .from('campanhas')
-    .select('id,nome,descricao,sistema_id,mestre_id,status,encerrada_at,created_at,updated_at,sistemas(id,nome,descricao,configuracao)')
-    .order('created_at', { ascending: true });
+async 
 
-  if (error) {
-    console.error('Erro ao carregar campanhas:', error);
-    if (lista) lista.innerHTML = '<div class="estado-galeria">Não foi possível carregar as campanhas. Execute a migração de acesso por solicitação no Supabase.</div>';
-    return;
-  }
+async 
 
-  const { data: pedidos, error: pedidosError } = await supabaseClient
-    .from('campanha_pedidos')
-    .select('id,campanha_id,status,created_at,resolved_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  if (pedidosError) console.warn('Pedidos de entrada indisponíveis:', pedidosError);
+async 
 
-  const { data: meusMembros, error: membrosError } = await supabaseClient
-    .from('campanha_membros')
-    .select('campanha_id,papel')
-    .eq('user_id', userId);
-  if (membrosError) console.warn('Vínculos de campanha indisponíveis:', membrosError);
 
-  MAMUS_STATE.campaign.available = data || [];
-  window.pedidosCampanhaUsuario = pedidos || [];
-  window.campanhasMembroIds = new Set((meusMembros || []).map(m => m.campanha_id));
 
-  // Não entra automaticamente na primeira campanha. O jogador precisa
-  // escolher uma campanha ou solicitar acesso.
-  MAMUS_STATE.campaign.current = null;
-  MAMUS_STATE.system.current = null;
-  atualizarContextoCampanha();
-  atualizarVisibilidadeAcoesRapidas();
-  renderizarListaCampanhas();
-
-  const btn = document.getElementById('btn-nova-campanha');
-  if (btn) btn.style.display = usuarioAutenticado() ? 'inline-flex' : 'none';
-  if (ehMestreDaCampanhaAtual()) await carregarPedidosComoMestre();
-
-  // Se o usuário já era membro de uma campanha anteriormente selecionada,
-  // deixamos a campanha visível como opção, mas não carregamos seus dados sem
-  // que ele clique nela nesta sessão.
-}
-
-async function carregarPedidosComoMestre() {
-  const painel = document.getElementById('painel-pedidos-campanha');
-  const lista = document.getElementById('lista-pedidos-campanha');
-  if (!ehMestreDaCampanhaAtual() || !supabaseClient || !painel || !lista) return;
-  painel.style.display = 'block';
-  const { data, error } = await supabaseClient
-    .from('campanha_pedidos')
-    .select('id,campanha_id,user_id,status,created_at,campanhas(nome)')
-    .eq('status', 'pendente')
-    .order('created_at', { ascending: true });
-  if (error) {
-    console.warn('Não foi possível carregar pedidos:', error);
-    lista.innerHTML = '<div class="estado-galeria">Execute o SQL de acesso por solicitação.</div>';
-    return;
-  }
-  if (!data?.length) { lista.innerHTML = '<div class="estado-galeria">Nenhum pedido pendente.</div>'; return; }
-  lista.innerHTML = data.map(p => {
-    const camp = p.campanhas?.nome || 'Campanha';
-    const dataPedido = p.created_at ? new Date(p.created_at).toLocaleString('pt-BR') : '';
-    return `<article class="card-campanha"><div class="card-campanha-conteudo"><span class="card-campanha-icone">📨</span><div><h3>Pedido de entrada</h3><p>Jogador: <strong>${escaparHTML(p.user_id)}</strong></p><span class="card-campanha-meta">🏰 ${escaparHTML(camp)} · ${escaparHTML(dataPedido)}</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-selecionar-campanha" onclick="resolverPedidoCampanha('${p.id}', true)">✅ Aceitar</button><button type="button" class="btn-secundario" onclick="resolverPedidoCampanha('${p.id}', false)">❌ Recusar</button></div></article>`;
-  }).join('');
-}
-
-async function resolverPedidoCampanha(pedidoId, aceitar) {
-  if (!ehMestreDaCampanhaAtual() || !supabaseClient) return;
-  const { error } = await supabaseClient.rpc('resolver_pedido_campanha', { p_pedido: pedidoId, p_aceitar: aceitar });
-  if (error) { console.error(error); return mostrarPopup('❌ Não foi possível resolver o pedido: ' + error.message); }
-  await carregarPedidosComoMestre();
-  mostrarPopup(aceitar ? '✅ Jogador aceito na campanha.' : '❌ Pedido recusado.');
-}
-
-async function usuarioEhMembroDaCampanha(campanhaId) {
-  if (!supabaseClient || !campanhaId || !window.usuarioAtualId) return false;
-  const campanhaConhecida = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
-  if (ehMestreGlobal() || campanhaConhecida?.mestre_id === window.usuarioAtualId) return true;
-  const { data, error } = await supabaseClient.rpc('eh_membro_da_campanha', { p_campanha: campanhaId });
-  if (error) { console.warn('Não foi possível verificar membro da campanha:', error); return false; }
-  return data === true;
-}
-
-function obterPedidoCampanha(campanhaId) {
-  const pedidos = Array.isArray(window.pedidosCampanhaUsuario) ? window.pedidosCampanhaUsuario : [];
-  return pedidos.find(p => p.campanha_id === campanhaId && p.status === 'pendente') || null;
-}
-
-async function solicitarEntradaCampanha(campanhaId) {
-  if (!supabaseClient || !campanhaId) return;
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session?.user) return mostrarPopup('❌ Faça login para solicitar entrada.');
-  if (await usuarioEhMembroDaCampanha(campanhaId)) {
-    await selecionarCampanha(campanhaId);
-    return;
-  }
-  if (obterPedidoCampanha(campanhaId)) return mostrarPopup('⏳ Seu pedido de entrada já está pendente.');
-
-  const { error } = await supabaseClient.from('campanha_pedidos').insert({
-    campanha_id: campanhaId, user_id: session.user.id, status: 'pendente'
-  });
-  if (error) {
-    console.error('Erro ao solicitar entrada:', error);
-    return mostrarPopup('❌ Não foi possível enviar o pedido: ' + error.message);
-  }
-  window.pedidosCampanhaUsuario = [{ campanha_id: campanhaId, user_id: session.user.id, status: 'pendente', created_at: new Date().toISOString() }, ...(window.pedidosCampanhaUsuario || [])];
-  renderizarListaCampanhas();
-  mostrarPopup('📨 Pedido enviado ao Mestre. Aguarde a aprovação.');
-}
+async 
 
 async function selecionarCampanha(campanhaId, mostrarFeedback = true) {
   const campanha = MAMUS_STATE.campaign.available.find(c => c.id === campanhaId);
