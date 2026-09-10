@@ -20,10 +20,3 @@ O `app.js` original continua sendo executado. Nenhuma feature foi deliberadament
 ## Próxima etapa
 
 Separar o bootstrap real do `app.js`, começando pela responsabilidade hoje concentrada em `atualizarStatusConexao` e no bloco `DOMContentLoaded`.
-
-
-## Patch mobile — scroll nativo
-- Removido o fallback global de `touchmove` que executava `window.scrollBy()` + `preventDefault()`.
-- O scroll vertical do documento agora fica exclusivamente com o navegador.
-- O VTT continua com gestos próprios via `touch-action: none`.
-- Cache/script versions bumped para `mobile-scroll-v8` / `mamusboard-shell-v15`.

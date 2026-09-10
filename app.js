@@ -897,6 +897,42 @@ try {
   console.error('Erro ao inicializar Supabase:', err);
 }
 
+function obterAbaAtualRealtime() {
+  return abaAtual;
+}
+
+function aplicarMapaTaticoRecebidoRealtime(mapaTatico) {
+  if (!mapaTatico) return;
+  worldTriggerEstado.mapaTatico = normalizarMapaTaticoWT(mapaTatico);
+  worldTriggerEstado.ultimaSincronizacaoTatica = Date.now();
+  salvarEstadoWorldTrigger();
+  renderizarObstaculosMapaWT();
+  agendarRecalculoVisibilidadeWT();
+}
+
+window.obterAbaAtualRealtime = obterAbaAtualRealtime;
+window.aplicarMapaTaticoRecebidoRealtime = aplicarMapaTaticoRecebidoRealtime;
+
+function aplicarZoomRecebidoRealtime(zoom, panX, panY) {
+  vttZoom = zoom;
+  vttPanX = panX || 0;
+  vttPanY = panY || 0;
+  atualizarTransformMapaVTT();
+}
+
+function aplicarCalendarioRecebidoRealtime(ano, diaDoAno) {
+  calendarioDados = {
+    ano: Math.max(1, Number(ano) || 1),
+    dia: Math.max(1, Math.min(365, Number(diaDoAno) || 1))
+  };
+  centralAdicionarAtividade('🗓️', `Calendário avançou para o dia ${calendarioDados.dia}`, `Ano ${calendarioDados.ano}`);
+  calendarioCarregadoCampanha = obterCampanhaIdAtual();
+  renderizarCalendario();
+}
+
+window.aplicarZoomRecebidoRealtime = aplicarZoomRecebidoRealtime;
+window.aplicarCalendarioRecebidoRealtime = aplicarCalendarioRecebidoRealtime;
+
 document.addEventListener('DOMContentLoaded', async () => {
   restaurarEstadoSidebar();
   inicializarInteracoesMobile();
@@ -952,89 +988,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         carregarGaleria();
       }
 
-      canalMesa = supabaseClient.channel('sala-rpg-geral');
-      canalMesa
-        .on('broadcast', { event: 'novo_mapa' }, (payload) => {
-          if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          exibirMapaNaTela(payload.payload.url);
-          centralAdicionarAtividade('🗺️', 'O Mestre atualizou o mapa da campanha');
-          setTimeout(() => carregarTokensCampanha(true), 120);
-          mostrarPopup('🗺️ O Mestre atualizou o Mapa de Batalha!');
-        })
-        .on('broadcast', { event: 'wt_mapa_tatico' }, (payload) => {
-          const dados = payload.payload || {};
-          if (dados.campanha_id && dados.campanha_id !== obterCampanhaIdAtual()) return;
-          if (!dados.mapaTatico) return;
-          worldTriggerEstado.mapaTatico = normalizarMapaTaticoWT(dados.mapaTatico);
-          worldTriggerEstado.ultimaSincronizacaoTatica = Date.now();
-          salvarEstadoWorldTrigger();
-          renderizarObstaculosMapaWT();
-          agendarRecalculoVisibilidadeWT();
-        })
-        .on('broadcast', { event: 'vtt_zoom' }, (payload) => {
-          if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          vttZoom = payload.payload.zoom;
-          vttPanX = payload.payload.panX || 0;
-          vttPanY = payload.payload.panY || 0;
-          atualizarTransformMapaVTT();
-        })
-        .on('broadcast', { event: 'sessao_atualizada' }, async (payload) => {
-          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return; await carregarSessaoAtual(); centralAdicionarAtividade(dados.status==='aberta'?'🎬':'📕', `Sessão ${dados.numero || ''} ${dados.status==='aberta'?'iniciada':'atualizada'}`, dados.nome || ''); renderizarCentralCampanha(); if(abaAtual==='inicio') carregarResumoCentralCampanha(true); if(abaAtual==='diario') carregarDiarioAtual(); if(abaAtual==='sessoes' && ehMestreDaCampanhaAtual()) carregarSessoesCampanha();
-        })
-        .on('broadcast', { event: 'nova_rolagem' }, (payload) => {
-          if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          registrarRolagemHistorico(payload.payload.descricao, payload.payload.resultado, true);
-          centralAdicionarAtividade('🎲', String(payload.payload.descricao || 'Nova rolagem'), String(payload.payload.resultado ?? ''));
-        })
-        .on('broadcast', { event: 'galeria_mostrar_imagem' }, (payload) => {
-          const dados = payload.payload || {};
-          if (dados.campanha_id && dados.campanha_id !== obterCampanhaIdAtual()) return;
-          if (dados.url) abrirImagemMestre(dados.url, dados.nome || 'Imagem da campanha', dados.pasta || 'Geral', true);
-        })
-        .on('broadcast', { event: 'galeria_fechar_imagem' }, (payload) => {
-          if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          fecharImagemMestre(true);
-        })
-        .on('broadcast', { event: 'vtt_ping' }, (payload) => {
-          if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          criarEfeitoPing(payload.payload.x, payload.payload.y);
-        })
-        .on('broadcast', { event: 'economia_atualizada' }, (payload) => {
-          if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          if (abaAtual === 'economia') carregarEconomiaAtual(true);
-        })
-        .on('broadcast', { event: 'jornal_atualizado' }, (payload) => {
-          if (payload.payload?.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          if (abaAtual === 'jornais') carregarJornaisAtual(true); if (abaAtual === 'inicio') { centralAdicionarAtividade('📰','Novo jornal publicado'); carregarResumoCentralCampanha(true); }
-  if (abaAtual === 'calendario') carregarCalendarioAtual(true);
-        })
-        .on('broadcast', { event: 'calendario_atualizado' }, (payload) => {
-          const dados=payload.payload||{}; if(dados.campanha_id && dados.campanha_id!==obterCampanhaIdAtual()) return;
-          calendarioDados={ano:Math.max(1,Number(dados.ano)||1),dia:Math.max(1,Math.min(365,Number(dados.dia_do_ano)||1))};
-          centralAdicionarAtividade('🗓️', `Calendário avançou para o dia ${calendarioDados.dia}`, `Ano ${calendarioDados.ano}`);
-          calendarioCarregadoCampanha=obterCampanhaIdAtual(); renderizarCalendario();
-        })
-        .on('broadcast', { event: 'vtt_mover_token' }, (payload) => {
-          if (payload.payload.campanha_id && payload.payload.campanha_id !== obterCampanhaIdAtual()) return;
-          criarElementoToken(
-            payload.payload.id, 
-            payload.payload.nome, 
-            payload.payload.x, 
-            payload.payload.y, 
-            payload.payload.tamanho || 45, 
-            payload.payload.imagemStoragePath ? '' : (payload.payload.imagem || ''), 
-            payload.payload.hpAtual ?? 50, 
-            payload.payload.hpMax ?? 50, 
-            (String(payload.payload.ownerNick || payload.payload.nome || '').trim().toLowerCase() === obterMeuNickWT().trim().toLowerCase()) || ehMestreDaCampanhaAtual(),
-            { ownerNick: payload.payload.ownerNick || '', ownerUserId: payload.payload.ownerUserId || '', tipo: payload.payload.tipo || '', npcIndex: payload.payload.npcIndex, squad: payload.payload.squad || '', bagworm: !!payload.payload.bagworm, chameleon: !!payload.payload.chameleon, trion: payload.payload.trion ?? null, triggers: Array.isArray(payload.payload.triggers) ? payload.payload.triggers : [], imagemStoragePath: payload.payload.imagemStoragePath || '', imagemBucket: payload.payload.imagemBucket || '', imagemPublico: payload.payload.imagemPublico !== false }
-          );
-          const tokenRecebido = document.getElementById(payload.payload.id);
-          if (tokenRecebido && payload.payload.imagemStoragePath) aplicarImagemStorageAoToken(tokenRecebido, payload.payload.imagemStoragePath, payload.payload.imagemBucket || '', payload.payload.imagemPublico !== false, payload.payload.imagem || '');
-        })
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') atualizarStatusConexao('online', 'Távola sincronizada');
-          else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') atualizarStatusConexao('offline', 'Sincronização indisponível');
-        });
+      canalMesa = await globalThis.MAMUS_REALTIME?.connect(supabaseClient) || null;
 
       // Mapa e galeria agora carregam sob demanda, quando o jogador abre a aba.
       // Isso reduz consultas e trabalho inicial sem alterar o conteúdo dessas abas.
@@ -5682,16 +5636,62 @@ function fecharMenuMobileMais() {
 }
 
 function inicializarScrollTouchMobile() {
-  // A rolagem da página fica 100% a cargo do navegador no mobile.
-  //
-  // A versão anterior instalava um touchmove global com preventDefault() e
-  // window.scrollBy() para tentar corrigir navegadores que prendiam o gesto.
-  // Isso fazia o usuário disputar o gesto com o navegador: pequenos movimentos
-  // podiam virar uma rolagem aos trancos, principalmente em telas touch.
-  // O CSS atual já define touch-action: pan-y no documento e deixa o VTT
-  // controlar seus próprios gestos, então não precisamos mais desse fallback.
   if (window.__mamusTouchScrollInicializado) return;
   window.__mamusTouchScrollInicializado = true;
+
+  let inicioX = 0;
+  let inicioY = 0;
+  let ultimoY = 0;
+  let arrastandoPagina = false;
+  let ignorar = false;
+
+  const elementoDeveManterGestosProprios = (el) => !!el?.closest?.(
+    '#vtt-canvas, .vtt-wrapper, .mobile-more-sheet, .abas-navegacao, input, textarea, select, [contenteditable=\"true\"]'
+  );
+
+  document.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) {
+      arrastandoPagina = false;
+      ignorar = true;
+      return;
+    }
+    const t = event.touches[0];
+    inicioX = ultimoY = t.clientX;
+    inicioY = t.clientY;
+    arrastandoPagina = false;
+    ignorar = elementoDeveManterGestosProprios(event.target);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (event) => {
+    if (ignorar || event.touches.length !== 1) return;
+    const t = event.touches[0];
+    const dx = t.clientX - inicioX;
+    const dy = t.clientY - inicioY;
+
+    if (!arrastandoPagina) {
+      if (Math.abs(dy) < 8 || Math.abs(dy) < Math.abs(dx) * 1.05) return;
+      arrastandoPagina = true;
+    }
+
+    const deltaY = t.clientY - ultimoY;
+    if (!Number.isFinite(deltaY) || deltaY === 0) return;
+
+    // Fallback de rolagem para navegadores móveis que prendem o gesto no
+    // documento por causa de wrappers/fixed overlays. Não toca no VTT.
+    window.scrollBy(0, -deltaY);
+    ultimoY = t.clientY;
+    event.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    arrastandoPagina = false;
+    ignorar = false;
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', () => {
+    arrastandoPagina = false;
+    ignorar = false;
+  }, { passive: true });
 }
 
 function inicializarInteracoesMobile() {
