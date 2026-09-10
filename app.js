@@ -2232,62 +2232,7 @@ async function garantirSistemaElarion(){
   const r=await supabaseClient.from('sistemas').insert({nome:'Elarion — Sistema de Joias e Luvas',descricao:'RPG de Joias e Luvas de Canalização. Ficha com inventário de joias sem limite de quantidade.',configuracao:cfg,criado_por:session.user.id});
   if(r.error)console.warn('Elarion não pôde ser criado automaticamente:',r.error.message);
 }
-async function carregarSistemas(){
-  if(!supabaseClient) return;
-  const lista=document.getElementById('lista-sistemas'); if(!lista) return;
-  const {data,error}=await supabaseClient.from('sistemas').select('id,nome,descricao,configuracao,criado_por,created_at').order('created_at',{ascending:true});
-  if(error){ lista.innerHTML='<div class="estado-galeria">Execute a atualização SQL da Etapa 2 no Supabase.</div>'; console.error(error); return; }
-  lista.innerHTML='';
-  (data||[]).forEach(s=>{
-    const card=document.createElement('article'); card.className='card-sistema'+(s.configuracao?.tipo==='legado'?' legado':'');
-    const cfg=s.configuracao||{};
-    const modulosWT=cfg.tipo==='world_trigger'?['🔋 Trion','👥 Squads','📡 Radar','👻 Stealth','🏆 Rank Wars']:[]; const modulosEL=cfg.tipo==='elarion'?['💎 Joias ilimitadas','🧤 Luvas','✨ Inspiração','❤️ Fadiga','🎲 2d10']:[]; const modulosEB=cfg.tipo==='eter_brasas'?['🎲 2d10','✨ Técnica Única','🏰 Reinos','🏛️ Guildas','📖 Bestiário','🗓️ Calendário']:[]; const modulosNO=cfg.tipo==='noctavell'?['🎲 Dado do Véu','📜 Pactos','👁️ Entidades','🧠 Sanidade','🔐 Nome Verdadeiro']:[]; const modulosOP=cfg.tipo==='olimpia_pangeia'?['🏛️ Pangeia','⚔️ Classes','✨ Passiva + 3 Habilidades + Ultimate','💎 Jóias','📈 XP dobrando']:[]; const modulosSF=cfg.tipo==='sobreviventes_fronteira'?['🧱 Grau de Linhagem','⚔️ Combate letal','🌀 Ciclos temporais','🌌 Órbitas','✨ Moldagem de Mana']:[]; const modulosNT=cfg.tipo==='noites_em_tokyo'?['🩸 Ghouls','🧬 Kagunes','🔬 RC / Kakuja','⚔️ CCG / Quinques','🌙 Fome / Sanidade']:[]; const resumo=modulosWT.length?modulosWT.join(' · '):modulosEL.length?modulosEL.join(' · '):modulosEB.length?modulosEB.join(' · '):modulosNO.length?modulosNO.join(' · '):modulosOP.length?modulosOP.join(' · '):modulosSF.length?modulosSF.join(' · '):modulosNT.length?modulosNT.join(' · '):[`${(cfg.dados||[]).length} dados`,`${(cfg.atributos||[]).length} atributos`,`${(cfg.recursos||[]).length} recursos`,`${(cfg.pericias||[]).length} perícias`].join(' · ');
-    card.innerHTML=`<div class="card-sistema-topo"><div><h3>⚙️ ${escaparHTML(s.nome)}</h3><p>${escaparHTML(s.descricao||'Sem descrição.')}</p><div class="card-sistema-meta">${escaparHTML(resumo)}</div></div>${cfg.tipo==='legado'?'<span class="badge-legado">LEGADO</span>':''}</div><div class="card-sistema-acoes"><button class="btn-sistema-acao" onclick="abrirFichaDoSistema('${s.id}')">📖 Abrir Ficha</button>${(s.criado_por === window.usuarioAtualId || ehMestreGlobal()) ? `<button class="btn-sistema-acao" onclick="editarSistema('${s.id}')">✏️ Editar</button>`:''}</div>`;
-    lista.appendChild(card);
-  });
-}
-async function editarSistema(id){
-  const s=(await supabaseClient.from('sistemas').select('*').eq('id',id).single()).data; if(!s)return;
-  if (s.criado_por !== window.usuarioAtualId && !ehMestreGlobal()) return mostrarPopup('❌ Você só pode editar sistemas que criou.');
-  document.getElementById('sistema-editando-id').value=s.id;
-  document.getElementById('titulo-editor-sistema').textContent='⚒️ Editar sistema';
-  document.getElementById('novo-sistema-nome').value=s.nome||''; document.getElementById('novo-sistema-descricao').value=s.descricao||'';
-  iniciarBuilderSistema(s.configuracao||{}); const tema=s.configuracao?.tema||{}; if(document.getElementById('sistema-cor-primaria')) document.getElementById('sistema-cor-primaria').value=tema.corPrimaria||'#c5a059'; if(document.getElementById('sistema-cor-fundo')) document.getElementById('sistema-cor-fundo').value=tema.corFundo||'#080a0f'; if(document.getElementById('sistema-cor-painel')) document.getElementById('sistema-cor-painel').value=tema.corPainel||'#151821'; document.getElementById('painel-novo-sistema').style.display='block'; document.getElementById('novo-sistema-nome').focus();
-}
-async function salvarSistema(){
-  if(!usuarioAutenticado()) return; const nome=document.getElementById('novo-sistema-nome')?.value.trim(); if(!nome)return mostrarPopup('❌ Informe o nome do sistema.');
-  const descricao=document.getElementById('novo-sistema-descricao')?.value.trim()||''; const id=document.getElementById('sistema-editando-id')?.value||null;
-  sincronizarIdsComLayout();
-  const config={versao:builderTipoSistema==='world_trigger'?4:3,tipo:builderTipoSistema,dados:[...builderSistema.dados],atributos:builderSistema.atributos.map(x=>({...x})),recursos:builderSistema.recursos.map(x=>({...x})),pericias:builderSistema.pericias.map(x=>({...x})),campos:builderSistema.campos.map(x=>({...x})),secoes:builderSistema.secoes.map(x=>({...x,campos:[...x.campos]})),tema:{corPrimaria:document.getElementById('sistema-cor-primaria')?.value||'#c5a059',corFundo:document.getElementById('sistema-cor-fundo')?.value||'#080a0f',corPainel:document.getElementById('sistema-cor-painel')?.value||'#151821'},ficha:'ficha-generica.html',...(builderSistema.especial||{})};
-  let q=supabaseClient.from('sistemas'); const payload={nome,descricao,configuracao:config,updated_at:new Date().toISOString()};
-  const result=id
-    ? await (ehMestreGlobal() ? q.update(payload).eq('id',id) : q.update(payload).eq('id',id).eq('criado_por',window.usuarioAtualId)).select().single()
-    : await q.insert({...payload,criado_por:(await supabaseClient.auth.getUser()).data.user?.id}).select().single();
-  if(result.error)return mostrarPopup('❌ Erro ao salvar sistema: '+result.error.message);
-  fecharNovoSistema(); await carregarSistemas(); mostrarPopup(`⚙️ Sistema "${nome}" salvo com sucesso!`);
-}
-function abrirFichaGenericaNoIframe(iframe, src, sistema, dados = null, modo = 'criacao') {
-  if (!iframe || !sistema) return;
-  const enviar = () => {
-    try {
-      iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-sistema', sistema }, window.location.origin);
-      if (dados) iframe.contentWindow.postMessage({ type: 'cronicas-camelot-carregar-ficha', dados, modo }, window.location.origin);
-    } catch (err) { console.error('Erro ao enviar sistema para a ficha:', err); }
-  };
-  iframe.addEventListener('load', enviar, { once: true });
-  iframe.src = src;
-}
-
-async function abrirFichaDoSistema(id){
-  const {data,error}=await supabaseClient.from('sistemas').select('*').eq('id',id).single(); if(error||!data)return mostrarPopup('❌ Sistema não encontrado.');
-  MAMUS_STATE.system.current=data;
-  const modal=document.getElementById('modal-criador-ficha'), iframe=document.getElementById('iframe-criador-ficha'); if(!modal||!iframe)return;
-  if(data.configuracao?.tipo==='legado') iframe.src='ficha-editor.html?modo=criacao&t='+Date.now(); else if(data.configuracao?.tipo==='elarion') abrirFichaGenericaNoIframe(iframe, 'ficha-elarion.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='eter_brasas') abrirFichaGenericaNoIframe(iframe, 'ficha-eter-brasas.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noctavell') abrirFichaGenericaNoIframe(iframe, 'ficha-noctavell.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='olimpia_pangeia') abrirFichaGenericaNoIframe(iframe, 'ficha-olimpia.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='noites_em_tokyo') abrirFichaGenericaNoIframe(iframe, 'ficha-noites-em-tokyo.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else if(data.configuracao?.tipo==='sobreviventes_fronteira') abrirFichaGenericaNoIframe(iframe, 'ficha-sobreviventes.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao'); else abrirFichaGenericaNoIframe(iframe, 'ficha-generica.html?modo=criacao&sistema='+encodeURIComponent(id)+'&t='+Date.now(), data, null, 'criacao');
-  const titulo=document.querySelector('#modal-criador-ficha .modal-ficha-cabecalho h2'); if(titulo)titulo.textContent=`⚔️ Ficha — ${data.nome}`;
-  modal.style.display='flex';
-}
-
-
+// Gerenciamento de sistemas extraído para js/systems/systems.js (Marco 5).
 // --- BESTIÁRIO ELARION ---
 let bestiarioElarion = [];
 let bestiarioInicializado = false;
@@ -3585,16 +3530,7 @@ function mudarAba(nomeAba, evento) {
     carregarGaleria();
   }
   if (nomeAba === 'sistemas' && supabaseClient) {
-    (async () => {
-      if (usuarioAutenticado()) {
-        await garantirSistemaElarion();
-        await garantirSistemaEterBrasas();
-        await garantirSistemaNoctavell(); garantirSistemaNoitesEmTokyo();
-        await garantirSistemaOlimpia();
-      await garantirSistemaSobreviventes();
-      }
-      await carregarSistemas();
-    })();
+    globalThis.MAMUS_SYSTEMS?.load?.();
   }
 }
 
