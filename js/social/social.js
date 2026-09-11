@@ -3,15 +3,40 @@
   'use strict';
   const state = global.MAMUS_STATE;
   const client = () => global.MAMUS_SUPABASE || null;
+  function ensureSocialState(){
+    if(!global.MAMUS_STATE) return null;
+    if(!global.MAMUS_STATE.social) global.MAMUS_STATE.social={profile:null,friends:[],friendRequests:[],discovery:[],searchResults:[],loading:false};
+    return global.MAMUS_STATE.social;
+  }
   const esc = value => typeof global.escaparHTML === 'function' ? global.escaparHTML(value ?? '') : String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let mesasCache = [];
 
-  function uid(){ return state?.auth?.user?.id || global.usuarioAtualId || null; }
+  function uid(){ return global.MAMUS_STATE?.auth?.user?.id || global.usuarioAtualId || null; }
+  async function currentUser(){
+    const id=uid();
+    if(id) return global.MAMUS_STATE?.auth?.user || null;
+    const sb=client();
+    if(!sb) return null;
+    try{
+      const {data}=await sb.auth.getSession();
+      const user=data?.session?.user||null;
+      if(user){
+        global.MAMUS_STATE.auth.session=data.session;
+        global.MAMUS_STATE.auth.user=user;
+        global.usuarioAtualId=user.id;
+      }
+      return user;
+    }catch(error){
+      console.error('[Social] sessão:',error);
+      return null;
+    }
+  }
   function nick(){ return state?.auth?.user?.user_metadata?.display_name || document.getElementById('user-nick-display')?.innerText || 'Jogador'; }
   function toast(msg){ global.mostrarPopup?.(msg); }
 
   async function ensureProfile(){
-    const sb=client(), id=uid(); if(!sb||!id) return null;
+    ensureSocialState();
+    const sb=client(), user=await currentUser(), id=user?.id||uid(); if(!sb||!id) return null;
     let {data,error}=await sb.from('perfis').select('id,username,display_name,bio,avatar_url').eq('id',id).maybeSingle();
     if(error){ console.error('[Social] perfil:',error); return null; }
     if(!data){
@@ -36,7 +61,8 @@
   }
 
   async function salvarPerfilSocial(){
-    const sb=client(), id=uid(); if(!sb||!id) return toast('❌ Faça login para editar seu perfil.');
+    ensureSocialState();
+    const sb=client(), user=await currentUser(), id=user?.id||uid(); if(!sb||!id) return toast('❌ Faça login para editar seu perfil.');
     const username=String(document.getElementById('social-username')?.value||'').trim().toLowerCase().replace(/\s+/g,'_');
     const display_name=String(document.getElementById('social-display-name')?.value||'').trim();
     const bio=String(document.getElementById('social-bio-input')?.value||'').trim();
@@ -48,7 +74,8 @@
   }
 
   async function buscarUsuariosSocial(){
-    const sb=client(), id=uid(); if(!sb||!id) return toast('❌ Faça login primeiro.');
+    ensureSocialState();
+    const sb=client(), user=await currentUser(), id=user?.id||uid(); if(!sb||!id) return toast('❌ Faça login primeiro.');
     const q=String(document.getElementById('social-busca-usuario')?.value||'').trim().replace(/[^a-zA-Z0-9_ áéíóúãõçÁÉÍÓÚÃÕÇ-]/g,'');
     if(q.length<2) return toast('Digite pelo menos 2 caracteres.');
     const {data,error}=await sb.from('perfis').select('id,username,display_name,bio,avatar_url').neq('id',id).or(`username.ilike.%${q}%,display_name.ilike.%${q}%`).limit(12);
@@ -64,7 +91,8 @@
   }
 
   async function loadFriends(){
-    const sb=client(), id=uid(); if(!sb||!id) return;
+    ensureSocialState();
+    const sb=client(), user=await currentUser(), id=user?.id||uid(); if(!sb||!id) return;
     const {data:rels,error}=await sb.from('amizades').select('id,user_a,user_b,created_at').or(`user_a.eq.${id},user_b.eq.${id}`);
     if(error){console.error('[Social] amizades:',error);return;}
     const ids=(rels||[]).map(r=>r.user_a===id?r.user_b:r.user_a);
@@ -75,7 +103,8 @@
   }
 
   async function loadRequests(){
-    const sb=client(), id=uid(); if(!sb||!id) return;
+    ensureSocialState();
+    const sb=client(), user=await currentUser(), id=user?.id||uid(); if(!sb||!id) return;
     const {data,error}=await sb.from('solicitacoes_amizade').select('id,de_usuario,para_usuario,status,created_at').eq('para_usuario',id).eq('status','pendente').order('created_at',{ascending:false});
     if(error){console.error('[Social] requests:',error);return;}
     const ids=(data||[]).map(r=>r.de_usuario); let profiles=[];
@@ -110,7 +139,8 @@
   }
 
   async function carregarDescobertaSocial(){
-    const sb=client(), me=uid(); if(!sb||!me)return;
+    ensureSocialState();
+    const sb=client(), user=await currentUser(), me=user?.id||uid(); if(!sb||!me)return;
     const {data,error}=await sb.from('campanhas').select('id,nome,descricao,sistema_id,mestre_id,publica,procurando_jogadores,vagas_jogadores,horario_texto,status,created_at').eq('publica',true).eq('procurando_jogadores',true).neq('mestre_id',me).neq('status','encerrada').order('created_at',{ascending:false}).limit(50);
     if(error){console.error('[Social] mesas:',error); const el=document.getElementById('social-mesas-lista');if(el)el.innerHTML='<p class="texto-vazio">Não foi possível carregar as mesas.</p>';return;}
     const ownerIds=[...new Set((data||[]).map(c=>c.mestre_id).filter(Boolean))]; const sysIds=[...new Set((data||[]).map(c=>c.sistema_id).filter(Boolean))];
@@ -133,7 +163,7 @@
   }
 
   async function solicitarEntradaMesaSocial(campanhaId){
-    const sb=client(), me=uid(); if(!sb||!me)return;
+    const sb=client(), user=await currentUser(), me=user?.id||uid(); if(!sb||!me)return;
     const {data:existing}=await sb.from('campanha_pedidos').select('id,status').eq('campanha_id',campanhaId).eq('user_id',me).in('status',['pendente','aceito']).maybeSingle();
     if(existing) return toast(existing.status==='aceito'?'Você já está nesta campanha.':'⏳ Você já enviou um pedido para esta mesa.');
     const {error}=await sb.from('campanha_pedidos').insert({campanha_id:campanhaId,user_id:me,status:'pendente'});
@@ -175,9 +205,30 @@
   }
 
   async function load(){
-    const aviso=document.getElementById('comunidade-login-aviso'), conteudo=document.getElementById('comunidade-conteudo');
-    const id=uid(); if(aviso)aviso.style.display=id?'none':'block'; if(conteudo)conteudo.style.display=id?'grid':'none'; if(!id)return;
-    await ensureProfile(); await Promise.all([loadFriends(),loadRequests(),carregarDescobertaSocial(),carregarPublicacaoAtual()]);
+    const aviso=document.getElementById('comunidade-login-aviso'), conteudo=document.getElementById('comunidade-conteudo'), nome=document.getElementById('social-perfil-nome'), bio=document.getElementById('social-perfil-bio');
+    const social=ensureSocialState();
+    social.loading=true;
+    const user=await currentUser();
+    const id=user?.id||uid();
+    if(aviso)aviso.style.display=id?'none':'block';
+    if(conteudo)conteudo.style.display=id?'grid':'none';
+    if(!id){
+      if(nome)nome.textContent='Entre na rede';
+      if(bio)bio.textContent='Faça login para carregar seu perfil.';
+      social.loading=false;
+      return;
+    }
+    try{
+      const results=await Promise.allSettled([ensureProfile(),loadFriends(),loadRequests(),carregarDescobertaSocial(),carregarPublicacaoAtual()]);
+      const failed=results.filter(r=>r.status==='rejected');
+      if(failed.length){
+        console.error('[Social] falhas ao carregar comunidade:',failed);
+        if(nome && nome.textContent==='Carregando...') nome.textContent='Comunidade';
+        if(bio) bio.textContent='Alguns dados não puderam ser carregados. Verifique o console para detalhes.';
+      }
+    }finally{
+      social.loading=false;
+    }
   }
 
   global.MAMUS_SOCIAL={load,buscarUsuarios:buscarUsuariosSocial,salvarPerfil:salvarPerfilSocial,carregarDescoberta:carregarDescobertaSocial};

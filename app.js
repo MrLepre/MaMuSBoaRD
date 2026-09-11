@@ -52,6 +52,7 @@ window.MAMUS_AUTH_HOOKS = {
     atualizarInterfaceAuth(user);
     await carregarCampanhasDoUsuario(user.id);
     carregarFichaDoUsuario(user.id);
+    if (MAMUS_STATE.ui.currentTab === 'comunidade') await window.MAMUS_SOCIAL?.load?.();
   },
   onUserSignedOut: async () => {
     MAMUS_STATE.character.current = null;
@@ -245,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (usuarioAutenticado()) await garantirSistemaElarion();
         await carregarCampanhasDoUsuario(session.user.id);
         carregarFichaDoUsuario(session.user.id);
+        if (MAMUS_STATE.ui.currentTab === 'comunidade') await window.MAMUS_SOCIAL?.load?.();
       }
 
       // Se a aba restaurada precisar de dados remotos, carregue somente agora
