@@ -1,5 +1,5 @@
-const CACHE_NAME = 'mamus-cache-v23';
-const SHELL = ['./','./index.html','./style.css','./app.js','./manifest.json','./js/core/state.js','./js/core/bootstrap.js','./js/core/supabase.js','./js/realtime.js','./js/auth/auth.js','./js/campaigns/campaigns.js','./js/systems/systems.js','./js/characters/characters.js','./js/tabletop/tabletop.js','./js/systems-modules/registry.js','./js/systems-modules/world-trigger.js'];
+const CACHE_NAME = 'mamus-cache-v24';
+const SHELL = ['./','./index.html','./style.css','./app.js','./manifest.json','./js/core/state.js','./js/core/bootstrap.js','./js/core/supabase.js','./js/realtime.js','./js/auth/auth.js','./js/campaigns/campaigns.js','./js/systems/systems.js','./js/characters/characters.js','./js/tabletop/tabletop.js','./js/systems-modules/registry.js','./js/systems-modules/world-trigger.js','./js/social/social.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });

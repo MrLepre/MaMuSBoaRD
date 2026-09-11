@@ -24,6 +24,7 @@
   <script src="js/realtime.js?v=marco2-realtime-v1"></script>
   <script src="js/auth/auth.js?v=marco4-auth-v1"></script>
   <script src="js/campaigns/campaigns.js?v=marco4-campaigns-v1"></script>
+  <script src="js/social/social.js?v=marco11-social-v1"></script>
   <script src="js/systems/systems.js?v=marco5-systems-v1"></script>
 </head>
 <body>
@@ -88,6 +89,11 @@
           <button id="btn-aba-economia" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('economia', event)" aria-label="Economia do Mundo"><span>💰</span><span>Economia</span></button>
           <button id="btn-aba-jornais" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('jornais', event)" aria-label="Jornais do Mundo"><span>📰</span><span>Jornais</span></button>
           <button id="btn-aba-calendario" class="aba-mundo" data-nav-group-item="mundo" onclick="mudarAba('calendario', event)" aria-label="Calendário das Brasas"><span>🗓️</span><span>Calendário</span></button>
+        </div>
+
+        <div class="nav-grupo" data-nav-group="comunidade">
+          <div class="nav-grupo-titulo">COMUNIDADE</div>
+          <button data-nav-group-item="comunidade" onclick="mudarAba('comunidade', event)"><span>🌐</span><span>Comunidade</span></button>
         </div>
 
         <div class="nav-grupo" data-nav-group="campanha">
@@ -273,6 +279,60 @@
           <a id="guia-abrir-original" class="btn-secundario guia-link-original" href="#" target="_blank" rel="noopener">Abrir</a>
         </div>
         <iframe id="guia-iframe" title="Leitor de guia do RPG" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section id="aba-comunidade" class="painel painel-comunidade">
+      <div class="cabecalho-campanhas comunidade-cabecalho">
+        <div>
+          <span class="eyebrow-galeria">🌐 REDE RPG</span>
+          <h2>Comunidade MaMuS</h2>
+          <p class="subtexto-galeria">Encontre amigos, acompanhe suas mesas e descubra campanhas procurando jogadores.</p>
+        </div>
+      </div>
+
+      <div id="comunidade-login-aviso" class="card-secao comunidade-aviso" style="display:none;">
+        <h3>Entre na rede</h3><p>Faça login para encontrar jogadores, adicionar amigos e descobrir mesas abertas.</p>
+      </div>
+
+      <div id="comunidade-conteudo" class="comunidade-grid">
+        <section class="card-secao comunidade-card comunidade-perfil-card">
+          <div class="comunidade-card-titulo"><div><span class="eyebrow-galeria">SEU PERFIL</span><h3 id="social-perfil-nome">Carregando...</h3></div><span id="social-perfil-status" class="social-badge">ONLINE</span></div>
+          <p id="social-perfil-bio" class="social-bio">Configure seu perfil para aparecer na comunidade.</p>
+          <div class="social-form">
+            <label>Username<input id="social-username" maxlength="32" placeholder="seu_username"></label>
+            <label>Nome de exibição<input id="social-display-name" maxlength="80" placeholder="Como você quer ser chamado"></label>
+            <label>Bio<textarea id="social-bio-input" maxlength="240" rows="3" placeholder="Mestre de fantasia, jogador casual, procurando grupo...\"></textarea></label>
+            <button type="button" class="btn-ficha-principal" onclick="salvarPerfilSocial()">Salvar perfil</button>
+          </div>
+        </section>
+
+        <section class="card-secao comunidade-card">
+          <div class="comunidade-card-titulo"><div><span class="eyebrow-galeria">AMIGOS</span><h3>Minha rede</h3></div><span id="social-amigos-count" class="social-badge">0</span></div>
+          <div class="social-search-row"><input id="social-busca-usuario" type="search" maxlength="60" placeholder="Buscar por username ou nome"><button type="button" class="btn-secundario" onclick="buscarUsuariosSocial()">Buscar</button></div>
+          <div id="social-resultados-busca" class="social-lista"><p class="texto-vazio">Procure jogadores para adicionar à sua rede.</p></div>
+          <div id="social-solicitacoes" class="social-sublista"></div>
+          <div id="social-amigos" class="social-lista"><p class="texto-vazio">Você ainda não adicionou amigos.</p></div>
+        </section>
+
+        <section class="card-secao comunidade-card comunidade-mesas-card">
+          <div class="comunidade-card-titulo"><div><span class="eyebrow-galeria">EXPLORAR</span><h3>Mesas procurando jogadores</h3></div><button type="button" class="btn-secundario" onclick="carregarDescobertaSocial()">Atualizar</button></div>
+          <div class="social-filtros"><input id="social-filtro-mesas" type="search" maxlength="80" placeholder="Buscar mesa ou sistema" oninput="filtrarMesasSocial()"><select id="social-filtro-vagas" onchange="filtrarMesasSocial()"><option value="todas">Todas as mesas</option><option value="vagas">Com vagas</option></select></div>
+          <div id="social-mesas-lista" class="social-mesas-lista"><p class="texto-vazio">Carregando mesas...</p></div>
+        </section>
+
+        <section class="card-secao comunidade-card comunidade-publicar-card">
+          <div class="comunidade-card-titulo"><div><span class="eyebrow-galeria">SUA MESA</span><h3>Encontrar jogadores</h3></div></div>
+          <p class="social-bio">Publique a campanha ativa na descoberta. Isso mostra apenas informações públicas da mesa; fichas, mapa e recursos continuam protegidos.</p>
+          <div id="social-campanha-atual" class="social-campanha-atual">Nenhuma campanha ativa.</div>
+          <div class="social-publicar-form">
+            <label class="social-toggle"><input id="social-campanha-publica" type="checkbox"><span>Mostrar esta campanha na comunidade</span></label>
+            <label class="social-toggle"><input id="social-procurando-jogadores" type="checkbox"><span>Estou procurando jogadores</span></label>
+            <label>Vagas disponíveis<input id="social-vagas" type="number" min="0" max="99" value="1"></label>
+            <label>Horário / disponibilidade<input id="social-horario" maxlength="160" placeholder="Ex.: sábados às 20h"></label>
+            <button type="button" class="btn-ficha-principal" onclick="salvarPublicacaoMesaSocial()">Atualizar publicação</button>
+          </div>
+        </section>
       </div>
     </section>
 

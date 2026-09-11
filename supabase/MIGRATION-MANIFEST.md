@@ -17,3 +17,5 @@ O restante entra em migrations posteriores por domínio.
 ## Não executado automaticamente
 
 Nenhum SQL foi enviado ao Supabase remoto neste marco. Isso é intencional: a próxima etapa de aplicação deve começar com um diff/inspeção do banco remoto.
+
+| 0013 | Amizade inicial das contas existentes | Bootstrap único: cria amizade entre todos os pares de contas existentes na aplicação no momento da execução. | Não cria amizade automática para contas futuras. |

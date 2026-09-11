@@ -2677,7 +2677,7 @@ async function carregarResumoCentralCampanha(force = false) {
 
 // --- NAVEGAÇÃO DE ABAS ---
 function mudarAba(nomeAba, evento) {
-  const abasValidas = ['inicio', 'ficha', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'calendario', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
+  const abasValidas = ['inicio', 'ficha', 'comunidade', 'campanhas', 'sistemas', 'bestiario', 'guias', 'economia', 'jornais', 'calendario', 'noctavell', 'grupo', 'mapa', 'rolagens', 'diario', 'sessoes', 'galeria'];
 
   // PROTEÇÃO CONTRA ABERTURA ACIDENTAL DO SALÃO DE DADOS.
   // 'Rolagens' é uma ação deliberada: só entra por seu botão da navegação,
@@ -2723,6 +2723,7 @@ function mudarAba(nomeAba, evento) {
   try { localStorage.setItem('cronicas_camelot_aba', nomeAba); } catch (err) {}
 
   if (nomeAba === 'inicio') { renderizarCentralCampanha(); carregarResumoCentralCampanha(); }
+  if (nomeAba === 'comunidade') { window.MAMUS_SOCIAL?.load?.(); }
 
   // Carregamento sob demanda: a mesa abre mais rápido e cada recurso é
   // consultado somente quando realmente é necessário.
@@ -3224,6 +3225,7 @@ const MOBILE_NAV_ITEMS = [
   { aba:'economia', icone:'💰', nome:'Economia' },
   { aba:'jornais', icone:'📰', nome:'Jornais' },
   { aba:'calendario', icone:'🗓️', nome:'Calendário' },
+  { aba:'comunidade', icone:'🌐', nome:'Comunidade' },
   { aba:'campanhas', icone:'🏰', nome:'Campanhas' },
   { aba:'diario', icone:'📔', nome:'Diário' },
   { aba:'galeria', icone:'💬', nome:'Galeria' },

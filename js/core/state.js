@@ -70,6 +70,15 @@
     realtime: {
       connected: false,
       channel: null
+    },
+
+    social: {
+      profile: null,
+      friends: [],
+      friendRequests: [],
+      discovery: [],
+      searchResults: [],
+      loading: false
     }
   };
 
@@ -125,6 +134,12 @@
     state.session.campaigns = [];
     state.realtime.connected = false;
     state.realtime.channel = null;
+    state.social.profile = null;
+    state.social.friends = [];
+    state.social.friendRequests = [];
+    state.social.discovery = [];
+    state.social.searchResults = [];
+    state.social.loading = false;
   }
 
   global.MAMUS_STATE = state;

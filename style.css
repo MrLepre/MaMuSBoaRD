@@ -2784,3 +2784,28 @@ body.tema-base .logo-marca-imagem .logo-layer-gold {
     overflow: visible !important;
   }
 }
+
+/* ==========================================================
+   MARCO 11 — COMUNIDADE / REDE RPG
+   ========================================================== */
+.comunidade-grid{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(320px,1.1fr);gap:16px;max-width:1500px;margin:0 auto}
+.comunidade-card{min-width:0}.comunidade-mesas-card,.comunidade-publicar-card{grid-column:1/-1}
+.comunidade-card-titulo{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.comunidade-card-titulo h3{margin:3px 0 0;color:#f3d075;font-family:'Cinzel',serif}
+.social-badge{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:3px 9px;border:1px solid rgba(197,160,89,.45);border-radius:999px;color:#f3d075;background:rgba(197,160,89,.08);font-size:.7rem;font-weight:800;letter-spacing:.06em}
+.social-bio{color:#a8a8b3;line-height:1.5;margin:0 0 12px}.social-form,.social-publicar-form{display:grid;gap:10px}
+.social-form label,.social-publicar-form label{display:grid;gap:5px;color:#d8c58f;font-family:'Cinzel',serif;font-size:.78rem}
+.social-form input,.social-form textarea,.social-publicar-form input{box-sizing:border-box;width:100%;font-family:'EB Garamond',serif}
+.social-search-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}.social-lista{display:grid;gap:7px;max-height:300px;overflow:auto}.social-sublista{display:grid;gap:7px;margin-bottom:8px}
+.social-subtitulo{color:#9f8750;font-size:.7rem;letter-spacing:.1em;font-weight:800;margin:8px 0 2px}
+.social-user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid rgba(197,160,89,.14);border-radius:7px;background:rgba(10,12,18,.55)}
+.social-user-row>div{min-width:0;display:grid;gap:2px}.social-user-row strong{color:#eee;font-family:'Cinzel',serif;font-size:.86rem;overflow:hidden;text-overflow:ellipsis}.social-user-row small{color:#858b98}
+.btn-social{min-height:32px;padding:5px 9px;font-size:.8rem;white-space:nowrap}.social-filtros{display:grid;grid-template-columns:1fr 180px;gap:9px;margin-bottom:12px}
+.social-mesas-lista{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.social-mesa{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid rgba(197,160,89,.18);border-radius:9px;background:linear-gradient(145deg,#151923,#0d1018);box-shadow:0 8px 20px rgba(0,0,0,.16)}
+.social-mesa-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.social-mesa-sistema{color:#9f8750;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
+.social-mesa h4{margin:3px 0 0;color:#f3d075;font-family:'Cinzel',serif;font-size:1rem}.social-mesa p{margin:0;color:#a8a8b3;line-height:1.4}.social-mesa-meta{display:flex;flex-wrap:wrap;gap:7px;color:#858b98;font-size:.78rem}.social-vagas{color:#77d99b;font-size:.75rem;font-weight:800;white-space:nowrap}
+.social-campanha-atual{display:flex;flex-direction:column;gap:2px;padding:10px;border:1px solid rgba(197,160,89,.16);border-radius:7px;background:#0d1018;margin-bottom:12px}.social-campanha-atual strong{color:#f3d075}.social-campanha-atual small{color:#858b98}
+.social-toggle{display:flex!important;grid-template-columns:none!important;align-items:center;gap:9px!important;color:#ddd!important;font-family:'EB Garamond',serif!important;font-size:1rem!important}.social-toggle input{width:auto!important;accent-color:#c5a059}
+@media(max-width:900px){.comunidade-grid{grid-template-columns:1fr}.comunidade-mesas-card,.comunidade-publicar-card{grid-column:auto}.social-filtros,.social-search-row{grid-template-columns:1fr}}
+@media(max-width:600px){.social-mesas-lista{grid-template-columns:1fr}.social-user-row{align-items:flex-start}}
