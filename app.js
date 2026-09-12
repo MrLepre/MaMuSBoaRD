@@ -143,20 +143,12 @@ function vibrarPadrao(padrao = [18]) {
 function atualizarStatusConexao(estado, texto) {
   const status = document.getElementById('status-conexao');
   const label = document.getElementById('status-conexao-texto');
-
-  if (status) {
-    status.classList.remove('online', 'offline', 'connecting');
-    status.classList.add(estado || 'connecting');
-    status.dataset.status = estado || 'connecting';
-  }
-
-  if (label) label.textContent = texto || '';
-
-  try {
-    MAMUS_STATE_API?.set('realtime.connected', estado === 'online');
-    MAMUS_STATE_API?.set('realtime.status', estado || 'connecting');
-    MAMUS_STATE_API?.set('realtime.text', texto || '');
-  } catch (_) {}
+  if (!status) return;
+  status.classList.remove('online', 'offline', 'connecting');
+  if (estado === 'online') status.classList.add('online');
+  else if (estado === 'offline') status.classList.add('offline');
+  else if (estado === 'connecting') status.classList.add('connecting');
+  if (label) label.textContent = texto;
 }
 
 // Inicialização segura
@@ -231,7 +223,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (supabaseClient) window.MAMUS_SUPABASE = supabaseClient;
 
-  atualizarStatusConexao(supabaseClient ? 'online' : 'offline', supabaseClient ? 'Conectando à Távola...' : 'Modo local — Supabase indisponível.');
+  // O Realtime precisa iniciar independentemente de falhas em outras consultas.
+  // Assim, um erro em campanhas/ficha nunca deixa o indicador preso em 'Conectando'.
+  atualizarStatusConexao(supabaseClient ? 'connecting' : 'offline', supabaseClient ? 'Conectando à Távola...' : 'Modo local — Supabase indisponível.');
+  if (supabaseClient) {
+    canalMesa = await globalThis.MAMUS_REALTIME?.connect(supabaseClient) || null;
+  }
   garantirAbasEconomiaJornaisVisiveis();
 
   try {
@@ -268,8 +265,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         abasCarregadas.galeria = true;
         carregarGaleria();
       }
-
-      canalMesa = await globalThis.MAMUS_REALTIME?.connect(supabaseClient) || null;
 
       // Mapa e galeria agora carregam sob demanda, quando o jogador abre a aba.
       // Isso reduz consultas e trabalho inicial sem alterar o conteúdo dessas abas.

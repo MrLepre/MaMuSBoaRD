@@ -69,6 +69,7 @@
 
     realtime: {
       connected: false,
+      status: 'disconnected',
       channel: null
     },
 

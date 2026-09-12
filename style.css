@@ -481,8 +481,8 @@ button:disabled { opacity: .55; cursor: not-allowed; transform: none !important;
 }
 .status-ponto { width:8px; height:8px; border-radius:50%; background:#d6a83d; box-shadow:0 0 8px rgba(214,168,61,.7); }
 .status-conexao.online .status-ponto { background:#5fcf82; box-shadow:0 0 8px rgba(95,207,130,.8); }
-.status-conexao.connecting .status-ponto { animation: statusPulse 1.2s ease-in-out infinite; }
-@keyframes statusPulse { 0%,100% { opacity:.45; transform:scale(.85); } 50% { opacity:1; transform:scale(1.15); } }
+.status-conexao.connecting .status-ponto { background:#d1a349; box-shadow:0 0 8px rgba(209,163,73,.8); animation:mamusPulse 1.2s ease-in-out infinite; }
+@keyframes mamusPulse { 0%,100%{opacity:.55} 50%{opacity:1} }
 .status-conexao.offline .status-ponto { background:#d45b5b; box-shadow:0 0 8px rgba(212,91,91,.7); }
 
 .toast {
