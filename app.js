@@ -143,11 +143,20 @@ function vibrarPadrao(padrao = [18]) {
 function atualizarStatusConexao(estado, texto) {
   const status = document.getElementById('status-conexao');
   const label = document.getElementById('status-conexao-texto');
-  if (!status) return;
-  status.classList.remove('online', 'offline');
-  if (estado === 'online') status.classList.add('online');
-  if (estado === 'offline') status.classList.add('offline');
-  if (label) label.textContent = texto;
+
+  if (status) {
+    status.classList.remove('online', 'offline', 'connecting');
+    status.classList.add(estado || 'connecting');
+    status.dataset.status = estado || 'connecting';
+  }
+
+  if (label) label.textContent = texto || '';
+
+  try {
+    MAMUS_STATE_API?.set('realtime.connected', estado === 'online');
+    MAMUS_STATE_API?.set('realtime.status', estado || 'connecting');
+    MAMUS_STATE_API?.set('realtime.text', texto || '');
+  } catch (_) {}
 }
 
 // Inicialização segura
